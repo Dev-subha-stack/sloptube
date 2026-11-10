@@ -50,7 +50,8 @@ export async function uploadBanner(supabase: SupabaseClient, userId: string, blo
   if (error) throw new Error(error.message);
 
   await removeBanners(supabase, userId, path);
-  return bucket.getPublicUrl(path).data.publicUrl;
+  // The bucket is private: banners are served through the public image address.
+  return `/api/public/images/${BANNER_BUCKET}/${path}`;
 }
 
 /** Deletes every file in the person's banner folder, except `keep`. */

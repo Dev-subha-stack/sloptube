@@ -44,7 +44,8 @@ export async function uploadAvatar(supabase: SupabaseClient, userId: string, blo
   if (error) throw new Error(error.message);
 
   await removeAvatars(supabase, userId, path);
-  return bucket.getPublicUrl(path).data.publicUrl;
+  // The bucket is private: pictures are served through the public image address.
+  return `/api/public/images/${AVATAR_BUCKET}/${path}`;
 }
 
 /** Deletes every file in the person's avatar folder, except `keep`. */
