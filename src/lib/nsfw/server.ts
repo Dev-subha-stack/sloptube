@@ -37,7 +37,7 @@ export async function classifyFrames(frames: string[]): Promise<NsfwVerdict | nu
         role: "user",
         content: [
           { type: "text", text: `Here are ${frames.length} frames from the video.` },
-          ...frames.map((f) => ({ type: "image" as const, image: new URL(f) })),
+          ...frames.map((f) => ({ type: "file" as const, data: new URL(f), mediaType: "image" })),
         ],
       },
     ],
