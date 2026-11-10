@@ -76,7 +76,7 @@ export function SubscribeButton({ channelId, channelName, count }: { channelId: 
     return (
       <button
         type="button"
-        className={red}
+        className={`${red} transition-transform active:scale-95`}
         data-subscribe="no"
         aria-pressed={false}
         onClick={() => toggle(channelId)}
@@ -91,7 +91,7 @@ export function SubscribeButton({ channelId, channelName, count }: { channelId: 
     <span className="inline-flex shrink-0 items-center gap-1">
       <button
         type="button"
-        className={grey}
+        className={`${grey} anim-sub`}
         data-subscribe="yes"
         aria-pressed
         title={`Unsubscribe from ${channelName}`}
@@ -108,7 +108,9 @@ export function SubscribeButton({ channelId, channelName, count }: { channelId: 
         data-sub-bell={view.notify ? "on" : "off"}
         className="grid h-10 w-10 place-items-center rounded-full text-icon hover:bg-hover"
       >
-        <Bell className="h-6 w-6" />
+        <span key={view.notify ? "on" : "off"} className={`inline-flex ${view.notify ? "anim-ring" : ""}`}>
+          <Bell className="h-6 w-6" />
+        </span>
       </button>
     </span>
   );
