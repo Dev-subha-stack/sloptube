@@ -66,8 +66,8 @@ Paste this and fill in your values after each `=` (every setting is also
 explained in [`worker/.env.example`](../../worker/.env.example)):
 
 ```bash
-SUPABASE_URL=https://<project-ref>.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=
+APP_URL=https://tube.example.com
+ENCODER_SECRET=
 R2_ACCOUNT_ID=
 R2_ACCESS_KEY_ID=
 R2_SECRET_ACCESS_KEY=
@@ -85,8 +85,8 @@ Where each value comes from:
 
 | Name | Where to find it |
 | --- | --- |
-| `SUPABASE_URL` | [API settings](https://supabase.com/dashboard/project/_/settings/api), **Project URL** |
-| `SUPABASE_SERVICE_ROLE_KEY` | [API keys](https://supabase.com/dashboard/project/_/settings/api-keys), a **Secret key** (or the legacy `service_role` key) |
+| `APP_URL` | the website's address, like `https://tube.example.com`. The encoder reaches the database only through the website's `/api/public/encoder/rpc`. |
+| `ENCODER_SECRET` | a long random value (at least 32 characters, e.g. `openssl rand -hex 32`). Set the same value as the `ENCODER_SECRET` secret on the website. |
 | `R2_ACCOUNT_ID` | the [R2 overview page](https://dash.cloudflare.com/?to=/:account/r2/overview), **Account ID** |
 | `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | [Manage R2 API Tokens](https://dash.cloudflare.com/?to=/:account/r2/api-tokens), **Create API token** with **Object Read & Write** on the video bucket only. A separate token for the encoder makes it easy to revoke. |
 | `R2_BUCKET` | the name of the video bucket, the same as the website uses |

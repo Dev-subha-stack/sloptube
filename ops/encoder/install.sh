@@ -5,7 +5,7 @@
 #   bash install.sh
 #
 # Before running it, create /opt/sloptube-encoder/.env (see ops/encoder/README.md)
-# with SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY and the four R2_ settings.
+# with APP_URL, ENCODER_SECRET and the four R2_ settings.
 #
 # What it does:
 #   1. Installs Docker
@@ -32,7 +32,7 @@ die() { printf '\n\033[1;31mError: %s\033[0m\n' "$*" >&2; exit 1; }
 [ "$(id -u)" -eq 0 ] || die "run this as root (try: sudo bash install.sh)"
 [ -f "$ENV_FILE" ] || die "$ENV_FILE is missing. Create it first, see ops/encoder/README.md"
 
-for name in SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET; do
+for name in APP_URL ENCODER_SECRET R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET; do
   value=$(grep -E "^$name=" "$ENV_FILE" | tail -n1 | cut -d= -f2- | tr -d '"'"'"' \r')
   [ -n "$value" ] || die "$name= is not set in $ENV_FILE"
 done
