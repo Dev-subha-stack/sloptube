@@ -34,6 +34,20 @@ async function sameSecret(a: string, b: string) {
   return diff === 0;
 }
 
+async function checkEncodedVideo(
+  admin: (typeof import("@/integrations/supabase/client.server"))["supabaseAdmin"],
+  jobId: string,
+) {
+  const { data: job } = await admin.from("encode_jobs").select("video_id").eq("id", jobId).maybeSingle();
+  if (!job) return;
+  const { data: video } = await admin.from("videos").select("id, thumbnail_url").eq("id", job.video_id).maybeSingle();
+  const thumb = video?.thumbnail_url;
+  if (!video || !thumb || !/^https:\/\//.test(thumb)) return;
+  const { classifyFrames, shouldBlock, removeAndBan } = await import("@/lib/nsfw/server");
+  const verdict = await classifyFrames([thumb]);
+  if (shouldBlock(verdict)) await removeAndBan(video.id, verdict!.reason);
+}
+
 const json = (body: unknown, status = 200) =>
   Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 
@@ -52,6 +66,14 @@ export const Route = createFileRoute("/api/public/encoder/rpc")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data, error } = await supabaseAdmin.rpc(parsed.data.fn as never, parsed.data.args as never);
         if (error) return json({ data: null, error: { message: error.message, code: error.code } });
+        // A second content check once the video is encoded: its thumbnail.
+        if (parsed.data.fn === "encode_done" && typeof parsed.data.args["job_id"] === "string") {
+          try {
+            await checkEncodedVideo(supabaseAdmin, parsed.data.args["job_id"] as string);
+          } catch (err) {
+            console.warn("nsfw filter: thumbnail check failed", err);
+          }
+        }
         return json({ data, error: null });
       },
     },

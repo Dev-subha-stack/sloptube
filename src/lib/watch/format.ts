@@ -63,10 +63,23 @@ export function formatDate(iso: string | null | undefined): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
 
+/**
+ * Milliseconds for a database time. Times without a zone ("2026-11-10 13:56:00")
+ * are UTC: the browser would otherwise read them as local time and put a
+ * comment hours in the past (5.5 hours in India).
+ */
+export function parseUtc(iso: string): number {
+  let s = iso.trim();
+  if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(s) && !/(Z|[+-]\d{2}(:?\d{2})?)$/i.test(s)) {
+    s = s.replace(" ", "T") + "Z";
+  }
+  return new Date(s).getTime();
+}
+
 /** "3 days ago" for the Up next cards. `now` is passed in so tests are stable. */
 export function timeAgo(iso: string | null | undefined, now: number = Date.now()): string {
   if (!iso) return "";
-  const t = new Date(iso).getTime();
+  const t = parseUtc(iso);
   if (Number.isNaN(t)) return "";
   const s = Math.max(0, Math.floor((now - t) / 1000));
   const steps: [number, string][] = [

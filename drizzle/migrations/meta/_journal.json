@@ -127,6 +127,20 @@
       "when": 1794318865886,
       "tag": "0017_sloptube_ban_pre_request",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794319339162,
+      "tag": "0018_round2_owner_views_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794319410425,
+      "tag": "0019_round2_ratings_bugs_staff",
+      "breakpoints": true
     }
   ]
 }

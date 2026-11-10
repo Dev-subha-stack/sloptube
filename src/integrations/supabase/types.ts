@@ -32,6 +32,45 @@ export type Database = {
         }
         Relationships: []
       }
+      bug_report_comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          report_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          report_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bug_report_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bug_report_comments_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "bug_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bug_reports: {
         Row: {
           admin_notes: string | null
@@ -595,6 +634,8 @@ export type Database = {
       notifications: {
         Row: {
           actor_id: string | null
+          bug_report_id: string | null
+          comment_id: string | null
           created_at: string
           id: string
           message: string
@@ -605,6 +646,8 @@ export type Database = {
         }
         Insert: {
           actor_id?: string | null
+          bug_report_id?: string | null
+          comment_id?: string | null
           created_at?: string
           id?: string
           message: string
@@ -615,6 +658,8 @@ export type Database = {
         }
         Update: {
           actor_id?: string | null
+          bug_report_id?: string | null
+          comment_id?: string | null
           created_at?: string
           id?: string
           message?: string
@@ -629,6 +674,27 @@ export type Database = {
             columns: ["actor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_bug_report_id_fkey"
+            columns: ["bug_report_id"]
+            isOneToOne: false
+            referencedRelation: "bug_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comment_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
             referencedColumns: ["id"]
           },
           {
@@ -988,6 +1054,74 @@ export type Database = {
             foreignKeyName: "video_dislike_counts_video_id_fkey"
             columns: ["video_id"]
             isOneToOne: true
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_rating_totals: {
+        Row: {
+          ratings: number
+          stars_sum: number
+          updated_at: string
+          video_id: string
+        }
+        Insert: {
+          ratings?: number
+          stars_sum?: number
+          updated_at?: string
+          video_id: string
+        }
+        Update: {
+          ratings?: number
+          stars_sum?: number
+          updated_at?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_rating_totals_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: true
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_ratings: {
+        Row: {
+          created_at: string
+          stars: number
+          updated_at: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          created_at?: string
+          stars: number
+          updated_at?: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          created_at?: string
+          stars?: number
+          updated_at?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_ratings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_ratings_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
             referencedRelation: "videos"
             referencedColumns: ["id"]
           },
@@ -1583,6 +1717,18 @@ export type Database = {
           video_id: string
         }[]
       }
+      admin_set_ban: {
+        Args: { banned: boolean; reason?: string; target: string }
+        Returns: undefined
+      }
+      admin_set_role: {
+        Args: {
+          enabled: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          target: string
+        }
+        Returns: undefined
+      }
       admin_set_word: {
         Args: { on?: boolean; word: string }
         Returns: undefined
@@ -1599,6 +1745,27 @@ export type Database = {
           suspended_at: string
         }[]
       }
+      admin_users: {
+        Args: { lim?: number; off?: number; q?: string }
+        Returns: {
+          avatar_url: string
+          ban_reason: string
+          banned_at: string
+          channel_handle: string
+          channel_id: string
+          created_at: string
+          display_name: string
+          email: string
+          id: string
+          is_owner: boolean
+          last_sign_in_at: string
+          roles: string[]
+          subscriber_count: number
+          total: number
+          username: string
+          video_count: number
+        }[]
+      }
       admin_words: {
         Args: never
         Returns: {
@@ -1611,6 +1778,10 @@ export type Database = {
       appeal_removal: {
         Args: { details?: string; video_id: string }
         Returns: string
+      }
+      auto_remove_nsfw: {
+        Args: { reason: string; video_id: string }
+        Returns: boolean
       }
       channel_active_strikes: { Args: { channel_id: string }; Returns: number }
       channel_handle_available: { Args: { handle: string }; Returns: boolean }
@@ -1883,6 +2054,7 @@ export type Database = {
       }
       history_paused: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      is_staff: { Args: never; Returns: boolean }
       launch_flag_on: { Args: { uid: string }; Returns: boolean }
       like_comment: {
         Args: { comment_id: string; on?: boolean }
@@ -1993,6 +2165,7 @@ export type Database = {
           video_id: string
         }[]
       }
+      mark_notifications_read: { Args: { ids?: string[] }; Returns: undefined }
       mod_action: {
         Args: {
           action: string
@@ -2057,12 +2230,47 @@ export type Database = {
           watched_at: string
         }[]
       }
+      my_notifications: {
+        Args: { lim?: number }
+        Returns: {
+          actor_avatar_url: string
+          actor_name: string
+          bug_report_id: string
+          comment_id: string
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          type: string
+          video_id: string
+        }[]
+      }
       my_progress: {
         Args: { video_ids: string[] }
         Returns: {
           duration_s: number
           position_s: number
           video_id: string
+        }[]
+      }
+      my_ratings: {
+        Args: { lim?: number }
+        Returns: {
+          channel_avatar_url: string
+          channel_handle: string
+          channel_id: string
+          channel_name: string
+          duration_s: number
+          hls_key: string
+          id: string
+          is_short: boolean
+          preview_sprite_key: string
+          published_at: string
+          rated_at: string
+          stars: number
+          thumbnail_url: string
+          title: string
+          views: number
         }[]
       }
       my_subscriptions: {
@@ -2078,6 +2286,7 @@ export type Database = {
           unseen: number
         }[]
       }
+      owner_email: { Args: never; Returns: string }
       pin_comment: {
         Args: { comment_id: string; on?: boolean }
         Returns: boolean
@@ -2113,6 +2322,14 @@ export type Database = {
       }
       processing_flag_on: { Args: { uid: string }; Returns: boolean }
       purge_trash: { Args: { lim?: number }; Returns: number }
+      rate_video: {
+        Args: { stars: number; video_id: string }
+        Returns: {
+          average: number
+          my_stars: number
+          ratings: number
+        }[]
+      }
       react: {
         Args: { kind: string; video_id: string }
         Returns: {
@@ -2269,6 +2486,34 @@ export type Database = {
           updated_at: string
         }[]
       }
+      staff_badges: {
+        Args: never
+        Returns: {
+          badge: string
+          channel_handle: string
+          user_id: string
+          username: string
+        }[]
+      }
+      staff_recent_comments: {
+        Args: { lim?: number; only_reported?: boolean }
+        Returns: {
+          author_handle: string
+          author_id: string
+          author_name: string
+          body: string
+          created_at: string
+          id: string
+          open_reports: number
+          removed: boolean
+          video_id: string
+          video_title: string
+        }[]
+      }
+      staff_remove_comment: {
+        Args: { comment_id: string; reason?: string }
+        Returns: undefined
+      }
       stats_caller: { Args: never; Returns: string }
       stats_flag_on: { Args: { uid: string }; Returns: boolean }
       stats_range_from: { Args: { range: string }; Returns: string }
@@ -2376,6 +2621,26 @@ export type Database = {
         }[]
       }
       subscriptions_flag_on: { Args: { uid: string }; Returns: boolean }
+      top_rated_videos: {
+        Args: { lim?: number }
+        Returns: {
+          average: number
+          channel_avatar_url: string
+          channel_handle: string
+          channel_id: string
+          channel_name: string
+          duration_s: number
+          hls_key: string
+          id: string
+          is_short: boolean
+          preview_sprite_key: string
+          published_at: string
+          ratings: number
+          thumbnail_url: string
+          title: string
+          views: number
+        }[]
+      }
       unlink_yapin: { Args: never; Returns: undefined }
       unsubscribe: {
         Args: { channel_id: string }
@@ -2431,6 +2696,14 @@ export type Database = {
           width: number
         }
         Returns: boolean
+      }
+      video_rating: {
+        Args: { video_id: string }
+        Returns: {
+          average: number
+          my_stars: number
+          ratings: number
+        }[]
       }
       video_tags_are_valid: { Args: { tags: string[] }; Returns: boolean }
       video_thumbnail_name_is_valid: {

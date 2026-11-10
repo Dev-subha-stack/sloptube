@@ -151,6 +151,11 @@ export function CommentItem({ comment, ctx, parentId = null }: { comment: Commen
                     {author.name}
                   </Link>
                 )}
+                {author && (
+                  <span className="mr-1">
+                    <StaffBadge name={author.handle} />
+                  </span>
+                )}
                 <span className="text-text-2" data-comment-time>
                   {pending ? "Posting..." : timeAgo(comment.createdAt, ctx.now)}
                   {comment.editedAt && !pending ? " (edited)" : ""}

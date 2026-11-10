@@ -21,8 +21,10 @@ export function canManageBugs(role: UserRole | string | null | undefined): boole
 
 export type RoleBadge = { color: string; bg: string; label: string };
 
-export function getRoleBadge(role: UserRole | string | null | undefined): RoleBadge | null {
-  if (role === "admin") return { color: "#fff", bg: "#3b82f6", label: "Admin" };
-  if (role === "moderator") return { color: "#fff", bg: "#22c55e", label: "Mod" };
+/** Blue for the owner and admins, green for moderators (colours are theme tokens). */
+export function getRoleBadge(role: UserRole | "owner" | string | null | undefined): RoleBadge | null {
+  if (role === "owner") return { color: "var(--badge-text)", bg: "var(--badge-admin)", label: "Owner" };
+  if (role === "admin") return { color: "var(--badge-text)", bg: "var(--badge-admin)", label: "Admin" };
+  if (role === "moderator") return { color: "var(--badge-text)", bg: "var(--badge-mod)", label: "Mod" };
   return null;
 }

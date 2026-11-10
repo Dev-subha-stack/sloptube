@@ -76,6 +76,7 @@ import { Route as ApiCommentsSettingsRouteImport } from './routes/api/comments/s
 import { Route as ApiHistoryProgressRouteImport } from './routes/api/history/progress'
 import { Route as ApiModerationAppealRouteImport } from './routes/api/moderation/appeal'
 import { Route as ApiModerationReportRouteImport } from './routes/api/moderation/report'
+import { Route as ApiModerationScanRouteImport } from './routes/api/moderation/scan'
 import { Route as ApiSearchSuggestRouteImport } from './routes/api/search/suggest'
 import { Route as ApiShortsChoiceRouteImport } from './routes/api/shorts/choice'
 import { Route as ApiShortsCommentsRouteImport } from './routes/api/shorts/comments'
@@ -440,6 +441,11 @@ const ApiModerationReportRoute = ApiModerationReportRouteImport.update({
   path: '/api/moderation/report',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiModerationScanRoute = ApiModerationScanRouteImport.update({
+  id: '/api/moderation/scan',
+  path: '/api/moderation/scan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSearchSuggestRoute = ApiSearchSuggestRouteImport.update({
   id: '/suggest',
   path: '/suggest',
@@ -651,6 +657,7 @@ export interface FileRoutesByFullPath {
   '/api/history/progress': typeof ApiHistoryProgressRoute
   '/api/moderation/appeal': typeof ApiModerationAppealRoute
   '/api/moderation/report': typeof ApiModerationReportRoute
+  '/api/moderation/scan': typeof ApiModerationScanRoute
   '/api/search/suggest': typeof ApiSearchSuggestRoute
   '/api/shorts/choice': typeof ApiShortsChoiceRoute
   '/api/shorts/comments': typeof ApiShortsCommentsRoute
@@ -747,6 +754,7 @@ export interface FileRoutesByTo {
   '/api/history/progress': typeof ApiHistoryProgressRoute
   '/api/moderation/appeal': typeof ApiModerationAppealRoute
   '/api/moderation/report': typeof ApiModerationReportRoute
+  '/api/moderation/scan': typeof ApiModerationScanRoute
   '/api/search/suggest': typeof ApiSearchSuggestRoute
   '/api/shorts/choice': typeof ApiShortsChoiceRoute
   '/api/shorts/comments': typeof ApiShortsCommentsRoute
@@ -845,6 +853,7 @@ export interface FileRoutesById {
   '/api/history/progress': typeof ApiHistoryProgressRoute
   '/api/moderation/appeal': typeof ApiModerationAppealRoute
   '/api/moderation/report': typeof ApiModerationReportRoute
+  '/api/moderation/scan': typeof ApiModerationScanRoute
   '/api/search/suggest': typeof ApiSearchSuggestRoute
   '/api/shorts/choice': typeof ApiShortsChoiceRoute
   '/api/shorts/comments': typeof ApiShortsCommentsRoute
@@ -944,6 +953,7 @@ export interface FileRouteTypes {
     | '/api/history/progress'
     | '/api/moderation/appeal'
     | '/api/moderation/report'
+    | '/api/moderation/scan'
     | '/api/search/suggest'
     | '/api/shorts/choice'
     | '/api/shorts/comments'
@@ -1040,6 +1050,7 @@ export interface FileRouteTypes {
     | '/api/history/progress'
     | '/api/moderation/appeal'
     | '/api/moderation/report'
+    | '/api/moderation/scan'
     | '/api/search/suggest'
     | '/api/shorts/choice'
     | '/api/shorts/comments'
@@ -1137,6 +1148,7 @@ export interface FileRouteTypes {
     | '/api/history/progress'
     | '/api/moderation/appeal'
     | '/api/moderation/report'
+    | '/api/moderation/scan'
     | '/api/search/suggest'
     | '/api/shorts/choice'
     | '/api/shorts/comments'
@@ -1223,6 +1235,7 @@ export interface RootRouteChildren {
   ApiAdminWordsRoute: typeof ApiAdminWordsRoute
   ApiModerationAppealRoute: typeof ApiModerationAppealRoute
   ApiModerationReportRoute: typeof ApiModerationReportRoute
+  ApiModerationScanRoute: typeof ApiModerationScanRoute
   ApiStudioAnalyticsRoute: typeof ApiStudioAnalyticsRouteWithChildren
   ApiStudioBulkRoute: typeof ApiStudioBulkRoute
   ApiStudioThumbnailRoute: typeof ApiStudioThumbnailRouteWithChildren
@@ -1712,6 +1725,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiModerationReportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/moderation/scan': {
+      id: '/api/moderation/scan'
+      path: '/api/moderation/scan'
+      fullPath: '/api/moderation/scan'
+      preLoaderRoute: typeof ApiModerationScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/search/suggest': {
       id: '/api/search/suggest'
       path: '/suggest'
@@ -2101,6 +2121,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminWordsRoute: ApiAdminWordsRoute,
   ApiModerationAppealRoute: ApiModerationAppealRoute,
   ApiModerationReportRoute: ApiModerationReportRoute,
+  ApiModerationScanRoute: ApiModerationScanRoute,
   ApiStudioAnalyticsRoute: ApiStudioAnalyticsRouteWithChildren,
   ApiStudioBulkRoute: ApiStudioBulkRoute,
   ApiStudioThumbnailRoute: ApiStudioThumbnailRouteWithChildren,

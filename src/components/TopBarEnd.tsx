@@ -38,7 +38,7 @@ export function TopBarEnd() {
       )}
       {sessionUser ? (
         <>
-          {flags.subscriptions && <NotificationsBell />}
+          {(flags.notifications || flags.subscriptions) && <NotificationsBell />}
           <AvatarMenu user={sessionUser} email={email} />
         </>
       ) : (

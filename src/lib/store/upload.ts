@@ -2,6 +2,8 @@
 
 import { create } from "zustand";
 import { probeVideoFile } from "@/lib/shorts/probe";
+import { CompressCancelled, compressVideo, grabFrames } from "@/lib/upload/compress";
+import { supabase } from "@/integrations/supabase/client";
 import { shortProblem } from "@/lib/shorts/rules";
 import { useSession } from "@/lib/store/session";
 import { SpeedMeter, UploadCancelled, uploadParts, xhrPutPart, type SignedPart } from "@/lib/upload/parts";
@@ -14,7 +16,10 @@ import {
   type Details,
 } from "@/lib/upload/rules";
 
-export type UploadPhase = "idle" | "signing" | "uploading" | "finishing" | "done" | "failed";
+export type UploadPhase = "idle" | "compressing" | "checking" | "signing" | "uploading" | "finishing" | "done" | "failed";
+
+/** What the built-in compressor did to the picked file. */
+export type CompressInfo = { fraction: number; originalBytes: number; finalBytes: number | null; compressed: boolean | null; note: string | null };
 
 /**
  * The "Upload as a Snip" box (feature 11). The file's shape is read in the
@@ -39,6 +44,7 @@ type UploadState = {
   /** A short line under the drop zone, like "Upload cancelled". */
   notice: string | null;
   short: ShortBox;
+  compress: CompressInfo;
   pick: (file: File) => void;
   setDetails: (patch: Partial<Details>) => void;
   setShortOn: (on: boolean) => void;
@@ -48,6 +54,7 @@ type UploadState = {
 
 const emptyDetails: Details = { title: "", description: "", visibility: "private" };
 const checkingShort: ShortBox = { state: "checking", problem: null, on: false };
+const emptyCompress: CompressInfo = { fraction: 0, originalBytes: 0, finalBytes: null, compressed: null, note: null };
 
 // The running upload lives outside the store: it is not something to render.
 let running: { controller: AbortController; videoId: string | null; uploadId: string | null } | null = null;
@@ -78,20 +85,22 @@ export const useUpload = create<UploadState>((set, get) => ({
   error: null,
   notice: null,
   short: checkingShort,
+  compress: emptyCompress,
 
   pick(file) {
     if (running) return;
-    const problem = fileProblem(file);
+    // Size is checked after compression: a big file may well fit once squeezed.
+    const problem = fileProblem({ name: file.name, type: file.type, size: Math.min(file.size, 1) });
     if (problem) {
       set({ notice: problem });
       return;
     }
-    const mime = videoTypeFor(file)!;
     const controller = new AbortController();
     running = { controller, videoId: null, uploadId: null };
     const details = { ...emptyDetails, title: titleFromFileName(file.name) };
     set({
-      phase: "signing",
+      phase: "compressing",
+      compress: { ...emptyCompress, originalBytes: file.size },
       fileName: file.name,
       total: file.size,
       sent: 0,
@@ -114,19 +123,75 @@ export const useUpload = create<UploadState>((set, get) => ({
     void (async () => {
       const job = running!;
       try {
+        // 1. The built-in compressor (always on).
+        let lastPaint = 0;
+        const result = await compressVideo(file, {
+          signal: controller.signal,
+          onProgress: (fraction) => {
+            const now = Date.now();
+            if (now - lastPaint > 150 || fraction >= 1) {
+              lastPaint = now;
+              set({ compress: { ...get().compress, fraction } });
+            }
+          },
+        });
+        const upload = result.file;
+        set({
+          total: upload.size,
+          compress: {
+            fraction: 1,
+            originalBytes: file.size,
+            finalBytes: upload.size,
+            compressed: result.compressed,
+            note: result.compressed
+              ? null
+              : result.reason === "not_smaller"
+                ? "Your file was already smaller than the compressed version, so it is uploaded as it is."
+                : "This browser can't compress video, so the original file is uploaded. Chrome, Edge or Safari compress automatically.",
+          },
+        });
+        const sizeProblem = fileProblem(upload);
+        if (sizeProblem) throw new Error(sizeProblem);
+        const mime = videoTypeFor(upload)!;
+
+        // 2. The content check, on a few stills from the video.
+        set({ phase: "checking" });
+        const frames = await grabFrames(upload);
+
+        set({ phase: "signing" });
         const signed = await postJson<SignResponse>(
           "/api/upload/sign",
-          { title: details.title, bytes: file.size, mime },
+          { title: details.title, bytes: upload.size, mime },
           controller.signal,
         );
         job.videoId = signed.videoId;
         job.uploadId = signed.uploadId;
+
+        if (frames.length > 0) {
+          const verdict = await postJson<{ blocked: boolean }>(
+            "/api/moderation/scan",
+            { videoId: signed.videoId, frames },
+            controller.signal,
+          ).catch(() => ({ blocked: false }));
+          if (verdict.blocked) {
+            void postJson("/api/upload/abort", { videoId: signed.videoId, uploadId: signed.uploadId }).catch(() => undefined);
+            running = null;
+            set({
+              phase: "failed",
+              error: "This video breaks the Community Guidelines (sexual content). It was removed and your account is banned.",
+            });
+            setTimeout(() => {
+              void supabase.auth.signOut({ scope: "local" }).then(() => window.location.assign("/login?banned=1"));
+            }, 4000);
+            return;
+          }
+        }
         set({ phase: "uploading", videoId: signed.videoId });
 
         const meter = new SpeedMeter();
-        let lastPaint = 0;
+        lastPaint = 0;
         const parts = await uploadParts({
-          file,
+          file: upload,
           parts: signed.parts,
           putPart: xhrPutPart,
           signal: controller.signal,
@@ -134,14 +199,14 @@ export const useUpload = create<UploadState>((set, get) => ({
             const speed = meter.add(sent);
             const now = Date.now();
             // Paint at most five times a second.
-            if (now - lastPaint > 200 || sent === file.size) {
+            if (now - lastPaint > 200 || sent === upload.size) {
               lastPaint = now;
               set({ sent, speed });
             }
           },
         });
 
-        set({ phase: "finishing", sent: file.size });
+        set({ phase: "finishing", sent: upload.size });
         const d = get().details;
         const finalDetails = detailsProblem(d) ? { ...d, title: d.title.trim() || details.title } : d;
         const done = await postJson<{ watchUrl: string }>(
@@ -158,7 +223,7 @@ export const useUpload = create<UploadState>((set, get) => ({
           void postJson("/api/shorts/choice", { videoId: signed.videoId, on: box.on }).catch(() => undefined);
         }
       } catch (err) {
-        if (err instanceof UploadCancelled || controller.signal.aborted) return;
+        if (err instanceof UploadCancelled || err instanceof CompressCancelled || controller.signal.aborted) return;
         running = null;
         // Throw the parts away so they do not sit in the bucket.
         if (job.videoId && job.uploadId) {
@@ -213,5 +278,6 @@ function initialView() {
     error: null,
     notice: null,
     short: checkingShort,
+    compress: emptyCompress,
   };
 }
