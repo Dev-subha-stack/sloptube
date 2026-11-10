@@ -96,6 +96,7 @@ import { Route as CHandleTabRouteImport } from './routes/c/$handle/$tab'
 import { Route as StudioContentIndexRouteImport } from './routes/studio/content/index'
 import { Route as StudioContentTrashRouteImport } from './routes/studio/content/trash'
 import { Route as ApiMediaVideoSplatRouteImport } from './routes/api/media/$video/$'
+import { Route as ApiPublicEncoderRpcRouteImport } from './routes/api/public/encoder/rpc'
 import { Route as ApiStudioAnalyticsRealtimeRouteImport } from './routes/api/studio/analytics/realtime'
 import { Route as ApiStudioAnalyticsVideoRouteImport } from './routes/api/studio/analytics/video'
 import { Route as ApiStudioThumbnailSignRouteImport } from './routes/api/studio/thumbnail/sign'
@@ -539,6 +540,11 @@ const ApiMediaVideoSplatRoute = ApiMediaVideoSplatRouteImport.update({
   path: '/api/media/$video/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicEncoderRpcRoute = ApiPublicEncoderRpcRouteImport.update({
+  id: '/api/public/encoder/rpc',
+  path: '/api/public/encoder/rpc',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiStudioAnalyticsRealtimeRoute =
   ApiStudioAnalyticsRealtimeRouteImport.update({
     id: '/realtime',
@@ -665,6 +671,7 @@ export interface FileRoutesByFullPath {
   '/c/$handle/': typeof CHandleIndexRoute
   '/studio/content/': typeof StudioContentIndexRoute
   '/api/media/$video/$': typeof ApiMediaVideoSplatRoute
+  '/api/public/encoder/rpc': typeof ApiPublicEncoderRpcRoute
   '/api/studio/analytics/realtime': typeof ApiStudioAnalyticsRealtimeRoute
   '/api/studio/analytics/video': typeof ApiStudioAnalyticsVideoRoute
   '/api/studio/thumbnail/sign': typeof ApiStudioThumbnailSignRoute
@@ -760,6 +767,7 @@ export interface FileRoutesByTo {
   '/c/$handle': typeof CHandleIndexRoute
   '/studio/content': typeof StudioContentIndexRoute
   '/api/media/$video/$': typeof ApiMediaVideoSplatRoute
+  '/api/public/encoder/rpc': typeof ApiPublicEncoderRpcRoute
   '/api/studio/analytics/realtime': typeof ApiStudioAnalyticsRealtimeRoute
   '/api/studio/analytics/video': typeof ApiStudioAnalyticsVideoRoute
   '/api/studio/thumbnail/sign': typeof ApiStudioThumbnailSignRoute
@@ -857,6 +865,7 @@ export interface FileRoutesById {
   '/c/$handle/': typeof CHandleIndexRoute
   '/studio/content/': typeof StudioContentIndexRoute
   '/api/media/$video/$': typeof ApiMediaVideoSplatRoute
+  '/api/public/encoder/rpc': typeof ApiPublicEncoderRpcRoute
   '/api/studio/analytics/realtime': typeof ApiStudioAnalyticsRealtimeRoute
   '/api/studio/analytics/video': typeof ApiStudioAnalyticsVideoRoute
   '/api/studio/thumbnail/sign': typeof ApiStudioThumbnailSignRoute
@@ -955,6 +964,7 @@ export interface FileRouteTypes {
     | '/c/$handle/'
     | '/studio/content/'
     | '/api/media/$video/$'
+    | '/api/public/encoder/rpc'
     | '/api/studio/analytics/realtime'
     | '/api/studio/analytics/video'
     | '/api/studio/thumbnail/sign'
@@ -1050,6 +1060,7 @@ export interface FileRouteTypes {
     | '/c/$handle'
     | '/studio/content'
     | '/api/media/$video/$'
+    | '/api/public/encoder/rpc'
     | '/api/studio/analytics/realtime'
     | '/api/studio/analytics/video'
     | '/api/studio/thumbnail/sign'
@@ -1146,6 +1157,7 @@ export interface FileRouteTypes {
     | '/c/$handle/'
     | '/studio/content/'
     | '/api/media/$video/$'
+    | '/api/public/encoder/rpc'
     | '/api/studio/analytics/realtime'
     | '/api/studio/analytics/video'
     | '/api/studio/thumbnail/sign'
@@ -1224,6 +1236,7 @@ export interface RootRouteChildren {
   CHandleTabRoute: typeof CHandleTabRoute
   CHandleIndexRoute: typeof CHandleIndexRoute
   ApiMediaVideoSplatRoute: typeof ApiMediaVideoSplatRoute
+  ApiPublicEncoderRpcRoute: typeof ApiPublicEncoderRpcRoute
   ApiVideosIdStatusRoute: typeof ApiVideosIdStatusRoute
   ApiPublicImagesBucketSplatRoute: typeof ApiPublicImagesBucketSplatRoute
 }
@@ -1839,6 +1852,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMediaVideoSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/encoder/rpc': {
+      id: '/api/public/encoder/rpc'
+      path: '/api/public/encoder/rpc'
+      fullPath: '/api/public/encoder/rpc'
+      preLoaderRoute: typeof ApiPublicEncoderRpcRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/studio/analytics/realtime': {
       id: '/api/studio/analytics/realtime'
       path: '/realtime'
@@ -2094,6 +2114,7 @@ const rootRouteChildren: RootRouteChildren = {
   CHandleTabRoute: CHandleTabRoute,
   CHandleIndexRoute: CHandleIndexRoute,
   ApiMediaVideoSplatRoute: ApiMediaVideoSplatRoute,
+  ApiPublicEncoderRpcRoute: ApiPublicEncoderRpcRoute,
   ApiVideosIdStatusRoute: ApiVideosIdStatusRoute,
   ApiPublicImagesBucketSplatRoute: ApiPublicImagesBucketSplatRoute,
 }
