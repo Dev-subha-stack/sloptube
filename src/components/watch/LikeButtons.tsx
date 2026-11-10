@@ -44,10 +44,9 @@ function Thumb({
       data-on={on ? "1" : undefined}
       className={`${button} ${on ? "text-link" : "text-text-2"} ${disabled ? "cursor-not-allowed opacity-60" : "hover:text-text"}`}
     >
-      <Icon
-        className={`h-6 w-6 ${on ? "text-link" : "text-icon"} ${pop ? "animate-like-pop" : ""}`}
-        onAnimationEnd={onPopEnd}
-      />
+      <span className={`inline-flex ${pop ? "anim-pop" : ""}`} onAnimationEnd={onPopEnd}>
+        <Icon className={`h-6 w-6 ${on ? "text-link" : "text-icon"}`} />
+      </span>
       {/* The name is the label and the count, so it includes what the button shows. */}
       <span className="sr-only">{label}</span>
       <span data-reaction-count={kind}>{count}</span>
