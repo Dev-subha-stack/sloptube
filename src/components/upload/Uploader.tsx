@@ -246,7 +246,7 @@ function DetailsForm() {
       <aside className="min-w-0">
         <div className="overflow-hidden rounded-[2px] bg-[var(--hover)]">
           <div className="grid aspect-video place-items-center bg-black text-[13px] text-[#aaaaaa]">
-            {phase === "finishing" ? "Finishing up" : "Uploading video"}
+            {phase === "compressing" ? "Compressing video" : phase === "checking" ? "Checking video" : phase === "finishing" ? "Finishing up" : "Uploading video"}
           </div>
           <div className="px-4 py-3">
             <p className="text-[12px] leading-4 text-text-2">Filename</p>
@@ -254,7 +254,8 @@ function DetailsForm() {
           </div>
         </div>
         <p className="mt-3 text-[12px] leading-4 text-text-3">
-          Your details are saved when the upload finishes. You can keep typing while it runs.
+          Every video is compressed in your browser before it uploads, so it goes up faster. Your details are saved when
+          the upload finishes. You can keep typing while it runs.
         </p>
       </aside>
     </div>
@@ -262,14 +263,22 @@ function DetailsForm() {
 }
 
 function ProgressFooter() {
-  const { phase, sent, total, speed, cancel } = useUpload();
-  const percent = phase === "signing" ? 0 : percentDone(sent, total);
-  const line =
-    phase === "signing"
-      ? "Starting upload"
-      : phase === "finishing"
-        ? "Upload complete, checking the file"
-        : `Uploading ${percent}%`;
+  const { phase, sent, total, speed, cancel, compress } = useUpload();
+  const squeezing = phase === "compressing";
+  const percent = squeezing
+    ? Math.round(compress.fraction * 100)
+    : phase === "signing" || phase === "checking"
+      ? 0
+      : percentDone(sent, total);
+  const line = squeezing
+    ? `Compressing ${percent}%`
+    : phase === "checking"
+      ? "Checking the video"
+      : phase === "signing"
+        ? "Starting upload"
+        : phase === "finishing"
+          ? "Upload complete, checking the file"
+          : `Uploading ${percent}%`;
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
       <div className="min-w-0 flex-1">
@@ -282,7 +291,17 @@ function ProgressFooter() {
               {formatBytes(sent)} of {formatBytes(total)}, {formatSpeed(speed)}
             </span>
           )}
+          {squeezing && (
+            <span className="text-text-2">Making {formatBytes(compress.originalBytes)} smaller before it uploads</span>
+          )}
+          {!squeezing && compress.compressed && compress.finalBytes !== null && (
+            <span className="text-text-2" data-compressed>
+              Compressed {formatBytes(compress.originalBytes)} to {formatBytes(compress.finalBytes)} (
+              {Math.max(0, Math.round((1 - compress.finalBytes / Math.max(1, compress.originalBytes)) * 100))}% smaller)
+            </span>
+          )}
         </div>
+        {compress.note && !squeezing && <p className="mt-1 text-[12px] leading-4 text-text-3">{compress.note}</p>}
         <div
           role="progressbar"
           aria-valuemin={0}
@@ -354,7 +373,7 @@ function FailedView() {
 export function Uploader({ configured, preview = false }: { configured: boolean; preview?: boolean }) {
   const phase = useUpload((s) => s.phase);
   const title = useUpload((s) => s.details.title);
-  const busy = phase === "signing" || phase === "uploading" || phase === "finishing";
+  const busy = phase === "compressing" || phase === "checking" || phase === "signing" || phase === "uploading" || phase === "finishing";
 
   // Keep a dropped file from opening in the tab, and warn before leaving mid upload.
   useEffect(() => {
