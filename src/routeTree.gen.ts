@@ -102,6 +102,7 @@ import { Route as ApiStudioThumbnailSignRouteImport } from './routes/api/studio/
 import { Route as ApiVideosIdStatusRouteImport } from './routes/api/videos/$id/status'
 import { Route as StudioVideoIdAnalyticsRouteImport } from './routes/studio/video/$id/analytics'
 import { Route as StudioVideoIdEditRouteImport } from './routes/studio/video/$id/edit'
+import { Route as ApiPublicImagesBucketSplatRouteImport } from './routes/api/public/images/$bucket/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -569,6 +570,12 @@ const StudioVideoIdEditRoute = StudioVideoIdEditRouteImport.update({
   path: '/video/$id/edit',
   getParentRoute: () => StudioRoute,
 } as any)
+const ApiPublicImagesBucketSplatRoute =
+  ApiPublicImagesBucketSplatRouteImport.update({
+    id: '/api/public/images/$bucket/$',
+    path: '/api/public/images/$bucket/$',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -664,6 +671,7 @@ export interface FileRoutesByFullPath {
   '/api/videos/$id/status': typeof ApiVideosIdStatusRoute
   '/studio/video/$id/analytics': typeof StudioVideoIdAnalyticsRoute
   '/studio/video/$id/edit': typeof StudioVideoIdEditRoute
+  '/api/public/images/$bucket/$': typeof ApiPublicImagesBucketSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -758,6 +766,7 @@ export interface FileRoutesByTo {
   '/api/videos/$id/status': typeof ApiVideosIdStatusRoute
   '/studio/video/$id/analytics': typeof StudioVideoIdAnalyticsRoute
   '/studio/video/$id/edit': typeof StudioVideoIdEditRoute
+  '/api/public/images/$bucket/$': typeof ApiPublicImagesBucketSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -854,6 +863,7 @@ export interface FileRoutesById {
   '/api/videos/$id/status': typeof ApiVideosIdStatusRoute
   '/studio/video/$id/analytics': typeof StudioVideoIdAnalyticsRoute
   '/studio/video/$id/edit': typeof StudioVideoIdEditRoute
+  '/api/public/images/$bucket/$': typeof ApiPublicImagesBucketSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -951,6 +961,7 @@ export interface FileRouteTypes {
     | '/api/videos/$id/status'
     | '/studio/video/$id/analytics'
     | '/studio/video/$id/edit'
+    | '/api/public/images/$bucket/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1045,6 +1056,7 @@ export interface FileRouteTypes {
     | '/api/videos/$id/status'
     | '/studio/video/$id/analytics'
     | '/studio/video/$id/edit'
+    | '/api/public/images/$bucket/$'
   id:
     | '__root__'
     | '/'
@@ -1140,6 +1152,7 @@ export interface FileRouteTypes {
     | '/api/videos/$id/status'
     | '/studio/video/$id/analytics'
     | '/studio/video/$id/edit'
+    | '/api/public/images/$bucket/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1212,6 +1225,7 @@ export interface RootRouteChildren {
   CHandleIndexRoute: typeof CHandleIndexRoute
   ApiMediaVideoSplatRoute: typeof ApiMediaVideoSplatRoute
   ApiVideosIdStatusRoute: typeof ApiVideosIdStatusRoute
+  ApiPublicImagesBucketSplatRoute: typeof ApiPublicImagesBucketSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1867,6 +1881,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudioVideoIdEditRouteImport
       parentRoute: typeof StudioRoute
     }
+    '/api/public/images/$bucket/$': {
+      id: '/api/public/images/$bucket/$'
+      path: '/api/public/images/$bucket/$'
+      fullPath: '/api/public/images/$bucket/$'
+      preLoaderRoute: typeof ApiPublicImagesBucketSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -2074,6 +2095,7 @@ const rootRouteChildren: RootRouteChildren = {
   CHandleIndexRoute: CHandleIndexRoute,
   ApiMediaVideoSplatRoute: ApiMediaVideoSplatRoute,
   ApiVideosIdStatusRoute: ApiVideosIdStatusRoute,
+  ApiPublicImagesBucketSplatRoute: ApiPublicImagesBucketSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
