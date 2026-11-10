@@ -26,7 +26,9 @@ export type ReactionEvent =
   | { type: "click"; kind: Reaction }
   | { type: "sent" }
   | { type: "settled"; server: ReactionSnapshot }
-  | { type: "failed"; error: string };
+  | { type: "failed"; error: string }
+  /** Fresh page data (e.g. reloaded as the signed in person): start over from it. */
+  | { type: "reset"; server: ReactionSnapshot };
 
 export function initialReaction(server: ReactionSnapshot): ReactionState {
   return { server, want: server.reaction, inFlight: false, error: null };
@@ -47,6 +49,10 @@ export function reduceReaction(s: ReactionState, e: ReactionEvent): ReactionStat
       return { ...s, server: e.server, inFlight: false };
     case "failed":
       return { ...s, inFlight: false, want: s.server.reaction, error: e.error };
+    case "reset":
+      // A request still running settles into the new state; never drop the person's click.
+      if (s.inFlight || s.want !== s.server.reaction) return { ...s, server: e.server };
+      return initialReaction(e.server);
   }
 }
 
