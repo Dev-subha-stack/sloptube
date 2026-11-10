@@ -529,3 +529,51 @@ html:has([data-embed-page]) [data-site-footer] {
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+
+/* Round 2: small interactive animations, staff badges, appearance options. */
+:root {
+  --badge-admin: #1a73e8;
+  --badge-mod: #188038;
+  --badge-text: #ffffff;
+}
+
+@keyframes anim-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.35) rotate(-12deg); }
+  70% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+.anim-pop { animation: anim-pop 420ms cubic-bezier(.2,.9,.3,1.4); }
+
+@keyframes anim-sub {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+.anim-sub { animation: anim-sub 320ms ease-out; }
+
+@keyframes anim-ring {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(14deg); }
+  40% { transform: rotate(-12deg); }
+  60% { transform: rotate(8deg); }
+  80% { transform: rotate(-4deg); }
+}
+.anim-ring { animation: anim-ring 700ms ease-in-out; transform-origin: 50% 10%; }
+
+@keyframes anim-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.anim-fade-in { animation: anim-fade-in 200ms ease-out; }
+
+/* Appearance: accent colour and compact layout (Settings -> Appearance). */
+html[data-accent="blue"] { --red: #1a73e8; }
+html[data-accent="green"] { --red: #188038; }
+html[data-accent="purple"] { --red: #8e24aa; }
+html[data-accent="orange"] { --red: #e8710a; }
+html[data-density="compact"] { font-size: 93.75%; }
+html[data-motion="reduced"] *, html[data-motion="reduced"] *::before, html[data-motion="reduced"] *::after {
+  animation-duration: 1ms !important;
+  transition-duration: 1ms !important;
+}
