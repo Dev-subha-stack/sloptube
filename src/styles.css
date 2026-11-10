@@ -577,3 +577,4 @@ html[data-motion="reduced"] *, html[data-motion="reduced"] *::before, html[data-
   animation-duration: 1ms !important;
   transition-duration: 1ms !important;
 }
+.comment-highlight { background: color-mix(in srgb, var(--link) 14%, transparent); transition: background 600ms ease; border-radius: 8px; }

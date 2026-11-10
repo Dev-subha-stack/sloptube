@@ -106,6 +106,21 @@ export function CommentsSection({
     return () => clearInterval(t);
   }, []);
 
+  // A notification link (?lc=<comment id>): scroll to that comment and light it up.
+  useEffect(() => {
+    if (!ready) return;
+    const lc = new URLSearchParams(window.location.search).get("lc");
+    if (!lc || !/^[0-9a-f-]{36}$/i.test(lc)) return;
+    const t = setTimeout(() => {
+      const el = document.querySelector<HTMLElement>(`[data-comment="${lc}"]`) ?? listTop.current;
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("comment-highlight");
+      setTimeout(() => el.classList.remove("comment-highlight"), 4000);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [ready]);
+
   // The new comments poll, only while the tab is visible.
   useEffect(() => {
     if (!ready || initial.mode === "off") return;
