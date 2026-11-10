@@ -3,37 +3,22 @@
 Source unpacked (no node_modules) at /tmp/src/sloptube (re-extract from user-uploads://sloptube.zip with python zipfile, skipping node_modules/.next/.git/.env*). Comment-stripped SQL at /tmp/mig/s/.
 
 ## Database (Lovable Cloud)
-- [x] 000-003 profiles/avatars (bucket rows created by tool, private: workspace blocks public buckets)
-- [x] 004 channels (+banners policies)
-- [x] 005-006 videos, processing
-- [x] 007-009 watch, feed, subscriptions
-- [x] 010 search
-- [x] 011 engagement (+ pg_cron hourly rollup)
-- [x] 012 comments (applied as 012a + 012b)
-- [x] 013 shorts
-- [x] 014 studio (+ pg_cron daily purge)
-- [x] 015 stats
-- [x] 016 moderation (016a + 016b; roles moved to user_roles/has_role; profiles.role deprecated; ban enforced in app server since pre-request hook not set; auth.sessions delete dropped)
-- [x] 017 launch, 018 yapin, 019 yapin facts, 020 flag panel
-- [ ] 021 SKIP (references nonexistent public.accounts) -> instead user_roles table synced to profiles.role
-- [ ] 022/023 with grants
-- [ ] final: reset default privileges added in first migration
-- Each table gets `grant all ... to service_role` explicitly after source revokes.
+- [x] 000-020, 022, 023 applied (016 split; roles in user_roles/has_role; profiles.role deprecated)
+- [x] 021 skipped (references nonexistent public.accounts; superseded by user_roles)
+- [x] ban pre-request hook on the Data API (moderation_pre_request), verified with a banned test account
+- [x] avatar/banner URL constraints allow /api/public/images/... addresses
 
 ## App port (Next.js -> TanStack Start)
-- [ ] styles: app/globals.css -> src/styles.css (Roboto link in head)
-- [ ] lib/ copied to src/lib (supabase shim: server client from bearer header via getRequest; browser = generated client)
-- [ ] R2: replace @aws-sdk with aws4fetch (UploadStorage/MediaStorage interfaces)
-- [ ] components/ copied to src/components (next/link, next/navigation, next/image shims)
-- [ ] server components -> server fns + route loaders
-- [ ] app/api/* -> src/routes/api/* server routes (client fetch adds bearer)
-- [ ] pages -> src/routes/*, /@handle rewrites, redirects, embed CSP header
-- [ ] auth: email/password + Google via Lovable broker; Yapin' OAuth routes preserved
-- [ ] avatars/banners served through a public image route (private buckets)
-- [ ] encoder worker: /api/public/encoder/* endpoints with ENCODER_SECRET; worker/lib/db.mjs over HTTP; copy worker/ + ops/
-- [ ] head() metadata per route
-- [ ] verify build, routes, sign-in, CRUD
+- [x] styles, lib, components, shims (next/link, next/navigation, next/image, next/server)
+- [x] R2 via aws4fetch (not yet tested against R2: needs secrets)
+- [x] every page as a route with server-fn loaders + head(); /@handle via router rewrite; /history, /subscriptions redirects; embed CSP header
+- [x] API handlers as server routes (bearer from browser fetch wrapper)
+- [x] auth: email/password + Google (Lovable broker) + /auth/callback; Yapin' callback -> /yapin-finish one-time token
+- [x] avatars/banners served by /api/public/images (private buckets), verified upload + display
+- [x] encoder worker talks to /api/public/encoder/rpc with ENCODER_SECRET (worker/test/db.test.mjs)
+- [x] verified: typecheck clean, all pages render, sign in, onboarding write, studio/channel owner view
 
 ## Blocked on user
-- R2_* secrets, MEDIA_PUBLIC_URL, SITE_URL, YAPIN_CLIENT_ID/SECRET, ENCODER_SECRET
-- Data export (per-table CSV/JSON) + users export (id, email)
+- [ ] Secrets: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, MEDIA_PUBLIC_URL, SITE_URL, YAPIN_CLIENT_ID, YAPIN_CLIENT_SECRET, ENCODER_SECRET (then verify upload, playback, Yapin', encoder)
+- [ ] Data export (per-table CSV/JSON) + users export (id, email, profile fields, roles), avatar/banner files
+- [ ] Feature switches: all start off like a fresh install (accounts on); confirm which to turn on
