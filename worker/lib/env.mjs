@@ -3,8 +3,8 @@ import { hostname, tmpdir } from "node:os";
 import { YAPIN_WEBHOOK_HOSTS } from "./yapin.mjs";
 
 export const REQUIRED_ENV = [
-  "SUPABASE_URL",
-  "SUPABASE_SERVICE_ROLE_KEY",
+  "APP_URL",
+  "ENCODER_SECRET",
   "R2_ACCOUNT_ID",
   "R2_ACCESS_KEY_ID",
   "R2_SECRET_ACCESS_KEY",
@@ -12,6 +12,9 @@ export const REQUIRED_ENV = [
 ];
 
 /**
+ * APP_URL is this sloptube's address (https://...), whose /api/public/encoder/rpc
+ * the worker calls with ENCODER_SECRET (the same value set as a secret on the app).
+ *
  * Optional:
  *   WORKER_NAME       shown in encode_jobs.worker (default: the host name)
  *   WORK_DIR          where sources are downloaded and encoded (default: the system temp folder)
@@ -28,8 +31,8 @@ export function readConfig(env = process.env) {
   const siteUrl = get("SITE_URL").replace(/\/+$/, "");
   return {
     missing,
-    supabaseUrl: get("SUPABASE_URL"),
-    serviceRoleKey: get("SUPABASE_SERVICE_ROLE_KEY"),
+    appUrl: get("APP_URL").replace(/\/+$/, ""),
+    encoderSecret: get("ENCODER_SECRET"),
     r2: {
       accountId: get("R2_ACCOUNT_ID"),
       accessKeyId: get("R2_ACCESS_KEY_ID"),

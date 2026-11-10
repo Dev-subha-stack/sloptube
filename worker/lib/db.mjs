@@ -1,12 +1,27 @@
 // The worker RPCs from supabase/migrations/006_processing.sql (and the
-// storage_cleanup queue from 014_studio.sql), called with the
-// service role key. Only this box ever holds that key.
-import { createClient } from "@supabase/supabase-js";
+// storage_cleanup queue from 014_studio.sql). The database is not reached
+// directly: every call goes to the app's /api/public/encoder/rpc with
+// ENCODER_SECRET, which only this box and the app hold.
 
-export function createSupabase(url, serviceRoleKey) {
-  return createClient(url, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
-  });
+/** A tiny client with the same rpc() shape the queue below expects. */
+export function createSupabase(siteUrl, encoderSecret, fetchImpl = fetch) {
+  const endpoint = `${siteUrl.replace(/\/+$/, "")}/api/public/encoder/rpc`;
+  return {
+    async rpc(fn, args = {}) {
+      try {
+        const res = await fetchImpl(endpoint, {
+          method: "POST",
+          headers: { "content-type": "application/json", authorization: `Bearer ${encoderSecret}` },
+          body: JSON.stringify({ fn, args }),
+        });
+        const body = await res.json().catch(() => null);
+        if (!body) return { data: null, error: { message: `http_${res.status}` } };
+        return { data: body.data ?? null, error: body.error ?? (res.ok ? null : { message: `http_${res.status}` }) };
+      } catch (e) {
+        return { data: null, error: { message: e instanceof Error ? e.message : "network error" } };
+      }
+    },
+  };
 }
 
 function rpcError(name, error) {

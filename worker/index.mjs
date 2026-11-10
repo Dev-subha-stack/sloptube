@@ -43,7 +43,7 @@ for (const sig of ["SIGTERM", "SIGINT"]) {
 }
 
 await runLoop({
-  db: createDb(createSupabase(config.supabaseUrl, config.serviceRoleKey)),
+  db: createDb(createSupabase(config.appUrl, config.encoderSecret)),
   storage: createStorage(createR2Client(config.r2), config.bucket),
   log,
   config,
