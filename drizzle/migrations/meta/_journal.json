@@ -120,6 +120,13 @@
       "when": 1794318677867,
       "tag": "0016_sloptube_image_addresses",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794318865886,
+      "tag": "0017_sloptube_ban_pre_request",
+      "breakpoints": true
     }
   ]
 }
