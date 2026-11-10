@@ -595,6 +595,8 @@ export type Database = {
       notifications: {
         Row: {
           actor_id: string | null
+          bug_report_id: string | null
+          comment_id: string | null
           created_at: string
           id: string
           message: string
@@ -605,6 +607,8 @@ export type Database = {
         }
         Insert: {
           actor_id?: string | null
+          bug_report_id?: string | null
+          comment_id?: string | null
           created_at?: string
           id?: string
           message: string
@@ -615,6 +619,8 @@ export type Database = {
         }
         Update: {
           actor_id?: string | null
+          bug_report_id?: string | null
+          comment_id?: string | null
           created_at?: string
           id?: string
           message?: string
@@ -629,6 +635,27 @@ export type Database = {
             columns: ["actor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_bug_report_id_fkey"
+            columns: ["bug_report_id"]
+            isOneToOne: false
+            referencedRelation: "bug_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comment_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
             referencedColumns: ["id"]
           },
           {
@@ -1883,6 +1910,7 @@ export type Database = {
       }
       history_paused: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      is_staff: { Args: never; Returns: boolean }
       launch_flag_on: { Args: { uid: string }; Returns: boolean }
       like_comment: {
         Args: { comment_id: string; on?: boolean }
@@ -1993,6 +2021,7 @@ export type Database = {
           video_id: string
         }[]
       }
+      mark_notifications_read: { Args: { ids?: string[] }; Returns: undefined }
       mod_action: {
         Args: {
           action: string
@@ -2057,6 +2086,21 @@ export type Database = {
           watched_at: string
         }[]
       }
+      my_notifications: {
+        Args: { lim?: number }
+        Returns: {
+          actor_avatar_url: string
+          actor_name: string
+          bug_report_id: string
+          comment_id: string
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          type: string
+          video_id: string
+        }[]
+      }
       my_progress: {
         Args: { video_ids: string[] }
         Returns: {
@@ -2078,6 +2122,7 @@ export type Database = {
           unseen: number
         }[]
       }
+      owner_email: { Args: never; Returns: string }
       pin_comment: {
         Args: { comment_id: string; on?: boolean }
         Returns: boolean
@@ -2267,6 +2312,15 @@ export type Database = {
           thumbnail_url: string
           title: string
           updated_at: string
+        }[]
+      }
+      staff_badges: {
+        Args: never
+        Returns: {
+          badge: string
+          channel_handle: string
+          user_id: string
+          username: string
         }[]
       }
       stats_caller: { Args: never; Returns: string }
