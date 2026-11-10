@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { ThumbDownIcon, ThumbUpIcon } from "@/components/icons";
 import { initialReaction, likeRatio, nextReaction, reduceReaction, viewReaction } from "@/lib/engagement/reaction";
 import { engagementErrorMessage, type Reaction } from "@/lib/engagement/rules";
@@ -19,6 +19,8 @@ function Thumb({
   disabled,
   title,
   onClick,
+  pop,
+  onPopEnd,
 }: {
   kind: Reaction;
   count: string;
@@ -26,6 +28,8 @@ function Thumb({
   disabled?: boolean;
   title: string;
   onClick?: () => void;
+  pop?: boolean;
+  onPopEnd?: () => void;
 }) {
   const Icon = kind === "like" ? ThumbUpIcon : ThumbDownIcon;
   const label = kind === "like" ? "I like this" : "I dislike this";
@@ -40,7 +44,10 @@ function Thumb({
       data-on={on ? "1" : undefined}
       className={`${button} ${on ? "text-link" : "text-text-2"} ${disabled ? "cursor-not-allowed opacity-60" : "hover:text-text"}`}
     >
-      <Icon className={`h-6 w-6 ${on ? "text-link" : "text-icon"}`} />
+      <Icon
+        className={`h-6 w-6 ${on ? "text-link" : "text-icon"} ${pop ? "animate-like-pop" : ""}`}
+        onAnimationEnd={onPopEnd}
+      />
       {/* The name is the label and the count, so it includes what the button shows. */}
       <span className="sr-only">{label}</span>
       <span data-reaction-count={kind}>{count}</span>
@@ -77,6 +84,18 @@ export function LikeButtons({ videoId, engagement }: { videoId: string; engageme
     (e) => initialReaction({ reaction: e.reaction, likes: e.likes, dislikes: e.dislikes }),
   );
   const busy = useRef(false);
+  const [pop, setPop] = useState<Reaction | null>(null);
+
+  // The page was first drawn for a signed out visitor and then loaded again as
+  // the signed in person: take their real like/dislike, or a click would undo it.
+  const eReaction = engagement?.reaction ?? null;
+  const eLikes = engagement?.likes ?? 0;
+  const eDislikes = engagement?.dislikes ?? null;
+  useEffect(() => {
+    if (!engagement) return;
+    dispatch({ type: "reset", server: { reaction: eReaction, likes: eLikes, dislikes: eDislikes } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eReaction, eLikes, eDislikes, signedIn]);
 
   // Send what the buttons still need, one request at a time.
   useEffect(() => {
@@ -117,6 +136,7 @@ export function LikeButtons({ videoId, engagement }: { videoId: string; engageme
       router.push(`/login?next=${encodeURIComponent(here)}`);
       return;
     }
+    if (view.reaction !== kind) setPop(kind);
     dispatch({ type: "click", kind });
   };
 
@@ -128,6 +148,8 @@ export function LikeButtons({ videoId, engagement }: { videoId: string; engageme
         on={view.reaction === "like"}
         title={view.reaction === "like" ? "Unlike" : "I like this"}
         onClick={() => click("like")}
+        pop={pop === "like"}
+        onPopEnd={() => setPop(null)}
       />
       <Thumb
         kind="dislike"
@@ -135,6 +157,8 @@ export function LikeButtons({ videoId, engagement }: { videoId: string; engageme
         on={view.reaction === "dislike"}
         title="I dislike this"
         onClick={() => click("dislike")}
+        pop={pop === "dislike"}
+        onPopEnd={() => setPop(null)}
       />
       {ratio !== null && (
         <div
