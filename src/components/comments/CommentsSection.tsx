@@ -100,7 +100,9 @@ export function CommentsSection({
 
   // "2 days ago" moves on while the page is open (it starts from the server's clock).
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 60_000);
+    // The page may have been rendered (or cached) a while ago: use this device's clock now.
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 30_000);
     return () => clearInterval(t);
   }, []);
 
