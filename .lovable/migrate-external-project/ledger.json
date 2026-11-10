@@ -1,0 +1,20 @@
+{
+  "source": "code-archive (sloptube.zip: Next.js 16 + Supabase + Cloudflare R2 + ffmpeg encoder worker)",
+  "capabilities": [
+    {"capability": "code", "source": "app/, components/, lib/ (Next.js App Router, ~90 routes)", "outcome": "port to TanStack Start routes, server functions and server routes", "status": "in_progress", "next_action": "port pages, components, lib and API routes"},
+    {"capability": "schema", "source": "supabase/migrations/000-023", "outcome": "migrate to Lovable Cloud", "status": "pending", "next_action": "apply migrations"},
+    {"capability": "records", "source": "Supabase (no export attached)", "outcome": "migrate", "status": "pending", "next_action": "request per-table CSV/JSON exports after preview"},
+    {"capability": "auth identities", "source": "Supabase Auth (email/password, Google, Sign in with Yapin')", "outcome": "migrate to Lovable Cloud auth with first-login email verification and new password", "status": "pending", "next_action": "request users export (id, email) after preview"},
+    {"capability": "authorization", "source": "RLS + security definer RPCs, profiles.role admin, bans", "outcome": "migrate as-is", "status": "pending", "next_action": "apply migrations, verify RLS"},
+    {"capability": "uploaded file bytes (avatars, banners buckets)", "source": "Supabase Storage", "outcome": "migrate buckets; bytes need export", "status": "pending", "next_action": "request avatar/banner files after preview"},
+    {"capability": "video storage", "source": "Cloudflare R2", "outcome": "preserve (same bucket)", "status": "pending", "next_action": "port R2 client to Worker-safe signer; request R2_* secrets"},
+    {"capability": "encoder worker", "source": "worker/ (ffmpeg, runs on own server with service role key)", "outcome": "preserve; switch DB access to authenticated HTTP endpoints on the app", "status": "pending", "next_action": "add /api/public/encoder endpoints + ENCODER_SECRET; update worker/lib/db.mjs"},
+    {"capability": "Sign in with Yapin' (OAuth + webhook)", "source": "app/auth/yapin, app/api/yapin/webhook", "outcome": "preserve", "status": "pending", "next_action": "port routes; request YAPIN_CLIENT_ID/SECRET"},
+    {"capability": "Google sign-in", "source": "Supabase OAuth", "outcome": "replace with Lovable Cloud Google sign-in", "status": "pending", "next_action": "configure"},
+    {"capability": "public endpoints", "source": "/api/*, /robots.txt, /sitemap.xml, /sitemaps/*, /embed/*, /api/health, /api/version", "outcome": "preserve", "status": "pending", "next_action": "port"},
+    {"capability": "schedules", "source": "pg_cron: stats rollup hourly, trash purge daily", "outcome": "preserve via pg_cron", "status": "pending", "next_action": "apply with migrations"},
+    {"capability": "secrets", "source": "R2_*, MEDIA_PUBLIC_URL, SITE_URL, YAPIN_CLIENT_ID/SECRET", "outcome": "request via secure form before verification", "status": "pending", "next_action": "ask user"},
+    {"capability": "cutover", "source": "self-hosted Docker app", "outcome": "Lovable hosting; Yapin redirect URI and R2 CORS origin change", "status": "pending", "next_action": "tell user after publish"},
+    {"capability": "verification", "source": "-", "outcome": "build, routes, CRUD, auth", "status": "pending", "next_action": "after port"}
+  ]
+}
