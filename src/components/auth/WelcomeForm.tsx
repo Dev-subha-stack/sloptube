@@ -50,8 +50,8 @@ export function WelcomeForm({ suggested, next }: { suggested: string; next: stri
       setBusy(false);
       return setError(accountErrorText(error.message));
     }
-    router.push(next);
-    router.refresh();
+    // A full load, so the whole page (and the onboarding check) reads the finished profile.
+    window.location.assign(next);
   }
 
   if (refused) {
