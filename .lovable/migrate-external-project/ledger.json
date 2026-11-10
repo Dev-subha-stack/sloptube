@@ -1,0 +1,22 @@
+{
+  "source": "code-archive (sloptube.zip: Next.js 16 + Supabase + Cloudflare R2 + ffmpeg encoder worker)",
+  "capabilities": [
+    {"capability": "code", "source": "app/, components/, lib/ (Next.js App Router)", "outcome": "ported to TanStack Start routes, server functions and server routes", "status": "verified", "next_action": "none (typecheck clean, every page renders)"},
+    {"capability": "schema", "source": "supabase/migrations/000-023", "outcome": "migrated to Lovable Cloud (021 superseded by user_roles)", "status": "verified", "next_action": "none"},
+    {"capability": "records", "source": "Supabase (no export attached)", "outcome": "migrate", "status": "pending", "next_action": "user exports per-table CSV/JSON"},
+    {"capability": "auth identities", "source": "Supabase Auth (email/password, Google, Yapin')", "outcome": "Lovable Cloud auth; imported users verify email and set a new password on first sign-in", "status": "pending", "next_action": "user exports users (id, email, profile fields, roles)"},
+    {"capability": "authorization", "source": "RLS + security definer RPCs, admin role, bans", "outcome": "migrated; roles in user_roles; ban hook on every Data API request", "status": "verified", "next_action": "none (ban verified with a test account)"},
+    {"capability": "uploaded file bytes (avatars, banners)", "source": "Supabase Storage", "outcome": "private buckets served through /api/public/images", "status": "pending", "next_action": "user sends existing avatar/banner files (new uploads verified)"},
+    {"capability": "video storage", "source": "Cloudflare R2", "outcome": "preserved (same bucket, Worker-safe signer)", "status": "pending", "next_action": "R2 secrets, then verify upload and playback"},
+    {"capability": "encoder worker", "source": "worker/ on own server", "outcome": "preserved; database access via /api/public/encoder/rpc with ENCODER_SECRET", "status": "implemented", "next_action": "set ENCODER_SECRET on app and worker, set APP_URL, redeploy worker"},
+    {"capability": "Sign in with Yapin'", "source": "app/auth/yapin, app/api/yapin/*", "outcome": "preserved; finish step at /yapin-finish", "status": "implemented", "next_action": "YAPIN_CLIENT_ID/SECRET, register new redirect URI, verify"},
+    {"capability": "Google sign-in", "source": "Supabase OAuth", "outcome": "Lovable Cloud Google sign-in", "status": "implemented", "next_action": "try once in the preview"},
+    {"capability": "email/password sign-in", "source": "Supabase Auth", "outcome": "Lovable Cloud email sign-in with confirmation", "status": "verified", "next_action": "none"},
+    {"capability": "public endpoints", "source": "/api/*, /robots.txt, /sitemap.xml, /sitemaps/*, /embed/*, /api/health, /api/version", "outcome": "preserved", "status": "verified", "next_action": "none"},
+    {"capability": "schedules", "source": "pg_cron stats rollup hourly, trash purge daily", "outcome": "preserved via pg_cron", "status": "verified", "next_action": "none"},
+    {"capability": "feature switches", "source": "feature_flags rows", "outcome": "fresh-install defaults (accounts on, rest off)", "status": "pending", "next_action": "user confirms which to turn on (or exports the table)"},
+    {"capability": "secrets", "source": "R2_*, MEDIA_PUBLIC_URL, SITE_URL, YAPIN_CLIENT_ID/SECRET, ENCODER_SECRET", "outcome": "request via secure form", "status": "pending", "next_action": "ask user"},
+    {"capability": "cutover", "source": "self-hosted Docker app", "outcome": "Lovable hosting; Yapin' redirect URI, R2 CORS origin and encoder APP_URL change", "status": "pending", "next_action": "after publish"},
+    {"capability": "verification", "source": "-", "outcome": "typecheck, pages, sign-in, onboarding write, owner views, avatar upload, ban", "status": "partial", "next_action": "video upload/playback and Yapin' after secrets; imported-user sign-in after export"}
+  ]
+}

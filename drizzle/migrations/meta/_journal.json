@@ -1,0 +1,132 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1794315607670,
+      "tag": "0000_sloptube_000_003_base_profiles_avatars",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794315665395,
+      "tag": "0001_sloptube_004_channels",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794315767111,
+      "tag": "0002_sloptube_005_006_videos_processing",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794315855453,
+      "tag": "0003_sloptube_007_009_watch_feed_subscriptions",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794315903676,
+      "tag": "0004_sloptube_010_search",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794315989144,
+      "tag": "0005_sloptube_011_engagement",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794316059092,
+      "tag": "0006_sloptube_012a_comments",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794316113666,
+      "tag": "0007_sloptube_012b_comments",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794316180387,
+      "tag": "0008_sloptube_013_shorts",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794316250181,
+      "tag": "0009_sloptube_014_studio",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794316330314,
+      "tag": "0010_sloptube_015_stats",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794316398458,
+      "tag": "0011_sloptube_016a_moderation",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1794316576392,
+      "tag": "0012_sloptube_016b_moderation_roles",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794316623843,
+      "tag": "0013_sloptube_017_launch",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1794316682741,
+      "tag": "0014_sloptube_018_yapin",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1794316778318,
+      "tag": "0015_sloptube_019_023_yapin_facts_flags_bugs_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1794318677867,
+      "tag": "0016_sloptube_image_addresses",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794318865886,
+      "tag": "0017_sloptube_ban_pre_request",
+      "breakpoints": true
+    }
+  ]
+}

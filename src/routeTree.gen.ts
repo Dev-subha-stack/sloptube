@@ -10,33 +10,1235 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FlagsRouteImport } from './routes/flags'
+import { Route as GuidelinesRouteImport } from './routes/guidelines'
+import { Route as HistoryRouteImport } from './routes/history'
+import { Route as LibraryRouteImport } from './routes/library'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PlaylistRouteImport } from './routes/playlist'
+import { Route as PlaylistsRouteImport } from './routes/playlists'
+import { Route as PressRouteImport } from './routes/press'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ResultsRouteImport } from './routes/results'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as StudioRouteImport } from './routes/studio'
+import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TrendingRouteImport } from './routes/trending'
+import { Route as UploadRouteImport } from './routes/upload'
+import { Route as WatchRouteImport } from './routes/watch'
+import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as YapinFinishRouteImport } from './routes/yapin-finish'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminLogRouteImport } from './routes/admin/log'
+import { Route as AdminMessagesRouteImport } from './routes/admin/messages'
+import { Route as AdminWordsRouteImport } from './routes/admin/words'
+import { Route as ApiCommentsRouteImport } from './routes/api/comments'
+import { Route as ApiContactRouteImport } from './routes/api/contact'
+import { Route as ApiFeedRouteImport } from './routes/api/feed'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiHistoryRouteImport } from './routes/api/history'
+import { Route as ApiReactionsRouteImport } from './routes/api/reactions'
+import { Route as ApiSearchRouteImport } from './routes/api/search'
+import { Route as ApiShortsRouteImport } from './routes/api/shorts'
+import { Route as ApiSubscriptionsRouteImport } from './routes/api/subscriptions'
+import { Route as ApiVersionRouteImport } from './routes/api/version'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as AuthYapinRouteImport } from './routes/auth/yapin'
+import { Route as ChannelIdRouteImport } from './routes/channel/$id'
+import { Route as EmbedIdRouteImport } from './routes/embed/$id'
+import { Route as FeedHistoryRouteImport } from './routes/feed/history'
+import { Route as FeedSubscriptionsRouteImport } from './routes/feed/subscriptions'
+import { Route as FeedWatchLaterRouteImport } from './routes/feed/watch-later'
+import { Route as ShortsIndexRouteImport } from './routes/shorts/index'
+import { Route as ShortsIdRouteImport } from './routes/shorts/$id'
+import { Route as SitemapsNameRouteImport } from './routes/sitemaps/$name'
+import { Route as StudioIndexRouteImport } from './routes/studio/index'
+import { Route as StudioAnalyticsRouteImport } from './routes/studio/analytics'
+import { Route as StudioCalendarRouteImport } from './routes/studio/calendar'
+import { Route as StudioChannelRouteImport } from './routes/studio/channel'
+import { Route as StudioCommentsRouteImport } from './routes/studio/comments'
+import { Route as StudioSettingsRouteImport } from './routes/studio/settings'
+import { Route as StudioVideosRouteImport } from './routes/studio/videos'
+import { Route as ApiAdminActionRouteImport } from './routes/api/admin/action'
+import { Route as ApiAdminFlagsRouteImport } from './routes/api/admin/flags'
+import { Route as ApiAdminMessagesRouteImport } from './routes/api/admin/messages'
+import { Route as ApiAdminWordsRouteImport } from './routes/api/admin/words'
+import { Route as ApiCommentsLikeRouteImport } from './routes/api/comments/like'
+import { Route as ApiCommentsModerateRouteImport } from './routes/api/comments/moderate'
+import { Route as ApiCommentsRepliesRouteImport } from './routes/api/comments/replies'
+import { Route as ApiCommentsSettingsRouteImport } from './routes/api/comments/settings'
+import { Route as ApiHistoryProgressRouteImport } from './routes/api/history/progress'
+import { Route as ApiModerationAppealRouteImport } from './routes/api/moderation/appeal'
+import { Route as ApiModerationReportRouteImport } from './routes/api/moderation/report'
+import { Route as ApiSearchSuggestRouteImport } from './routes/api/search/suggest'
+import { Route as ApiShortsChoiceRouteImport } from './routes/api/shorts/choice'
+import { Route as ApiShortsCommentsRouteImport } from './routes/api/shorts/comments'
+import { Route as ApiStudioAnalyticsRouteImport } from './routes/api/studio/analytics'
+import { Route as ApiStudioBulkRouteImport } from './routes/api/studio/bulk'
+import { Route as ApiStudioThumbnailRouteImport } from './routes/api/studio/thumbnail'
+import { Route as ApiStudioVideoRouteImport } from './routes/api/studio/video'
+import { Route as ApiSubscriptionsFeedRouteImport } from './routes/api/subscriptions/feed'
+import { Route as ApiUploadAbortRouteImport } from './routes/api/upload/abort'
+import { Route as ApiUploadCompleteRouteImport } from './routes/api/upload/complete'
+import { Route as ApiUploadSignRouteImport } from './routes/api/upload/sign'
+import { Route as ApiWatchPingRouteImport } from './routes/api/watch/ping'
+import { Route as ApiYapinUnlinkRouteImport } from './routes/api/yapin/unlink'
+import { Route as ApiYapinWebhookRouteImport } from './routes/api/yapin/webhook'
+import { Route as AuthYapinStartRouteImport } from './routes/auth/yapin/start'
+import { Route as CHandleIndexRouteImport } from './routes/c/$handle/index'
+import { Route as CHandleTabRouteImport } from './routes/c/$handle/$tab'
+import { Route as StudioContentIndexRouteImport } from './routes/studio/content/index'
+import { Route as StudioContentTrashRouteImport } from './routes/studio/content/trash'
+import { Route as ApiMediaVideoSplatRouteImport } from './routes/api/media/$video/$'
+import { Route as ApiPublicEncoderRpcRouteImport } from './routes/api/public/encoder/rpc'
+import { Route as ApiStudioAnalyticsRealtimeRouteImport } from './routes/api/studio/analytics/realtime'
+import { Route as ApiStudioAnalyticsVideoRouteImport } from './routes/api/studio/analytics/video'
+import { Route as ApiStudioThumbnailSignRouteImport } from './routes/api/studio/thumbnail/sign'
+import { Route as ApiVideosIdStatusRouteImport } from './routes/api/videos/$id/status'
+import { Route as StudioVideoIdAnalyticsRouteImport } from './routes/studio/video/$id/analytics'
+import { Route as StudioVideoIdEditRouteImport } from './routes/studio/video/$id/edit'
+import { Route as ApiPublicImagesBucketSplatRouteImport } from './routes/api/public/images/$bucket/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FlagsRoute = FlagsRouteImport.update({
+  id: '/flags',
+  path: '/flags',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidelinesRoute = GuidelinesRouteImport.update({
+  id: '/guidelines',
+  path: '/guidelines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlaylistRoute = PlaylistRouteImport.update({
+  id: '/playlist',
+  path: '/playlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlaylistsRoute = PlaylistsRouteImport.update({
+  id: '/playlists',
+  path: '/playlists',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PressRoute = PressRouteImport.update({
+  id: '/press',
+  path: '/press',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResultsRoute = ResultsRouteImport.update({
+  id: '/results',
+  path: '/results',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioRoute = StudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscriptionsRoute = SubscriptionsRouteImport.update({
+  id: '/subscriptions',
+  path: '/subscriptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrendingRoute = TrendingRouteImport.update({
+  id: '/trending',
+  path: '/trending',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UploadRoute = UploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WatchRoute = WatchRouteImport.update({
+  id: '/watch',
+  path: '/watch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const YapinFinishRoute = YapinFinishRouteImport.update({
+  id: '/yapin-finish',
+  path: '/yapin-finish',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLogRoute = AdminLogRouteImport.update({
+  id: '/admin/log',
+  path: '/admin/log',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMessagesRoute = AdminMessagesRouteImport.update({
+  id: '/admin/messages',
+  path: '/admin/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminWordsRoute = AdminWordsRouteImport.update({
+  id: '/admin/words',
+  path: '/admin/words',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCommentsRoute = ApiCommentsRouteImport.update({
+  id: '/api/comments',
+  path: '/api/comments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiContactRoute = ApiContactRouteImport.update({
+  id: '/api/contact',
+  path: '/api/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiFeedRoute = ApiFeedRouteImport.update({
+  id: '/api/feed',
+  path: '/api/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHistoryRoute = ApiHistoryRouteImport.update({
+  id: '/api/history',
+  path: '/api/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReactionsRoute = ApiReactionsRouteImport.update({
+  id: '/api/reactions',
+  path: '/api/reactions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSearchRoute = ApiSearchRouteImport.update({
+  id: '/api/search',
+  path: '/api/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiShortsRoute = ApiShortsRouteImport.update({
+  id: '/api/shorts',
+  path: '/api/shorts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSubscriptionsRoute = ApiSubscriptionsRouteImport.update({
+  id: '/api/subscriptions',
+  path: '/api/subscriptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiVersionRoute = ApiVersionRouteImport.update({
+  id: '/api/version',
+  path: '/api/version',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthYapinRoute = AuthYapinRouteImport.update({
+  id: '/auth/yapin',
+  path: '/auth/yapin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChannelIdRoute = ChannelIdRouteImport.update({
+  id: '/channel/$id',
+  path: '/channel/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmbedIdRoute = EmbedIdRouteImport.update({
+  id: '/embed/$id',
+  path: '/embed/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedHistoryRoute = FeedHistoryRouteImport.update({
+  id: '/feed/history',
+  path: '/feed/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedSubscriptionsRoute = FeedSubscriptionsRouteImport.update({
+  id: '/feed/subscriptions',
+  path: '/feed/subscriptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedWatchLaterRoute = FeedWatchLaterRouteImport.update({
+  id: '/feed/watch-later',
+  path: '/feed/watch-later',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShortsIndexRoute = ShortsIndexRouteImport.update({
+  id: '/shorts/',
+  path: '/shorts/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShortsIdRoute = ShortsIdRouteImport.update({
+  id: '/shorts/$id',
+  path: '/shorts/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapsNameRoute = SitemapsNameRouteImport.update({
+  id: '/sitemaps/$name',
+  path: '/sitemaps/$name',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioIndexRoute = StudioIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StudioRoute,
+} as any)
+const StudioAnalyticsRoute = StudioAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => StudioRoute,
+} as any)
+const StudioCalendarRoute = StudioCalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => StudioRoute,
+} as any)
+const StudioChannelRoute = StudioChannelRouteImport.update({
+  id: '/channel',
+  path: '/channel',
+  getParentRoute: () => StudioRoute,
+} as any)
+const StudioCommentsRoute = StudioCommentsRouteImport.update({
+  id: '/comments',
+  path: '/comments',
+  getParentRoute: () => StudioRoute,
+} as any)
+const StudioSettingsRoute = StudioSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => StudioRoute,
+} as any)
+const StudioVideosRoute = StudioVideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
+  getParentRoute: () => StudioRoute,
+} as any)
+const ApiAdminActionRoute = ApiAdminActionRouteImport.update({
+  id: '/api/admin/action',
+  path: '/api/admin/action',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminFlagsRoute = ApiAdminFlagsRouteImport.update({
+  id: '/api/admin/flags',
+  path: '/api/admin/flags',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminMessagesRoute = ApiAdminMessagesRouteImport.update({
+  id: '/api/admin/messages',
+  path: '/api/admin/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminWordsRoute = ApiAdminWordsRouteImport.update({
+  id: '/api/admin/words',
+  path: '/api/admin/words',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCommentsLikeRoute = ApiCommentsLikeRouteImport.update({
+  id: '/like',
+  path: '/like',
+  getParentRoute: () => ApiCommentsRoute,
+} as any)
+const ApiCommentsModerateRoute = ApiCommentsModerateRouteImport.update({
+  id: '/moderate',
+  path: '/moderate',
+  getParentRoute: () => ApiCommentsRoute,
+} as any)
+const ApiCommentsRepliesRoute = ApiCommentsRepliesRouteImport.update({
+  id: '/replies',
+  path: '/replies',
+  getParentRoute: () => ApiCommentsRoute,
+} as any)
+const ApiCommentsSettingsRoute = ApiCommentsSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => ApiCommentsRoute,
+} as any)
+const ApiHistoryProgressRoute = ApiHistoryProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => ApiHistoryRoute,
+} as any)
+const ApiModerationAppealRoute = ApiModerationAppealRouteImport.update({
+  id: '/api/moderation/appeal',
+  path: '/api/moderation/appeal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiModerationReportRoute = ApiModerationReportRouteImport.update({
+  id: '/api/moderation/report',
+  path: '/api/moderation/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSearchSuggestRoute = ApiSearchSuggestRouteImport.update({
+  id: '/suggest',
+  path: '/suggest',
+  getParentRoute: () => ApiSearchRoute,
+} as any)
+const ApiShortsChoiceRoute = ApiShortsChoiceRouteImport.update({
+  id: '/choice',
+  path: '/choice',
+  getParentRoute: () => ApiShortsRoute,
+} as any)
+const ApiShortsCommentsRoute = ApiShortsCommentsRouteImport.update({
+  id: '/comments',
+  path: '/comments',
+  getParentRoute: () => ApiShortsRoute,
+} as any)
+const ApiStudioAnalyticsRoute = ApiStudioAnalyticsRouteImport.update({
+  id: '/api/studio/analytics',
+  path: '/api/studio/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStudioBulkRoute = ApiStudioBulkRouteImport.update({
+  id: '/api/studio/bulk',
+  path: '/api/studio/bulk',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStudioThumbnailRoute = ApiStudioThumbnailRouteImport.update({
+  id: '/api/studio/thumbnail',
+  path: '/api/studio/thumbnail',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStudioVideoRoute = ApiStudioVideoRouteImport.update({
+  id: '/api/studio/video',
+  path: '/api/studio/video',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSubscriptionsFeedRoute = ApiSubscriptionsFeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => ApiSubscriptionsRoute,
+} as any)
+const ApiUploadAbortRoute = ApiUploadAbortRouteImport.update({
+  id: '/api/upload/abort',
+  path: '/api/upload/abort',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUploadCompleteRoute = ApiUploadCompleteRouteImport.update({
+  id: '/api/upload/complete',
+  path: '/api/upload/complete',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUploadSignRoute = ApiUploadSignRouteImport.update({
+  id: '/api/upload/sign',
+  path: '/api/upload/sign',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWatchPingRoute = ApiWatchPingRouteImport.update({
+  id: '/api/watch/ping',
+  path: '/api/watch/ping',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiYapinUnlinkRoute = ApiYapinUnlinkRouteImport.update({
+  id: '/api/yapin/unlink',
+  path: '/api/yapin/unlink',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiYapinWebhookRoute = ApiYapinWebhookRouteImport.update({
+  id: '/api/yapin/webhook',
+  path: '/api/yapin/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthYapinStartRoute = AuthYapinStartRouteImport.update({
+  id: '/start',
+  path: '/start',
+  getParentRoute: () => AuthYapinRoute,
+} as any)
+const CHandleIndexRoute = CHandleIndexRouteImport.update({
+  id: '/c/$handle/',
+  path: '/c/$handle/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CHandleTabRoute = CHandleTabRouteImport.update({
+  id: '/c/$handle/$tab',
+  path: '/c/$handle/$tab',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioContentIndexRoute = StudioContentIndexRouteImport.update({
+  id: '/content/',
+  path: '/content/',
+  getParentRoute: () => StudioRoute,
+} as any)
+const StudioContentTrashRoute = StudioContentTrashRouteImport.update({
+  id: '/content/trash',
+  path: '/content/trash',
+  getParentRoute: () => StudioRoute,
+} as any)
+const ApiMediaVideoSplatRoute = ApiMediaVideoSplatRouteImport.update({
+  id: '/api/media/$video/$',
+  path: '/api/media/$video/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicEncoderRpcRoute = ApiPublicEncoderRpcRouteImport.update({
+  id: '/api/public/encoder/rpc',
+  path: '/api/public/encoder/rpc',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStudioAnalyticsRealtimeRoute =
+  ApiStudioAnalyticsRealtimeRouteImport.update({
+    id: '/realtime',
+    path: '/realtime',
+    getParentRoute: () => ApiStudioAnalyticsRoute,
+  } as any)
+const ApiStudioAnalyticsVideoRoute = ApiStudioAnalyticsVideoRouteImport.update({
+  id: '/video',
+  path: '/video',
+  getParentRoute: () => ApiStudioAnalyticsRoute,
+} as any)
+const ApiStudioThumbnailSignRoute = ApiStudioThumbnailSignRouteImport.update({
+  id: '/sign',
+  path: '/sign',
+  getParentRoute: () => ApiStudioThumbnailRoute,
+} as any)
+const ApiVideosIdStatusRoute = ApiVideosIdStatusRouteImport.update({
+  id: '/api/videos/$id/status',
+  path: '/api/videos/$id/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioVideoIdAnalyticsRoute = StudioVideoIdAnalyticsRouteImport.update({
+  id: '/video/$id/analytics',
+  path: '/video/$id/analytics',
+  getParentRoute: () => StudioRoute,
+} as any)
+const StudioVideoIdEditRoute = StudioVideoIdEditRouteImport.update({
+  id: '/video/$id/edit',
+  path: '/video/$id/edit',
+  getParentRoute: () => StudioRoute,
+} as any)
+const ApiPublicImagesBucketSplatRoute =
+  ApiPublicImagesBucketSplatRouteImport.update({
+    id: '/api/public/images/$bucket/$',
+    path: '/api/public/images/$bucket/$',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/flags': typeof FlagsRoute
+  '/guidelines': typeof GuidelinesRoute
+  '/history': typeof HistoryRoute
+  '/library': typeof LibraryRoute
+  '/login': typeof LoginRoute
+  '/playlist': typeof PlaylistRoute
+  '/playlists': typeof PlaylistsRoute
+  '/press': typeof PressRoute
+  '/privacy': typeof PrivacyRoute
+  '/results': typeof ResultsRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/settings': typeof SettingsRoute
+  '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/studio': typeof StudioRouteWithChildren
+  '/subscriptions': typeof SubscriptionsRoute
+  '/terms': typeof TermsRoute
+  '/trending': typeof TrendingRoute
+  '/upload': typeof UploadRoute
+  '/watch': typeof WatchRoute
+  '/welcome': typeof WelcomeRoute
+  '/yapin-finish': typeof YapinFinishRoute
+  '/admin/log': typeof AdminLogRoute
+  '/admin/messages': typeof AdminMessagesRoute
+  '/admin/words': typeof AdminWordsRoute
+  '/api/comments': typeof ApiCommentsRouteWithChildren
+  '/api/contact': typeof ApiContactRoute
+  '/api/feed': typeof ApiFeedRoute
+  '/api/health': typeof ApiHealthRoute
+  '/api/history': typeof ApiHistoryRouteWithChildren
+  '/api/reactions': typeof ApiReactionsRoute
+  '/api/search': typeof ApiSearchRouteWithChildren
+  '/api/shorts': typeof ApiShortsRouteWithChildren
+  '/api/subscriptions': typeof ApiSubscriptionsRouteWithChildren
+  '/api/version': typeof ApiVersionRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/yapin': typeof AuthYapinRouteWithChildren
+  '/channel/$id': typeof ChannelIdRoute
+  '/embed/$id': typeof EmbedIdRoute
+  '/feed/history': typeof FeedHistoryRoute
+  '/feed/subscriptions': typeof FeedSubscriptionsRoute
+  '/feed/watch-later': typeof FeedWatchLaterRoute
+  '/shorts/$id': typeof ShortsIdRoute
+  '/sitemaps/$name': typeof SitemapsNameRoute
+  '/studio/analytics': typeof StudioAnalyticsRoute
+  '/studio/calendar': typeof StudioCalendarRoute
+  '/studio/channel': typeof StudioChannelRoute
+  '/studio/comments': typeof StudioCommentsRoute
+  '/studio/settings': typeof StudioSettingsRoute
+  '/studio/videos': typeof StudioVideosRoute
+  '/admin/': typeof AdminIndexRoute
+  '/shorts/': typeof ShortsIndexRoute
+  '/studio/': typeof StudioIndexRoute
+  '/api/admin/action': typeof ApiAdminActionRoute
+  '/api/admin/flags': typeof ApiAdminFlagsRoute
+  '/api/admin/messages': typeof ApiAdminMessagesRoute
+  '/api/admin/words': typeof ApiAdminWordsRoute
+  '/api/comments/like': typeof ApiCommentsLikeRoute
+  '/api/comments/moderate': typeof ApiCommentsModerateRoute
+  '/api/comments/replies': typeof ApiCommentsRepliesRoute
+  '/api/comments/settings': typeof ApiCommentsSettingsRoute
+  '/api/history/progress': typeof ApiHistoryProgressRoute
+  '/api/moderation/appeal': typeof ApiModerationAppealRoute
+  '/api/moderation/report': typeof ApiModerationReportRoute
+  '/api/search/suggest': typeof ApiSearchSuggestRoute
+  '/api/shorts/choice': typeof ApiShortsChoiceRoute
+  '/api/shorts/comments': typeof ApiShortsCommentsRoute
+  '/api/studio/analytics': typeof ApiStudioAnalyticsRouteWithChildren
+  '/api/studio/bulk': typeof ApiStudioBulkRoute
+  '/api/studio/thumbnail': typeof ApiStudioThumbnailRouteWithChildren
+  '/api/studio/video': typeof ApiStudioVideoRoute
+  '/api/subscriptions/feed': typeof ApiSubscriptionsFeedRoute
+  '/api/upload/abort': typeof ApiUploadAbortRoute
+  '/api/upload/complete': typeof ApiUploadCompleteRoute
+  '/api/upload/sign': typeof ApiUploadSignRoute
+  '/api/watch/ping': typeof ApiWatchPingRoute
+  '/api/yapin/unlink': typeof ApiYapinUnlinkRoute
+  '/api/yapin/webhook': typeof ApiYapinWebhookRoute
+  '/auth/yapin/start': typeof AuthYapinStartRoute
+  '/c/$handle/$tab': typeof CHandleTabRoute
+  '/studio/content/trash': typeof StudioContentTrashRoute
+  '/c/$handle/': typeof CHandleIndexRoute
+  '/studio/content/': typeof StudioContentIndexRoute
+  '/api/media/$video/$': typeof ApiMediaVideoSplatRoute
+  '/api/public/encoder/rpc': typeof ApiPublicEncoderRpcRoute
+  '/api/studio/analytics/realtime': typeof ApiStudioAnalyticsRealtimeRoute
+  '/api/studio/analytics/video': typeof ApiStudioAnalyticsVideoRoute
+  '/api/studio/thumbnail/sign': typeof ApiStudioThumbnailSignRoute
+  '/api/videos/$id/status': typeof ApiVideosIdStatusRoute
+  '/studio/video/$id/analytics': typeof StudioVideoIdAnalyticsRoute
+  '/studio/video/$id/edit': typeof StudioVideoIdEditRoute
+  '/api/public/images/$bucket/$': typeof ApiPublicImagesBucketSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/flags': typeof FlagsRoute
+  '/guidelines': typeof GuidelinesRoute
+  '/history': typeof HistoryRoute
+  '/library': typeof LibraryRoute
+  '/login': typeof LoginRoute
+  '/playlist': typeof PlaylistRoute
+  '/playlists': typeof PlaylistsRoute
+  '/press': typeof PressRoute
+  '/privacy': typeof PrivacyRoute
+  '/results': typeof ResultsRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/settings': typeof SettingsRoute
+  '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/subscriptions': typeof SubscriptionsRoute
+  '/terms': typeof TermsRoute
+  '/trending': typeof TrendingRoute
+  '/upload': typeof UploadRoute
+  '/watch': typeof WatchRoute
+  '/welcome': typeof WelcomeRoute
+  '/yapin-finish': typeof YapinFinishRoute
+  '/admin/log': typeof AdminLogRoute
+  '/admin/messages': typeof AdminMessagesRoute
+  '/admin/words': typeof AdminWordsRoute
+  '/api/comments': typeof ApiCommentsRouteWithChildren
+  '/api/contact': typeof ApiContactRoute
+  '/api/feed': typeof ApiFeedRoute
+  '/api/health': typeof ApiHealthRoute
+  '/api/history': typeof ApiHistoryRouteWithChildren
+  '/api/reactions': typeof ApiReactionsRoute
+  '/api/search': typeof ApiSearchRouteWithChildren
+  '/api/shorts': typeof ApiShortsRouteWithChildren
+  '/api/subscriptions': typeof ApiSubscriptionsRouteWithChildren
+  '/api/version': typeof ApiVersionRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/yapin': typeof AuthYapinRouteWithChildren
+  '/channel/$id': typeof ChannelIdRoute
+  '/embed/$id': typeof EmbedIdRoute
+  '/feed/history': typeof FeedHistoryRoute
+  '/feed/subscriptions': typeof FeedSubscriptionsRoute
+  '/feed/watch-later': typeof FeedWatchLaterRoute
+  '/shorts/$id': typeof ShortsIdRoute
+  '/sitemaps/$name': typeof SitemapsNameRoute
+  '/studio/analytics': typeof StudioAnalyticsRoute
+  '/studio/calendar': typeof StudioCalendarRoute
+  '/studio/channel': typeof StudioChannelRoute
+  '/studio/comments': typeof StudioCommentsRoute
+  '/studio/settings': typeof StudioSettingsRoute
+  '/studio/videos': typeof StudioVideosRoute
+  '/admin': typeof AdminIndexRoute
+  '/shorts': typeof ShortsIndexRoute
+  '/studio': typeof StudioIndexRoute
+  '/api/admin/action': typeof ApiAdminActionRoute
+  '/api/admin/flags': typeof ApiAdminFlagsRoute
+  '/api/admin/messages': typeof ApiAdminMessagesRoute
+  '/api/admin/words': typeof ApiAdminWordsRoute
+  '/api/comments/like': typeof ApiCommentsLikeRoute
+  '/api/comments/moderate': typeof ApiCommentsModerateRoute
+  '/api/comments/replies': typeof ApiCommentsRepliesRoute
+  '/api/comments/settings': typeof ApiCommentsSettingsRoute
+  '/api/history/progress': typeof ApiHistoryProgressRoute
+  '/api/moderation/appeal': typeof ApiModerationAppealRoute
+  '/api/moderation/report': typeof ApiModerationReportRoute
+  '/api/search/suggest': typeof ApiSearchSuggestRoute
+  '/api/shorts/choice': typeof ApiShortsChoiceRoute
+  '/api/shorts/comments': typeof ApiShortsCommentsRoute
+  '/api/studio/analytics': typeof ApiStudioAnalyticsRouteWithChildren
+  '/api/studio/bulk': typeof ApiStudioBulkRoute
+  '/api/studio/thumbnail': typeof ApiStudioThumbnailRouteWithChildren
+  '/api/studio/video': typeof ApiStudioVideoRoute
+  '/api/subscriptions/feed': typeof ApiSubscriptionsFeedRoute
+  '/api/upload/abort': typeof ApiUploadAbortRoute
+  '/api/upload/complete': typeof ApiUploadCompleteRoute
+  '/api/upload/sign': typeof ApiUploadSignRoute
+  '/api/watch/ping': typeof ApiWatchPingRoute
+  '/api/yapin/unlink': typeof ApiYapinUnlinkRoute
+  '/api/yapin/webhook': typeof ApiYapinWebhookRoute
+  '/auth/yapin/start': typeof AuthYapinStartRoute
+  '/c/$handle/$tab': typeof CHandleTabRoute
+  '/studio/content/trash': typeof StudioContentTrashRoute
+  '/c/$handle': typeof CHandleIndexRoute
+  '/studio/content': typeof StudioContentIndexRoute
+  '/api/media/$video/$': typeof ApiMediaVideoSplatRoute
+  '/api/public/encoder/rpc': typeof ApiPublicEncoderRpcRoute
+  '/api/studio/analytics/realtime': typeof ApiStudioAnalyticsRealtimeRoute
+  '/api/studio/analytics/video': typeof ApiStudioAnalyticsVideoRoute
+  '/api/studio/thumbnail/sign': typeof ApiStudioThumbnailSignRoute
+  '/api/videos/$id/status': typeof ApiVideosIdStatusRoute
+  '/studio/video/$id/analytics': typeof StudioVideoIdAnalyticsRoute
+  '/studio/video/$id/edit': typeof StudioVideoIdEditRoute
+  '/api/public/images/$bucket/$': typeof ApiPublicImagesBucketSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/flags': typeof FlagsRoute
+  '/guidelines': typeof GuidelinesRoute
+  '/history': typeof HistoryRoute
+  '/library': typeof LibraryRoute
+  '/login': typeof LoginRoute
+  '/playlist': typeof PlaylistRoute
+  '/playlists': typeof PlaylistsRoute
+  '/press': typeof PressRoute
+  '/privacy': typeof PrivacyRoute
+  '/results': typeof ResultsRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/settings': typeof SettingsRoute
+  '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/studio': typeof StudioRouteWithChildren
+  '/subscriptions': typeof SubscriptionsRoute
+  '/terms': typeof TermsRoute
+  '/trending': typeof TrendingRoute
+  '/upload': typeof UploadRoute
+  '/watch': typeof WatchRoute
+  '/welcome': typeof WelcomeRoute
+  '/yapin-finish': typeof YapinFinishRoute
+  '/admin/log': typeof AdminLogRoute
+  '/admin/messages': typeof AdminMessagesRoute
+  '/admin/words': typeof AdminWordsRoute
+  '/api/comments': typeof ApiCommentsRouteWithChildren
+  '/api/contact': typeof ApiContactRoute
+  '/api/feed': typeof ApiFeedRoute
+  '/api/health': typeof ApiHealthRoute
+  '/api/history': typeof ApiHistoryRouteWithChildren
+  '/api/reactions': typeof ApiReactionsRoute
+  '/api/search': typeof ApiSearchRouteWithChildren
+  '/api/shorts': typeof ApiShortsRouteWithChildren
+  '/api/subscriptions': typeof ApiSubscriptionsRouteWithChildren
+  '/api/version': typeof ApiVersionRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/yapin': typeof AuthYapinRouteWithChildren
+  '/channel/$id': typeof ChannelIdRoute
+  '/embed/$id': typeof EmbedIdRoute
+  '/feed/history': typeof FeedHistoryRoute
+  '/feed/subscriptions': typeof FeedSubscriptionsRoute
+  '/feed/watch-later': typeof FeedWatchLaterRoute
+  '/shorts/$id': typeof ShortsIdRoute
+  '/sitemaps/$name': typeof SitemapsNameRoute
+  '/studio/analytics': typeof StudioAnalyticsRoute
+  '/studio/calendar': typeof StudioCalendarRoute
+  '/studio/channel': typeof StudioChannelRoute
+  '/studio/comments': typeof StudioCommentsRoute
+  '/studio/settings': typeof StudioSettingsRoute
+  '/studio/videos': typeof StudioVideosRoute
+  '/admin/': typeof AdminIndexRoute
+  '/shorts/': typeof ShortsIndexRoute
+  '/studio/': typeof StudioIndexRoute
+  '/api/admin/action': typeof ApiAdminActionRoute
+  '/api/admin/flags': typeof ApiAdminFlagsRoute
+  '/api/admin/messages': typeof ApiAdminMessagesRoute
+  '/api/admin/words': typeof ApiAdminWordsRoute
+  '/api/comments/like': typeof ApiCommentsLikeRoute
+  '/api/comments/moderate': typeof ApiCommentsModerateRoute
+  '/api/comments/replies': typeof ApiCommentsRepliesRoute
+  '/api/comments/settings': typeof ApiCommentsSettingsRoute
+  '/api/history/progress': typeof ApiHistoryProgressRoute
+  '/api/moderation/appeal': typeof ApiModerationAppealRoute
+  '/api/moderation/report': typeof ApiModerationReportRoute
+  '/api/search/suggest': typeof ApiSearchSuggestRoute
+  '/api/shorts/choice': typeof ApiShortsChoiceRoute
+  '/api/shorts/comments': typeof ApiShortsCommentsRoute
+  '/api/studio/analytics': typeof ApiStudioAnalyticsRouteWithChildren
+  '/api/studio/bulk': typeof ApiStudioBulkRoute
+  '/api/studio/thumbnail': typeof ApiStudioThumbnailRouteWithChildren
+  '/api/studio/video': typeof ApiStudioVideoRoute
+  '/api/subscriptions/feed': typeof ApiSubscriptionsFeedRoute
+  '/api/upload/abort': typeof ApiUploadAbortRoute
+  '/api/upload/complete': typeof ApiUploadCompleteRoute
+  '/api/upload/sign': typeof ApiUploadSignRoute
+  '/api/watch/ping': typeof ApiWatchPingRoute
+  '/api/yapin/unlink': typeof ApiYapinUnlinkRoute
+  '/api/yapin/webhook': typeof ApiYapinWebhookRoute
+  '/auth/yapin/start': typeof AuthYapinStartRoute
+  '/c/$handle/$tab': typeof CHandleTabRoute
+  '/studio/content/trash': typeof StudioContentTrashRoute
+  '/c/$handle/': typeof CHandleIndexRoute
+  '/studio/content/': typeof StudioContentIndexRoute
+  '/api/media/$video/$': typeof ApiMediaVideoSplatRoute
+  '/api/public/encoder/rpc': typeof ApiPublicEncoderRpcRoute
+  '/api/studio/analytics/realtime': typeof ApiStudioAnalyticsRealtimeRoute
+  '/api/studio/analytics/video': typeof ApiStudioAnalyticsVideoRoute
+  '/api/studio/thumbnail/sign': typeof ApiStudioThumbnailSignRoute
+  '/api/videos/$id/status': typeof ApiVideosIdStatusRoute
+  '/studio/video/$id/analytics': typeof StudioVideoIdAnalyticsRoute
+  '/studio/video/$id/edit': typeof StudioVideoIdEditRoute
+  '/api/public/images/$bucket/$': typeof ApiPublicImagesBucketSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/contact'
+    | '/flags'
+    | '/guidelines'
+    | '/history'
+    | '/library'
+    | '/login'
+    | '/playlist'
+    | '/playlists'
+    | '/press'
+    | '/privacy'
+    | '/results'
+    | '/robots.txt'
+    | '/settings'
+    | '/signup'
+    | '/sitemap.xml'
+    | '/studio'
+    | '/subscriptions'
+    | '/terms'
+    | '/trending'
+    | '/upload'
+    | '/watch'
+    | '/welcome'
+    | '/yapin-finish'
+    | '/admin/log'
+    | '/admin/messages'
+    | '/admin/words'
+    | '/api/comments'
+    | '/api/contact'
+    | '/api/feed'
+    | '/api/health'
+    | '/api/history'
+    | '/api/reactions'
+    | '/api/search'
+    | '/api/shorts'
+    | '/api/subscriptions'
+    | '/api/version'
+    | '/auth/callback'
+    | '/auth/yapin'
+    | '/channel/$id'
+    | '/embed/$id'
+    | '/feed/history'
+    | '/feed/subscriptions'
+    | '/feed/watch-later'
+    | '/shorts/$id'
+    | '/sitemaps/$name'
+    | '/studio/analytics'
+    | '/studio/calendar'
+    | '/studio/channel'
+    | '/studio/comments'
+    | '/studio/settings'
+    | '/studio/videos'
+    | '/admin/'
+    | '/shorts/'
+    | '/studio/'
+    | '/api/admin/action'
+    | '/api/admin/flags'
+    | '/api/admin/messages'
+    | '/api/admin/words'
+    | '/api/comments/like'
+    | '/api/comments/moderate'
+    | '/api/comments/replies'
+    | '/api/comments/settings'
+    | '/api/history/progress'
+    | '/api/moderation/appeal'
+    | '/api/moderation/report'
+    | '/api/search/suggest'
+    | '/api/shorts/choice'
+    | '/api/shorts/comments'
+    | '/api/studio/analytics'
+    | '/api/studio/bulk'
+    | '/api/studio/thumbnail'
+    | '/api/studio/video'
+    | '/api/subscriptions/feed'
+    | '/api/upload/abort'
+    | '/api/upload/complete'
+    | '/api/upload/sign'
+    | '/api/watch/ping'
+    | '/api/yapin/unlink'
+    | '/api/yapin/webhook'
+    | '/auth/yapin/start'
+    | '/c/$handle/$tab'
+    | '/studio/content/trash'
+    | '/c/$handle/'
+    | '/studio/content/'
+    | '/api/media/$video/$'
+    | '/api/public/encoder/rpc'
+    | '/api/studio/analytics/realtime'
+    | '/api/studio/analytics/video'
+    | '/api/studio/thumbnail/sign'
+    | '/api/videos/$id/status'
+    | '/studio/video/$id/analytics'
+    | '/studio/video/$id/edit'
+    | '/api/public/images/$bucket/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/contact'
+    | '/flags'
+    | '/guidelines'
+    | '/history'
+    | '/library'
+    | '/login'
+    | '/playlist'
+    | '/playlists'
+    | '/press'
+    | '/privacy'
+    | '/results'
+    | '/robots.txt'
+    | '/settings'
+    | '/signup'
+    | '/sitemap.xml'
+    | '/subscriptions'
+    | '/terms'
+    | '/trending'
+    | '/upload'
+    | '/watch'
+    | '/welcome'
+    | '/yapin-finish'
+    | '/admin/log'
+    | '/admin/messages'
+    | '/admin/words'
+    | '/api/comments'
+    | '/api/contact'
+    | '/api/feed'
+    | '/api/health'
+    | '/api/history'
+    | '/api/reactions'
+    | '/api/search'
+    | '/api/shorts'
+    | '/api/subscriptions'
+    | '/api/version'
+    | '/auth/callback'
+    | '/auth/yapin'
+    | '/channel/$id'
+    | '/embed/$id'
+    | '/feed/history'
+    | '/feed/subscriptions'
+    | '/feed/watch-later'
+    | '/shorts/$id'
+    | '/sitemaps/$name'
+    | '/studio/analytics'
+    | '/studio/calendar'
+    | '/studio/channel'
+    | '/studio/comments'
+    | '/studio/settings'
+    | '/studio/videos'
+    | '/admin'
+    | '/shorts'
+    | '/studio'
+    | '/api/admin/action'
+    | '/api/admin/flags'
+    | '/api/admin/messages'
+    | '/api/admin/words'
+    | '/api/comments/like'
+    | '/api/comments/moderate'
+    | '/api/comments/replies'
+    | '/api/comments/settings'
+    | '/api/history/progress'
+    | '/api/moderation/appeal'
+    | '/api/moderation/report'
+    | '/api/search/suggest'
+    | '/api/shorts/choice'
+    | '/api/shorts/comments'
+    | '/api/studio/analytics'
+    | '/api/studio/bulk'
+    | '/api/studio/thumbnail'
+    | '/api/studio/video'
+    | '/api/subscriptions/feed'
+    | '/api/upload/abort'
+    | '/api/upload/complete'
+    | '/api/upload/sign'
+    | '/api/watch/ping'
+    | '/api/yapin/unlink'
+    | '/api/yapin/webhook'
+    | '/auth/yapin/start'
+    | '/c/$handle/$tab'
+    | '/studio/content/trash'
+    | '/c/$handle'
+    | '/studio/content'
+    | '/api/media/$video/$'
+    | '/api/public/encoder/rpc'
+    | '/api/studio/analytics/realtime'
+    | '/api/studio/analytics/video'
+    | '/api/studio/thumbnail/sign'
+    | '/api/videos/$id/status'
+    | '/studio/video/$id/analytics'
+    | '/studio/video/$id/edit'
+    | '/api/public/images/$bucket/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/contact'
+    | '/flags'
+    | '/guidelines'
+    | '/history'
+    | '/library'
+    | '/login'
+    | '/playlist'
+    | '/playlists'
+    | '/press'
+    | '/privacy'
+    | '/results'
+    | '/robots.txt'
+    | '/settings'
+    | '/signup'
+    | '/sitemap.xml'
+    | '/studio'
+    | '/subscriptions'
+    | '/terms'
+    | '/trending'
+    | '/upload'
+    | '/watch'
+    | '/welcome'
+    | '/yapin-finish'
+    | '/admin/log'
+    | '/admin/messages'
+    | '/admin/words'
+    | '/api/comments'
+    | '/api/contact'
+    | '/api/feed'
+    | '/api/health'
+    | '/api/history'
+    | '/api/reactions'
+    | '/api/search'
+    | '/api/shorts'
+    | '/api/subscriptions'
+    | '/api/version'
+    | '/auth/callback'
+    | '/auth/yapin'
+    | '/channel/$id'
+    | '/embed/$id'
+    | '/feed/history'
+    | '/feed/subscriptions'
+    | '/feed/watch-later'
+    | '/shorts/$id'
+    | '/sitemaps/$name'
+    | '/studio/analytics'
+    | '/studio/calendar'
+    | '/studio/channel'
+    | '/studio/comments'
+    | '/studio/settings'
+    | '/studio/videos'
+    | '/admin/'
+    | '/shorts/'
+    | '/studio/'
+    | '/api/admin/action'
+    | '/api/admin/flags'
+    | '/api/admin/messages'
+    | '/api/admin/words'
+    | '/api/comments/like'
+    | '/api/comments/moderate'
+    | '/api/comments/replies'
+    | '/api/comments/settings'
+    | '/api/history/progress'
+    | '/api/moderation/appeal'
+    | '/api/moderation/report'
+    | '/api/search/suggest'
+    | '/api/shorts/choice'
+    | '/api/shorts/comments'
+    | '/api/studio/analytics'
+    | '/api/studio/bulk'
+    | '/api/studio/thumbnail'
+    | '/api/studio/video'
+    | '/api/subscriptions/feed'
+    | '/api/upload/abort'
+    | '/api/upload/complete'
+    | '/api/upload/sign'
+    | '/api/watch/ping'
+    | '/api/yapin/unlink'
+    | '/api/yapin/webhook'
+    | '/auth/yapin/start'
+    | '/c/$handle/$tab'
+    | '/studio/content/trash'
+    | '/c/$handle/'
+    | '/studio/content/'
+    | '/api/media/$video/$'
+    | '/api/public/encoder/rpc'
+    | '/api/studio/analytics/realtime'
+    | '/api/studio/analytics/video'
+    | '/api/studio/thumbnail/sign'
+    | '/api/videos/$id/status'
+    | '/studio/video/$id/analytics'
+    | '/studio/video/$id/edit'
+    | '/api/public/images/$bucket/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  ContactRoute: typeof ContactRoute
+  FlagsRoute: typeof FlagsRoute
+  GuidelinesRoute: typeof GuidelinesRoute
+  HistoryRoute: typeof HistoryRoute
+  LibraryRoute: typeof LibraryRoute
+  LoginRoute: typeof LoginRoute
+  PlaylistRoute: typeof PlaylistRoute
+  PlaylistsRoute: typeof PlaylistsRoute
+  PressRoute: typeof PressRoute
+  PrivacyRoute: typeof PrivacyRoute
+  ResultsRoute: typeof ResultsRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SettingsRoute: typeof SettingsRoute
+  SignupRoute: typeof SignupRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StudioRoute: typeof StudioRouteWithChildren
+  SubscriptionsRoute: typeof SubscriptionsRoute
+  TermsRoute: typeof TermsRoute
+  TrendingRoute: typeof TrendingRoute
+  UploadRoute: typeof UploadRoute
+  WatchRoute: typeof WatchRoute
+  WelcomeRoute: typeof WelcomeRoute
+  YapinFinishRoute: typeof YapinFinishRoute
+  AdminLogRoute: typeof AdminLogRoute
+  AdminMessagesRoute: typeof AdminMessagesRoute
+  AdminWordsRoute: typeof AdminWordsRoute
+  ApiCommentsRoute: typeof ApiCommentsRouteWithChildren
+  ApiContactRoute: typeof ApiContactRoute
+  ApiFeedRoute: typeof ApiFeedRoute
+  ApiHealthRoute: typeof ApiHealthRoute
+  ApiHistoryRoute: typeof ApiHistoryRouteWithChildren
+  ApiReactionsRoute: typeof ApiReactionsRoute
+  ApiSearchRoute: typeof ApiSearchRouteWithChildren
+  ApiShortsRoute: typeof ApiShortsRouteWithChildren
+  ApiSubscriptionsRoute: typeof ApiSubscriptionsRouteWithChildren
+  ApiVersionRoute: typeof ApiVersionRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
+  AuthYapinRoute: typeof AuthYapinRouteWithChildren
+  ChannelIdRoute: typeof ChannelIdRoute
+  EmbedIdRoute: typeof EmbedIdRoute
+  FeedHistoryRoute: typeof FeedHistoryRoute
+  FeedSubscriptionsRoute: typeof FeedSubscriptionsRoute
+  FeedWatchLaterRoute: typeof FeedWatchLaterRoute
+  ShortsIdRoute: typeof ShortsIdRoute
+  SitemapsNameRoute: typeof SitemapsNameRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  ShortsIndexRoute: typeof ShortsIndexRoute
+  ApiAdminActionRoute: typeof ApiAdminActionRoute
+  ApiAdminFlagsRoute: typeof ApiAdminFlagsRoute
+  ApiAdminMessagesRoute: typeof ApiAdminMessagesRoute
+  ApiAdminWordsRoute: typeof ApiAdminWordsRoute
+  ApiModerationAppealRoute: typeof ApiModerationAppealRoute
+  ApiModerationReportRoute: typeof ApiModerationReportRoute
+  ApiStudioAnalyticsRoute: typeof ApiStudioAnalyticsRouteWithChildren
+  ApiStudioBulkRoute: typeof ApiStudioBulkRoute
+  ApiStudioThumbnailRoute: typeof ApiStudioThumbnailRouteWithChildren
+  ApiStudioVideoRoute: typeof ApiStudioVideoRoute
+  ApiUploadAbortRoute: typeof ApiUploadAbortRoute
+  ApiUploadCompleteRoute: typeof ApiUploadCompleteRoute
+  ApiUploadSignRoute: typeof ApiUploadSignRoute
+  ApiWatchPingRoute: typeof ApiWatchPingRoute
+  ApiYapinUnlinkRoute: typeof ApiYapinUnlinkRoute
+  ApiYapinWebhookRoute: typeof ApiYapinWebhookRoute
+  CHandleTabRoute: typeof CHandleTabRoute
+  CHandleIndexRoute: typeof CHandleIndexRoute
+  ApiMediaVideoSplatRoute: typeof ApiMediaVideoSplatRoute
+  ApiPublicEncoderRpcRoute: typeof ApiPublicEncoderRpcRoute
+  ApiVideosIdStatusRoute: typeof ApiVideosIdStatusRoute
+  ApiPublicImagesBucketSplatRoute: typeof ApiPublicImagesBucketSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +1250,873 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/flags': {
+      id: '/flags'
+      path: '/flags'
+      fullPath: '/flags'
+      preLoaderRoute: typeof FlagsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guidelines': {
+      id: '/guidelines'
+      path: '/guidelines'
+      fullPath: '/guidelines'
+      preLoaderRoute: typeof GuidelinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/playlist': {
+      id: '/playlist'
+      path: '/playlist'
+      fullPath: '/playlist'
+      preLoaderRoute: typeof PlaylistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/playlists': {
+      id: '/playlists'
+      path: '/playlists'
+      fullPath: '/playlists'
+      preLoaderRoute: typeof PlaylistsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/press': {
+      id: '/press'
+      path: '/press'
+      fullPath: '/press'
+      preLoaderRoute: typeof PressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/results': {
+      id: '/results'
+      path: '/results'
+      fullPath: '/results'
+      preLoaderRoute: typeof ResultsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio': {
+      id: '/studio'
+      path: '/studio'
+      fullPath: '/studio'
+      preLoaderRoute: typeof StudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscriptions': {
+      id: '/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/subscriptions'
+      preLoaderRoute: typeof SubscriptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trending': {
+      id: '/trending'
+      path: '/trending'
+      fullPath: '/trending'
+      preLoaderRoute: typeof TrendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/upload': {
+      id: '/upload'
+      path: '/upload'
+      fullPath: '/upload'
+      preLoaderRoute: typeof UploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/watch': {
+      id: '/watch'
+      path: '/watch'
+      fullPath: '/watch'
+      preLoaderRoute: typeof WatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/yapin-finish': {
+      id: '/yapin-finish'
+      path: '/yapin-finish'
+      fullPath: '/yapin-finish'
+      preLoaderRoute: typeof YapinFinishRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/log': {
+      id: '/admin/log'
+      path: '/admin/log'
+      fullPath: '/admin/log'
+      preLoaderRoute: typeof AdminLogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/messages': {
+      id: '/admin/messages'
+      path: '/admin/messages'
+      fullPath: '/admin/messages'
+      preLoaderRoute: typeof AdminMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/words': {
+      id: '/admin/words'
+      path: '/admin/words'
+      fullPath: '/admin/words'
+      preLoaderRoute: typeof AdminWordsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/comments': {
+      id: '/api/comments'
+      path: '/api/comments'
+      fullPath: '/api/comments'
+      preLoaderRoute: typeof ApiCommentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/contact': {
+      id: '/api/contact'
+      path: '/api/contact'
+      fullPath: '/api/contact'
+      preLoaderRoute: typeof ApiContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/feed': {
+      id: '/api/feed'
+      path: '/api/feed'
+      fullPath: '/api/feed'
+      preLoaderRoute: typeof ApiFeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/history': {
+      id: '/api/history'
+      path: '/api/history'
+      fullPath: '/api/history'
+      preLoaderRoute: typeof ApiHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/reactions': {
+      id: '/api/reactions'
+      path: '/api/reactions'
+      fullPath: '/api/reactions'
+      preLoaderRoute: typeof ApiReactionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/search': {
+      id: '/api/search'
+      path: '/api/search'
+      fullPath: '/api/search'
+      preLoaderRoute: typeof ApiSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/shorts': {
+      id: '/api/shorts'
+      path: '/api/shorts'
+      fullPath: '/api/shorts'
+      preLoaderRoute: typeof ApiShortsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/subscriptions': {
+      id: '/api/subscriptions'
+      path: '/api/subscriptions'
+      fullPath: '/api/subscriptions'
+      preLoaderRoute: typeof ApiSubscriptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/version': {
+      id: '/api/version'
+      path: '/api/version'
+      fullPath: '/api/version'
+      preLoaderRoute: typeof ApiVersionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/yapin': {
+      id: '/auth/yapin'
+      path: '/auth/yapin'
+      fullPath: '/auth/yapin'
+      preLoaderRoute: typeof AuthYapinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/channel/$id': {
+      id: '/channel/$id'
+      path: '/channel/$id'
+      fullPath: '/channel/$id'
+      preLoaderRoute: typeof ChannelIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/embed/$id': {
+      id: '/embed/$id'
+      path: '/embed/$id'
+      fullPath: '/embed/$id'
+      preLoaderRoute: typeof EmbedIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed/history': {
+      id: '/feed/history'
+      path: '/feed/history'
+      fullPath: '/feed/history'
+      preLoaderRoute: typeof FeedHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed/subscriptions': {
+      id: '/feed/subscriptions'
+      path: '/feed/subscriptions'
+      fullPath: '/feed/subscriptions'
+      preLoaderRoute: typeof FeedSubscriptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed/watch-later': {
+      id: '/feed/watch-later'
+      path: '/feed/watch-later'
+      fullPath: '/feed/watch-later'
+      preLoaderRoute: typeof FeedWatchLaterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shorts/': {
+      id: '/shorts/'
+      path: '/shorts'
+      fullPath: '/shorts/'
+      preLoaderRoute: typeof ShortsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shorts/$id': {
+      id: '/shorts/$id'
+      path: '/shorts/$id'
+      fullPath: '/shorts/$id'
+      preLoaderRoute: typeof ShortsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemaps/$name': {
+      id: '/sitemaps/$name'
+      path: '/sitemaps/$name'
+      fullPath: '/sitemaps/$name'
+      preLoaderRoute: typeof SitemapsNameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio/': {
+      id: '/studio/'
+      path: '/'
+      fullPath: '/studio/'
+      preLoaderRoute: typeof StudioIndexRouteImport
+      parentRoute: typeof StudioRoute
+    }
+    '/studio/analytics': {
+      id: '/studio/analytics'
+      path: '/analytics'
+      fullPath: '/studio/analytics'
+      preLoaderRoute: typeof StudioAnalyticsRouteImport
+      parentRoute: typeof StudioRoute
+    }
+    '/studio/calendar': {
+      id: '/studio/calendar'
+      path: '/calendar'
+      fullPath: '/studio/calendar'
+      preLoaderRoute: typeof StudioCalendarRouteImport
+      parentRoute: typeof StudioRoute
+    }
+    '/studio/channel': {
+      id: '/studio/channel'
+      path: '/channel'
+      fullPath: '/studio/channel'
+      preLoaderRoute: typeof StudioChannelRouteImport
+      parentRoute: typeof StudioRoute
+    }
+    '/studio/comments': {
+      id: '/studio/comments'
+      path: '/comments'
+      fullPath: '/studio/comments'
+      preLoaderRoute: typeof StudioCommentsRouteImport
+      parentRoute: typeof StudioRoute
+    }
+    '/studio/settings': {
+      id: '/studio/settings'
+      path: '/settings'
+      fullPath: '/studio/settings'
+      preLoaderRoute: typeof StudioSettingsRouteImport
+      parentRoute: typeof StudioRoute
+    }
+    '/studio/videos': {
+      id: '/studio/videos'
+      path: '/videos'
+      fullPath: '/studio/videos'
+      preLoaderRoute: typeof StudioVideosRouteImport
+      parentRoute: typeof StudioRoute
+    }
+    '/api/admin/action': {
+      id: '/api/admin/action'
+      path: '/api/admin/action'
+      fullPath: '/api/admin/action'
+      preLoaderRoute: typeof ApiAdminActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/flags': {
+      id: '/api/admin/flags'
+      path: '/api/admin/flags'
+      fullPath: '/api/admin/flags'
+      preLoaderRoute: typeof ApiAdminFlagsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/messages': {
+      id: '/api/admin/messages'
+      path: '/api/admin/messages'
+      fullPath: '/api/admin/messages'
+      preLoaderRoute: typeof ApiAdminMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/words': {
+      id: '/api/admin/words'
+      path: '/api/admin/words'
+      fullPath: '/api/admin/words'
+      preLoaderRoute: typeof ApiAdminWordsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/comments/like': {
+      id: '/api/comments/like'
+      path: '/like'
+      fullPath: '/api/comments/like'
+      preLoaderRoute: typeof ApiCommentsLikeRouteImport
+      parentRoute: typeof ApiCommentsRoute
+    }
+    '/api/comments/moderate': {
+      id: '/api/comments/moderate'
+      path: '/moderate'
+      fullPath: '/api/comments/moderate'
+      preLoaderRoute: typeof ApiCommentsModerateRouteImport
+      parentRoute: typeof ApiCommentsRoute
+    }
+    '/api/comments/replies': {
+      id: '/api/comments/replies'
+      path: '/replies'
+      fullPath: '/api/comments/replies'
+      preLoaderRoute: typeof ApiCommentsRepliesRouteImport
+      parentRoute: typeof ApiCommentsRoute
+    }
+    '/api/comments/settings': {
+      id: '/api/comments/settings'
+      path: '/settings'
+      fullPath: '/api/comments/settings'
+      preLoaderRoute: typeof ApiCommentsSettingsRouteImport
+      parentRoute: typeof ApiCommentsRoute
+    }
+    '/api/history/progress': {
+      id: '/api/history/progress'
+      path: '/progress'
+      fullPath: '/api/history/progress'
+      preLoaderRoute: typeof ApiHistoryProgressRouteImport
+      parentRoute: typeof ApiHistoryRoute
+    }
+    '/api/moderation/appeal': {
+      id: '/api/moderation/appeal'
+      path: '/api/moderation/appeal'
+      fullPath: '/api/moderation/appeal'
+      preLoaderRoute: typeof ApiModerationAppealRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/moderation/report': {
+      id: '/api/moderation/report'
+      path: '/api/moderation/report'
+      fullPath: '/api/moderation/report'
+      preLoaderRoute: typeof ApiModerationReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/search/suggest': {
+      id: '/api/search/suggest'
+      path: '/suggest'
+      fullPath: '/api/search/suggest'
+      preLoaderRoute: typeof ApiSearchSuggestRouteImport
+      parentRoute: typeof ApiSearchRoute
+    }
+    '/api/shorts/choice': {
+      id: '/api/shorts/choice'
+      path: '/choice'
+      fullPath: '/api/shorts/choice'
+      preLoaderRoute: typeof ApiShortsChoiceRouteImport
+      parentRoute: typeof ApiShortsRoute
+    }
+    '/api/shorts/comments': {
+      id: '/api/shorts/comments'
+      path: '/comments'
+      fullPath: '/api/shorts/comments'
+      preLoaderRoute: typeof ApiShortsCommentsRouteImport
+      parentRoute: typeof ApiShortsRoute
+    }
+    '/api/studio/analytics': {
+      id: '/api/studio/analytics'
+      path: '/api/studio/analytics'
+      fullPath: '/api/studio/analytics'
+      preLoaderRoute: typeof ApiStudioAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/studio/bulk': {
+      id: '/api/studio/bulk'
+      path: '/api/studio/bulk'
+      fullPath: '/api/studio/bulk'
+      preLoaderRoute: typeof ApiStudioBulkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/studio/thumbnail': {
+      id: '/api/studio/thumbnail'
+      path: '/api/studio/thumbnail'
+      fullPath: '/api/studio/thumbnail'
+      preLoaderRoute: typeof ApiStudioThumbnailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/studio/video': {
+      id: '/api/studio/video'
+      path: '/api/studio/video'
+      fullPath: '/api/studio/video'
+      preLoaderRoute: typeof ApiStudioVideoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/subscriptions/feed': {
+      id: '/api/subscriptions/feed'
+      path: '/feed'
+      fullPath: '/api/subscriptions/feed'
+      preLoaderRoute: typeof ApiSubscriptionsFeedRouteImport
+      parentRoute: typeof ApiSubscriptionsRoute
+    }
+    '/api/upload/abort': {
+      id: '/api/upload/abort'
+      path: '/api/upload/abort'
+      fullPath: '/api/upload/abort'
+      preLoaderRoute: typeof ApiUploadAbortRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/upload/complete': {
+      id: '/api/upload/complete'
+      path: '/api/upload/complete'
+      fullPath: '/api/upload/complete'
+      preLoaderRoute: typeof ApiUploadCompleteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/upload/sign': {
+      id: '/api/upload/sign'
+      path: '/api/upload/sign'
+      fullPath: '/api/upload/sign'
+      preLoaderRoute: typeof ApiUploadSignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/watch/ping': {
+      id: '/api/watch/ping'
+      path: '/api/watch/ping'
+      fullPath: '/api/watch/ping'
+      preLoaderRoute: typeof ApiWatchPingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/yapin/unlink': {
+      id: '/api/yapin/unlink'
+      path: '/api/yapin/unlink'
+      fullPath: '/api/yapin/unlink'
+      preLoaderRoute: typeof ApiYapinUnlinkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/yapin/webhook': {
+      id: '/api/yapin/webhook'
+      path: '/api/yapin/webhook'
+      fullPath: '/api/yapin/webhook'
+      preLoaderRoute: typeof ApiYapinWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/yapin/start': {
+      id: '/auth/yapin/start'
+      path: '/start'
+      fullPath: '/auth/yapin/start'
+      preLoaderRoute: typeof AuthYapinStartRouteImport
+      parentRoute: typeof AuthYapinRoute
+    }
+    '/c/$handle/': {
+      id: '/c/$handle/'
+      path: '/c/$handle'
+      fullPath: '/c/$handle/'
+      preLoaderRoute: typeof CHandleIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/c/$handle/$tab': {
+      id: '/c/$handle/$tab'
+      path: '/c/$handle/$tab'
+      fullPath: '/c/$handle/$tab'
+      preLoaderRoute: typeof CHandleTabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio/content/': {
+      id: '/studio/content/'
+      path: '/content'
+      fullPath: '/studio/content/'
+      preLoaderRoute: typeof StudioContentIndexRouteImport
+      parentRoute: typeof StudioRoute
+    }
+    '/studio/content/trash': {
+      id: '/studio/content/trash'
+      path: '/content/trash'
+      fullPath: '/studio/content/trash'
+      preLoaderRoute: typeof StudioContentTrashRouteImport
+      parentRoute: typeof StudioRoute
+    }
+    '/api/media/$video/$': {
+      id: '/api/media/$video/$'
+      path: '/api/media/$video/$'
+      fullPath: '/api/media/$video/$'
+      preLoaderRoute: typeof ApiMediaVideoSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/encoder/rpc': {
+      id: '/api/public/encoder/rpc'
+      path: '/api/public/encoder/rpc'
+      fullPath: '/api/public/encoder/rpc'
+      preLoaderRoute: typeof ApiPublicEncoderRpcRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/studio/analytics/realtime': {
+      id: '/api/studio/analytics/realtime'
+      path: '/realtime'
+      fullPath: '/api/studio/analytics/realtime'
+      preLoaderRoute: typeof ApiStudioAnalyticsRealtimeRouteImport
+      parentRoute: typeof ApiStudioAnalyticsRoute
+    }
+    '/api/studio/analytics/video': {
+      id: '/api/studio/analytics/video'
+      path: '/video'
+      fullPath: '/api/studio/analytics/video'
+      preLoaderRoute: typeof ApiStudioAnalyticsVideoRouteImport
+      parentRoute: typeof ApiStudioAnalyticsRoute
+    }
+    '/api/studio/thumbnail/sign': {
+      id: '/api/studio/thumbnail/sign'
+      path: '/sign'
+      fullPath: '/api/studio/thumbnail/sign'
+      preLoaderRoute: typeof ApiStudioThumbnailSignRouteImport
+      parentRoute: typeof ApiStudioThumbnailRoute
+    }
+    '/api/videos/$id/status': {
+      id: '/api/videos/$id/status'
+      path: '/api/videos/$id/status'
+      fullPath: '/api/videos/$id/status'
+      preLoaderRoute: typeof ApiVideosIdStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio/video/$id/analytics': {
+      id: '/studio/video/$id/analytics'
+      path: '/video/$id/analytics'
+      fullPath: '/studio/video/$id/analytics'
+      preLoaderRoute: typeof StudioVideoIdAnalyticsRouteImport
+      parentRoute: typeof StudioRoute
+    }
+    '/studio/video/$id/edit': {
+      id: '/studio/video/$id/edit'
+      path: '/video/$id/edit'
+      fullPath: '/studio/video/$id/edit'
+      preLoaderRoute: typeof StudioVideoIdEditRouteImport
+      parentRoute: typeof StudioRoute
+    }
+    '/api/public/images/$bucket/$': {
+      id: '/api/public/images/$bucket/$'
+      path: '/api/public/images/$bucket/$'
+      fullPath: '/api/public/images/$bucket/$'
+      preLoaderRoute: typeof ApiPublicImagesBucketSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface StudioRouteChildren {
+  StudioAnalyticsRoute: typeof StudioAnalyticsRoute
+  StudioCalendarRoute: typeof StudioCalendarRoute
+  StudioChannelRoute: typeof StudioChannelRoute
+  StudioCommentsRoute: typeof StudioCommentsRoute
+  StudioSettingsRoute: typeof StudioSettingsRoute
+  StudioVideosRoute: typeof StudioVideosRoute
+  StudioIndexRoute: typeof StudioIndexRoute
+  StudioContentTrashRoute: typeof StudioContentTrashRoute
+  StudioContentIndexRoute: typeof StudioContentIndexRoute
+  StudioVideoIdAnalyticsRoute: typeof StudioVideoIdAnalyticsRoute
+  StudioVideoIdEditRoute: typeof StudioVideoIdEditRoute
+}
+
+const StudioRouteChildren: StudioRouteChildren = {
+  StudioAnalyticsRoute: StudioAnalyticsRoute,
+  StudioCalendarRoute: StudioCalendarRoute,
+  StudioChannelRoute: StudioChannelRoute,
+  StudioCommentsRoute: StudioCommentsRoute,
+  StudioSettingsRoute: StudioSettingsRoute,
+  StudioVideosRoute: StudioVideosRoute,
+  StudioIndexRoute: StudioIndexRoute,
+  StudioContentTrashRoute: StudioContentTrashRoute,
+  StudioContentIndexRoute: StudioContentIndexRoute,
+  StudioVideoIdAnalyticsRoute: StudioVideoIdAnalyticsRoute,
+  StudioVideoIdEditRoute: StudioVideoIdEditRoute,
+}
+
+const StudioRouteWithChildren =
+  StudioRoute._addFileChildren(StudioRouteChildren)
+
+interface ApiCommentsRouteChildren {
+  ApiCommentsLikeRoute: typeof ApiCommentsLikeRoute
+  ApiCommentsModerateRoute: typeof ApiCommentsModerateRoute
+  ApiCommentsRepliesRoute: typeof ApiCommentsRepliesRoute
+  ApiCommentsSettingsRoute: typeof ApiCommentsSettingsRoute
+}
+
+const ApiCommentsRouteChildren: ApiCommentsRouteChildren = {
+  ApiCommentsLikeRoute: ApiCommentsLikeRoute,
+  ApiCommentsModerateRoute: ApiCommentsModerateRoute,
+  ApiCommentsRepliesRoute: ApiCommentsRepliesRoute,
+  ApiCommentsSettingsRoute: ApiCommentsSettingsRoute,
+}
+
+const ApiCommentsRouteWithChildren = ApiCommentsRoute._addFileChildren(
+  ApiCommentsRouteChildren,
+)
+
+interface ApiHistoryRouteChildren {
+  ApiHistoryProgressRoute: typeof ApiHistoryProgressRoute
+}
+
+const ApiHistoryRouteChildren: ApiHistoryRouteChildren = {
+  ApiHistoryProgressRoute: ApiHistoryProgressRoute,
+}
+
+const ApiHistoryRouteWithChildren = ApiHistoryRoute._addFileChildren(
+  ApiHistoryRouteChildren,
+)
+
+interface ApiSearchRouteChildren {
+  ApiSearchSuggestRoute: typeof ApiSearchSuggestRoute
+}
+
+const ApiSearchRouteChildren: ApiSearchRouteChildren = {
+  ApiSearchSuggestRoute: ApiSearchSuggestRoute,
+}
+
+const ApiSearchRouteWithChildren = ApiSearchRoute._addFileChildren(
+  ApiSearchRouteChildren,
+)
+
+interface ApiShortsRouteChildren {
+  ApiShortsChoiceRoute: typeof ApiShortsChoiceRoute
+  ApiShortsCommentsRoute: typeof ApiShortsCommentsRoute
+}
+
+const ApiShortsRouteChildren: ApiShortsRouteChildren = {
+  ApiShortsChoiceRoute: ApiShortsChoiceRoute,
+  ApiShortsCommentsRoute: ApiShortsCommentsRoute,
+}
+
+const ApiShortsRouteWithChildren = ApiShortsRoute._addFileChildren(
+  ApiShortsRouteChildren,
+)
+
+interface ApiSubscriptionsRouteChildren {
+  ApiSubscriptionsFeedRoute: typeof ApiSubscriptionsFeedRoute
+}
+
+const ApiSubscriptionsRouteChildren: ApiSubscriptionsRouteChildren = {
+  ApiSubscriptionsFeedRoute: ApiSubscriptionsFeedRoute,
+}
+
+const ApiSubscriptionsRouteWithChildren =
+  ApiSubscriptionsRoute._addFileChildren(ApiSubscriptionsRouteChildren)
+
+interface AuthYapinRouteChildren {
+  AuthYapinStartRoute: typeof AuthYapinStartRoute
+}
+
+const AuthYapinRouteChildren: AuthYapinRouteChildren = {
+  AuthYapinStartRoute: AuthYapinStartRoute,
+}
+
+const AuthYapinRouteWithChildren = AuthYapinRoute._addFileChildren(
+  AuthYapinRouteChildren,
+)
+
+interface ApiStudioAnalyticsRouteChildren {
+  ApiStudioAnalyticsRealtimeRoute: typeof ApiStudioAnalyticsRealtimeRoute
+  ApiStudioAnalyticsVideoRoute: typeof ApiStudioAnalyticsVideoRoute
+}
+
+const ApiStudioAnalyticsRouteChildren: ApiStudioAnalyticsRouteChildren = {
+  ApiStudioAnalyticsRealtimeRoute: ApiStudioAnalyticsRealtimeRoute,
+  ApiStudioAnalyticsVideoRoute: ApiStudioAnalyticsVideoRoute,
+}
+
+const ApiStudioAnalyticsRouteWithChildren =
+  ApiStudioAnalyticsRoute._addFileChildren(ApiStudioAnalyticsRouteChildren)
+
+interface ApiStudioThumbnailRouteChildren {
+  ApiStudioThumbnailSignRoute: typeof ApiStudioThumbnailSignRoute
+}
+
+const ApiStudioThumbnailRouteChildren: ApiStudioThumbnailRouteChildren = {
+  ApiStudioThumbnailSignRoute: ApiStudioThumbnailSignRoute,
+}
+
+const ApiStudioThumbnailRouteWithChildren =
+  ApiStudioThumbnailRoute._addFileChildren(ApiStudioThumbnailRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  ContactRoute: ContactRoute,
+  FlagsRoute: FlagsRoute,
+  GuidelinesRoute: GuidelinesRoute,
+  HistoryRoute: HistoryRoute,
+  LibraryRoute: LibraryRoute,
+  LoginRoute: LoginRoute,
+  PlaylistRoute: PlaylistRoute,
+  PlaylistsRoute: PlaylistsRoute,
+  PressRoute: PressRoute,
+  PrivacyRoute: PrivacyRoute,
+  ResultsRoute: ResultsRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SettingsRoute: SettingsRoute,
+  SignupRoute: SignupRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  StudioRoute: StudioRouteWithChildren,
+  SubscriptionsRoute: SubscriptionsRoute,
+  TermsRoute: TermsRoute,
+  TrendingRoute: TrendingRoute,
+  UploadRoute: UploadRoute,
+  WatchRoute: WatchRoute,
+  WelcomeRoute: WelcomeRoute,
+  YapinFinishRoute: YapinFinishRoute,
+  AdminLogRoute: AdminLogRoute,
+  AdminMessagesRoute: AdminMessagesRoute,
+  AdminWordsRoute: AdminWordsRoute,
+  ApiCommentsRoute: ApiCommentsRouteWithChildren,
+  ApiContactRoute: ApiContactRoute,
+  ApiFeedRoute: ApiFeedRoute,
+  ApiHealthRoute: ApiHealthRoute,
+  ApiHistoryRoute: ApiHistoryRouteWithChildren,
+  ApiReactionsRoute: ApiReactionsRoute,
+  ApiSearchRoute: ApiSearchRouteWithChildren,
+  ApiShortsRoute: ApiShortsRouteWithChildren,
+  ApiSubscriptionsRoute: ApiSubscriptionsRouteWithChildren,
+  ApiVersionRoute: ApiVersionRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
+  AuthYapinRoute: AuthYapinRouteWithChildren,
+  ChannelIdRoute: ChannelIdRoute,
+  EmbedIdRoute: EmbedIdRoute,
+  FeedHistoryRoute: FeedHistoryRoute,
+  FeedSubscriptionsRoute: FeedSubscriptionsRoute,
+  FeedWatchLaterRoute: FeedWatchLaterRoute,
+  ShortsIdRoute: ShortsIdRoute,
+  SitemapsNameRoute: SitemapsNameRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  ShortsIndexRoute: ShortsIndexRoute,
+  ApiAdminActionRoute: ApiAdminActionRoute,
+  ApiAdminFlagsRoute: ApiAdminFlagsRoute,
+  ApiAdminMessagesRoute: ApiAdminMessagesRoute,
+  ApiAdminWordsRoute: ApiAdminWordsRoute,
+  ApiModerationAppealRoute: ApiModerationAppealRoute,
+  ApiModerationReportRoute: ApiModerationReportRoute,
+  ApiStudioAnalyticsRoute: ApiStudioAnalyticsRouteWithChildren,
+  ApiStudioBulkRoute: ApiStudioBulkRoute,
+  ApiStudioThumbnailRoute: ApiStudioThumbnailRouteWithChildren,
+  ApiStudioVideoRoute: ApiStudioVideoRoute,
+  ApiUploadAbortRoute: ApiUploadAbortRoute,
+  ApiUploadCompleteRoute: ApiUploadCompleteRoute,
+  ApiUploadSignRoute: ApiUploadSignRoute,
+  ApiWatchPingRoute: ApiWatchPingRoute,
+  ApiYapinUnlinkRoute: ApiYapinUnlinkRoute,
+  ApiYapinWebhookRoute: ApiYapinWebhookRoute,
+  CHandleTabRoute: CHandleTabRoute,
+  CHandleIndexRoute: CHandleIndexRoute,
+  ApiMediaVideoSplatRoute: ApiMediaVideoSplatRoute,
+  ApiPublicEncoderRpcRoute: ApiPublicEncoderRpcRoute,
+  ApiVideosIdStatusRoute: ApiVideosIdStatusRoute,
+  ApiPublicImagesBucketSplatRoute: ApiPublicImagesBucketSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

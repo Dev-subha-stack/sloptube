@@ -1,102 +1,91 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
-  Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { Suspense, useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { supabase } from "@/integrations/supabase/client";
+import { installAuthFetch } from "@/lib/auth-fetch";
+import { maintenanceOpen } from "@/lib/launch/maintenance";
+import { SessionContext, sessionStoreFor } from "@/lib/store/session";
+import { themeScript } from "@/lib/theme";
+import { getSessionState } from "@/functions/session.functions";
+import { Guide } from "@/components/Guide";
+import { OnboardingGuard } from "@/components/OnboardingGuard";
+import { FlagPanel } from "@/components/flags/FlagPanel";
+import { SiteFooter } from "@/components/launch/SiteFooter";
+import { PathTracker } from "@/components/PathTracker";
+import { TopBar } from "@/components/TopBar";
+import { Logo } from "@/components/Logo";
+import { ErrorPage } from "@/components/launch/ErrorPage";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
-        </div>
-      </div>
-    </div>
+    <ErrorPage state="404" title="This page isn't available. Sorry about that.">
+      Try searching for something else.
+    </ErrorPage>
   );
 }
 
+/** Anything that throws while a page renders: the 2019 500 page with Try again. */
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
-  console.error(error);
   const router = useRouter();
   useEffect(() => {
+    console.error(error);
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
-          </a>
-        </div>
-      </div>
-    </div>
+    <ErrorPage
+      state="500"
+      title="Something went wrong."
+      search={false}
+      actions={
+        <button
+          type="button"
+          onClick={() => {
+            void router.invalidate();
+            reset();
+          }}
+          className="btn-text"
+        >
+          Try again
+        </button>
+      }
+    >
+      Sorry about that. Try again in a moment.
+    </ErrorPage>
   );
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  // Only reloaded when the session changes (router.invalidate()).
+  staleTime: Infinity,
+  loader: async () => ({ session: await getSessionState() }),
   head: () => ({
-    // Replace these placeholders with the app's name and description when first building the app.
-    // Each content route, / included, must still set its own head(). Never add og:image or
-    // twitter:image here: every page without its own would inherit the root's preview image.
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { title: "sloptube" },
+      { name: "description", content: "A video platform, built in the open one feature at a time." },
+      { name: "theme-color", content: "#ffffff", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#202020", media: "(prefers-color-scheme: dark)" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" },
+      { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
+    scripts: [{ children: themeScript }],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -106,11 +95,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning: the inline script may add the "dark" class before React hydrates.
+    <html lang="en" className="h-full antialiased" style={{ ["--font-roboto" as string]: "Roboto" }} suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="min-h-full pt-14">
         {children}
         <Scripts />
       </body>
@@ -118,13 +108,83 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+/** Keeps the page in step with the browser's session: reloads data on sign in/out. */
+function useSessionSync(signedInOnServer: boolean, banned: boolean) {
+  const router = useRouter();
+  useEffect(() => {
+    installAuthFetch();
+    // The server rendered for a signed out visitor; with a stored session, load again as them.
+    void supabase.auth.getSession().then(({ data }) => {
+      if (data.session && !signedInOnServer) void router.invalidate();
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      void router.invalidate();
+    });
+    return () => sub.subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (!banned) return;
+    void supabase.auth.signOut({ scope: "local" }).then(() => {
+      window.location.assign("/login?banned=1");
+    });
+  }, [banned]);
+}
+
+function Maintenance() {
+  return (
+    <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center" data-maintenance>
+      <Logo />
+      <p className="mt-6 text-[18px] text-text">We&apos;re doing some maintenance.</p>
+      <p className="mt-1 text-[14px] text-text-2">Check back in a few minutes.</p>
+    </div>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const { session } = Route.useLoaderData();
+  const pathname = useLocation({ select: (l) => l.pathname });
+  const [store] = useState(() => sessionStoreFor({ config: session.config, user: session.user, flags: session.flags }));
+  useEffect(() => {
+    store.getState().setSession({ config: session.config, user: session.user, flags: session.flags });
+  }, [store, session]);
+  useSessionSync(session.user !== null, session.banned);
+
+  const embed = pathname.startsWith("/embed/");
+  const down = session.maintenance && !maintenanceOpen(pathname);
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <SessionContext.Provider value={store}>
+        {embed ? (
+          <Outlet />
+        ) : (
+          <>
+            <a href="#content" className="skip-link">
+              Skip to content
+            </a>
+            <TopBar />
+            <Suspense fallback={null}>
+              <OnboardingGuard />
+            </Suspense>
+            <Suspense fallback={null}>
+              <PathTracker />
+            </Suspense>
+            {session.flagPanel && <FlagPanel initial={session.flagPanel} />}
+            <div className="flex">
+              <Guide />
+              <div className="flex min-w-0 flex-1 flex-col">
+                <main id="content" tabIndex={-1} className="min-w-0 flex-1 outline-none">
+                  {down ? <Maintenance /> : <Outlet />}
+                </main>
+                <SiteFooter />
+              </div>
+            </div>
+          </>
+        )}
+      </SessionContext.Provider>
     </QueryClientProvider>
   );
 }
