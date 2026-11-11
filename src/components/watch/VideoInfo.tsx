@@ -1,5 +1,6 @@
 "use client";
 
+import { StaffBadge } from "@/components/admin/RoleBadge";
 import Link from "next/link";
 import { useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { Avatar } from "@/components/Avatar";
@@ -153,6 +154,7 @@ export function VideoInfo({
           <div className="min-w-0 flex-1">
             <Link href={channelHref} className="block truncate text-[14px] font-medium leading-5 text-text">
               {video.channel.name}
+              <StaffBadge name={video.channel.handle} />
             </Link>
             <p className="text-[13px] leading-[18px] text-text-2">
               <SubscriberCount channelId={video.channel.id} count={video.channel.subscriberCount} />
