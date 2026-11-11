@@ -27,6 +27,8 @@ Hosting: stay on the Lovable database for now (user may move to own Supabase lat
 - [ ] Username change (exists in settings: check)
 - [ ] NSFW filter: auto-remove video + permanent ban
 - [ ] Star ratings: rate videos, top rated page, my ratings history
+- [ ] Upload limit 50 MB (after compression; compressor targets it)
+- [ ] Multiple accounts: add several, switch fast from the avatar menu
 
 ## Blocked on user
 - [ ] Secrets: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, MEDIA_PUBLIC_URL, SITE_URL, YAPIN_CLIENT_ID, YAPIN_CLIENT_SECRET, ENCODER_SECRET (then verify upload, playback, Yapin', encoder)
