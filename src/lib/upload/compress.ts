@@ -39,11 +39,7 @@ export async function compressVideo(
   let limit = PLATFORM_LIMIT_BYTES;
   let last: CompressResult | null = null;
   for (let attempt = 0; attempt < 3; attempt++) {
-    const base = attempt;
-    const result = await compressOnce(file, limit, {
-      signal: opts.signal,
-      onProgress: (f) => opts.onProgress?.(Math.min(0.99, (base + f) / (attempt === 0 ? 1 : attempt + 1))),
-    });
+    const result = await compressOnce(file, limit, { signal: opts.signal, onProgress: opts.onProgress });
     last = result;
     if (!result.compressed || result.file.size <= PLATFORM_LIMIT_BYTES) return result;
     limit = Math.floor(limit * (PLATFORM_LIMIT_BYTES / result.file.size) * 0.85);
