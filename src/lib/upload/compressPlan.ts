@@ -1,21 +1,26 @@
-// The built-in compressor's settings: what size, frame rate and bitrate a
-// picked video is squeezed to before it is uploaded. Always on. No imports,
-// so tests can load it directly.
+// The built-in compressor's settings: what size, frame rate and bitrates a
+// picked video is squeezed to before it is uploaded. Always on. The result
+// must fit the platform limit, so long videos get a smaller picture and a
+// lower bitrate. No imports, so tests can load it directly.
 
-/** The largest file the platform takes (keep in step with create_upload()). */
-export const PLATFORM_LIMIT_BYTES = 2 * 1024 * 1024 * 1024;
+/** The largest file the platform takes (keep in step with create_upload() and MAX_UPLOAD_BYTES). */
+export const PLATFORM_LIMIT_BYTES = 50 * 1024 * 1024;
 
-/** The shorter side of the picture is never more than this (1080p). */
-export const MAX_SHORT_SIDE = 1080;
-/** Frames per second are capped here. */
+/** Picture sizes tried, by the shorter side, biggest first. */
+export const SHORT_SIDES = [1080, 720, 540, 480, 360, 240] as const;
+/** Frames per second are capped here; very long videos drop to 24. */
 export const MAX_FPS = 30;
-/** Bits per pixel per frame for H.264: low, but clean for talking heads and gameplay alike. */
-export const BITS_PER_PIXEL = 0.05;
-/** Never below this, or text and faces fall apart. */
-export const MIN_VIDEO_BITRATE = 350_000;
+export const LOW_FPS = 24;
+/** Bits per pixel per frame: about where H.264 still looks clean. */
+export const GOOD_BPP = 0.06;
+/** Below this the picture gets blocky, so a smaller size is used first. */
+export const MIN_BPP = 0.035;
 /** Never above this: 1080p30 needs no more after a good encode. */
-export const MAX_VIDEO_BITRATE = 3_000_000;
-export const AUDIO_BITRATE = 96_000;
+export const MAX_VIDEO_BITRATE = 2_500_000;
+/** Never below this: the floor for a watchable 240p. */
+export const MIN_VIDEO_BITRATE = 60_000;
+/** Room kept for the MP4 container and encoder overshoot. */
+export const SAFETY = 0.9;
 
 export type CompressPlan = {
   width: number;
@@ -25,33 +30,65 @@ export type CompressPlan = {
   audioBitrate: number;
   /** About how big the result will be, in bytes. */
   estimatedBytes: number;
+  /** false when even the smallest settings can't fit the limit (the video is too long). */
+  fits: boolean;
 };
 
 const even = (n: number) => Math.max(2, Math.round(n / 2) * 2);
 
+function audioFor(totalBudget: number): number {
+  if (totalBudget >= 600_000) return 96_000;
+  if (totalBudget >= 250_000) return 64_000;
+  return 32_000;
+}
+
+/** The longest video (seconds) that can still fit the limit at the smallest settings. */
+export function maxDurationS(limitBytes = PLATFORM_LIMIT_BYTES): number {
+  return Math.floor((limitBytes * 8 * SAFETY) / (MIN_VIDEO_BITRATE + 32_000));
+}
+
 /**
  * The plan for a source of `width` x `height` at `fps` lasting `durationS`.
- * The picture only ever gets smaller, the frame rate is capped at 30, and
- * the bitrate is cut further when needed so the file fits the platform limit.
+ * The picture only ever gets smaller, the frame rate is capped, and the
+ * picture size, frame rate and bitrates come down until the file fits
+ * `limitBytes`.
  */
-export function planCompression(src: { width: number; height: number; fps: number | null; durationS: number }): CompressPlan {
+export function planCompression(
+  src: { width: number; height: number; fps: number | null; durationS: number },
+  limitBytes = PLATFORM_LIMIT_BYTES,
+): CompressPlan {
   const w0 = Math.max(2, Math.round(src.width));
   const h0 = Math.max(2, Math.round(src.height));
-  const short = Math.min(w0, h0);
-  const scale = short > MAX_SHORT_SIDE ? MAX_SHORT_SIDE / short : 1;
-  const width = even(w0 * scale);
-  const height = even(h0 * scale);
-  const fps = src.fps && Number.isFinite(src.fps) && src.fps > 0 ? src.fps : MAX_FPS;
-  const frameRate = Math.min(MAX_FPS, Math.round(fps));
-
-  let videoBitrate = Math.round(width * height * frameRate * BITS_PER_PIXEL);
-  videoBitrate = Math.min(MAX_VIDEO_BITRATE, Math.max(MIN_VIDEO_BITRATE, videoBitrate));
-
+  const srcShort = Math.min(w0, h0);
   const duration = Math.max(1, src.durationS || 1);
-  // Leave 5% for the container, then make sure it fits the limit.
-  const budget = Math.floor(((PLATFORM_LIMIT_BYTES * 0.95 * 8) / duration) - AUDIO_BITRATE);
-  if (videoBitrate > budget) videoBitrate = Math.max(100_000, budget);
+  const srcFps = src.fps && Number.isFinite(src.fps) && src.fps > 0 ? Math.round(src.fps) : MAX_FPS;
 
-  const estimatedBytes = Math.round(((videoBitrate + AUDIO_BITRATE) * duration) / 8);
-  return { width, height, frameRate, videoBitrate, audioBitrate: AUDIO_BITRATE, estimatedBytes };
+  const totalBudget = Math.floor((limitBytes * 8 * SAFETY) / duration);
+  const audioBitrate = audioFor(totalBudget);
+  const videoBudget = Math.min(MAX_VIDEO_BITRATE, totalBudget - audioBitrate);
+  const frameRate = Math.min(videoBudget < 400_000 ? LOW_FPS : MAX_FPS, srcFps);
+
+  // The biggest picture (never bigger than the source) that keeps enough bits per pixel.
+  const sides = [...SHORT_SIDES.filter((s) => s < srcShort), srcShort]
+    .filter((s, i, a) => a.indexOf(s) === i)
+    .sort((a, b) => b - a)
+    .filter((s) => s <= Math.max(srcShort, SHORT_SIDES[SHORT_SIDES.length - 1]) && s <= SHORT_SIDES[0]);
+  const size = (short: number) => {
+    const scale = Math.min(1, short / srcShort);
+    return { width: even(w0 * scale), height: even(h0 * scale) };
+  };
+  let chosen = size(sides[sides.length - 1] ?? Math.min(srcShort, SHORT_SIDES[0]));
+  for (const s of sides) {
+    const d = size(s);
+    if (d.width * d.height * frameRate * MIN_BPP <= videoBudget) {
+      chosen = d;
+      break;
+    }
+  }
+
+  const wanted = Math.round(chosen.width * chosen.height * frameRate * GOOD_BPP);
+  const fits = videoBudget >= MIN_VIDEO_BITRATE;
+  const videoBitrate = Math.max(MIN_VIDEO_BITRATE, Math.min(wanted, videoBudget, MAX_VIDEO_BITRATE));
+  const estimatedBytes = Math.round(((videoBitrate + audioBitrate) * duration) / 8);
+  return { ...chosen, frameRate, videoBitrate, audioBitrate, estimatedBytes, fits };
 }
