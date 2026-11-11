@@ -6,14 +6,14 @@
 // off. The only time the original goes up is when this browser cannot
 // encode video at all, or the result would be bigger than the original.
 
-import { planCompression, type CompressPlan } from "./compressPlan";
+import { PLATFORM_LIMIT_BYTES, planCompression, type CompressPlan } from "./compressPlan";
 
 export type CompressResult = {
   file: File;
   /** false when the original was kept (see reason). */
   compressed: boolean;
   originalBytes: number;
-  reason?: "unsupported" | "not_smaller" | "failed";
+  reason?: "unsupported" | "not_smaller" | "failed" | "too_long";
   plan?: CompressPlan;
 };
 
@@ -28,8 +28,32 @@ function outputName(name: string): string {
   return `${base}.mp4`;
 }
 
+/**
+ * Compresses `file` to fit the platform limit. When the encoder overshoots
+ * (busy scenes), it runs again aiming lower, up to two more times.
+ */
 export async function compressVideo(
   file: File,
+  opts: { signal?: AbortSignal; onProgress?: (fraction: number) => void } = {},
+): Promise<CompressResult> {
+  let limit = PLATFORM_LIMIT_BYTES;
+  let last: CompressResult | null = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const base = attempt;
+    const result = await compressOnce(file, limit, {
+      signal: opts.signal,
+      onProgress: (f) => opts.onProgress?.(Math.min(0.99, (base + f) / (attempt === 0 ? 1 : attempt + 1))),
+    });
+    last = result;
+    if (!result.compressed || result.file.size <= PLATFORM_LIMIT_BYTES) return result;
+    limit = Math.floor(limit * (PLATFORM_LIMIT_BYTES / result.file.size) * 0.85);
+  }
+  return last!;
+}
+
+async function compressOnce(
+  file: File,
+  limitBytes: number,
   opts: { signal?: AbortSignal; onProgress?: (fraction: number) => void } = {},
 ): Promise<CompressResult> {
   const keep = (reason: CompressResult["reason"]): CompressResult => ({ file, compressed: false, originalBytes: file.size, reason });
@@ -56,7 +80,8 @@ export async function compressVideo(
       height: videoTrack.displayHeight,
       fps,
       durationS,
-    });
+    }, limitBytes);
+    if (!plan.fits) return { ...keep("too_long"), plan };
 
     const codec = await mb.getFirstEncodableVideoCodec(["avc", "hevc", "vp9", "av1"], {
       width: plan.width,
@@ -106,7 +131,7 @@ export async function compressVideo(
 
     const buffer = target.buffer;
     if (!buffer || buffer.byteLength === 0) return keep("failed");
-    if (buffer.byteLength >= file.size) return { ...keep("not_smaller"), plan };
+    if (buffer.byteLength >= file.size && file.size <= PLATFORM_LIMIT_BYTES) return { ...keep("not_smaller"), plan };
     const out = new File([buffer], outputName(file.name), { type: "video/mp4" });
     return { file: out, compressed: true, originalBytes: file.size, plan };
   } catch (err) {

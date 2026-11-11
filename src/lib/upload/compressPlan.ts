@@ -69,15 +69,13 @@ export function planCompression(
   const frameRate = Math.min(videoBudget < 400_000 ? LOW_FPS : MAX_FPS, srcFps);
 
   // The biggest picture (never bigger than the source) that keeps enough bits per pixel.
-  const sides = [...SHORT_SIDES.filter((s) => s < srcShort), srcShort]
-    .filter((s, i, a) => a.indexOf(s) === i)
-    .sort((a, b) => b - a)
-    .filter((s) => s <= Math.max(srcShort, SHORT_SIDES[SHORT_SIDES.length - 1]) && s <= SHORT_SIDES[0]);
+  const top = Math.min(srcShort, SHORT_SIDES[0]);
+  const sides = [top, ...SHORT_SIDES.filter((x) => x < top)];
   const size = (short: number) => {
     const scale = Math.min(1, short / srcShort);
     return { width: even(w0 * scale), height: even(h0 * scale) };
   };
-  let chosen = size(sides[sides.length - 1] ?? Math.min(srcShort, SHORT_SIDES[0]));
+  let chosen = size(sides[sides.length - 1]!);
   for (const s of sides) {
     const d = size(s);
     if (d.width * d.height * frameRate * MIN_BPP <= videoBudget) {
