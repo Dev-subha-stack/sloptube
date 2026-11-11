@@ -2,6 +2,9 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 const TABS = [
+  { key: "users", label: "Users", href: "/admin/users" },
+  { key: "bugs", label: "Bugs", href: "/admin/bugs" },
+  { key: "comments", label: "Comments", href: "/admin/comments" },
   { key: "queue", label: "Reports", href: "/admin" },
   { key: "log", label: "Mod log", href: "/admin/log" },
   { key: "words", label: "Word list", href: "/admin/words" },

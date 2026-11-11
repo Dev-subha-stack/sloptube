@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { StaffBadge } from "@/components/admin/RoleBadge";
 import Link from "next/link";
 import type { Channel } from "@/lib/channels/types";
 import { formatJoined, formatSubscribers } from "@/lib/channels/validation";
@@ -78,6 +79,7 @@ export function ChannelHeader({
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-[20px] font-normal leading-7 text-text sm:text-[24px] sm:leading-[30px]">
               {channel.name}
+              <StaffBadge name={channel.handle} />
             </h1>
             <p className="mt-0.5 truncate text-[14px] leading-5 text-text-2">
               <span>@{channel.handle}</span>

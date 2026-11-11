@@ -1,5 +1,7 @@
 "use client";
 
+import { StaffBadge } from "@/components/admin/RoleBadge";
+import { StarRating } from "@/components/ratings/StarRating";
 import Link from "next/link";
 import { useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { Avatar } from "@/components/Avatar";
@@ -126,6 +128,7 @@ export function VideoInfo({
           <VisibilityNote visibility={video.visibility} />
           {formatViews(video.views)} · {formatDate(video.date)}
         </p>
+        <StarRating videoId={video.id} />
         <div className="-mx-1.5 flex items-center sm:mx-0">
           <LikeButtons key={video.id} videoId={video.id} engagement={engagement} />
           <ActionButton Icon={ShareIcon} label="Share" onClick={() => setSharing(true)} mirror data-share />
@@ -153,6 +156,7 @@ export function VideoInfo({
           <div className="min-w-0 flex-1">
             <Link href={channelHref} className="block truncate text-[14px] font-medium leading-5 text-text">
               {video.channel.name}
+              <StaffBadge name={video.channel.handle} />
             </Link>
             <p className="text-[13px] leading-[18px] text-text-2">
               <SubscriberCount channelId={video.channel.id} count={video.channel.subscriberCount} />

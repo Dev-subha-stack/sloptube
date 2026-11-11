@@ -147,7 +147,9 @@ export const useUpload = create<UploadState>((set, get) => ({
               ? null
               : result.reason === "not_smaller"
                 ? "Your file was already smaller than the compressed version, so it is uploaded as it is."
-                : "This browser can't compress video, so the original file is uploaded. Chrome, Edge or Safari compress automatically.",
+                : result.reason === "too_long"
+                  ? "This video is too long to fit 50 MB, even compressed. Try a clip under about an hour."
+                  : "This browser can't compress video, so the original file is uploaded if it is under 50 MB. Chrome, Edge or Safari compress automatically.",
           },
         });
         const sizeProblem = fileProblem(upload);
