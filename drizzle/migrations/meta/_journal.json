@@ -141,6 +141,13 @@
       "when": 1794319410425,
       "tag": "0019_round2_ratings_bugs_staff",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794372206163,
+      "tag": "0020_upload_limit_50mb",
+      "breakpoints": true
     }
   ]
 }
