@@ -140,12 +140,15 @@ export const useAccounts = create<AccountsState>((set, get) => ({
       }
     }
     // Forget the session in this browser only (no server sign-out, the saved account stays valid).
-    const key = (supabase.auth as unknown as { storageKey?: string }).storageKey;
+    const auth = supabase.auth as unknown as {
+      storageKey?: string;
+      storage?: { removeItem: (k: string) => void | Promise<void> };
+    };
     try {
-      if (key) {
-        localStorage.removeItem(key);
-        localStorage.removeItem(`${key}-code-verifier`);
-        localStorage.removeItem(`${key}-user`);
+      if (auth.storageKey && auth.storage) {
+        await auth.storage.removeItem(auth.storageKey);
+        await auth.storage.removeItem(`${auth.storageKey}-code-verifier`);
+        await auth.storage.removeItem(`${auth.storageKey}-user`);
       }
     } catch {
       // ignore
