@@ -568,10 +568,17 @@ html:has([data-embed-page]) [data-site-footer] {
 .anim-fade-in { animation: anim-fade-in 200ms ease-out; }
 
 /* Appearance: accent colour and compact layout (Settings -> Appearance). */
-html[data-accent="blue"] { --red: #1a73e8; }
-html[data-accent="green"] { --red: #188038; }
-html[data-accent="purple"] { --red: #8e24aa; }
-html[data-accent="orange"] { --red: #e8710a; }
+:root {
+  --accent-red: #ff0000;
+  --accent-blue: #1a73e8;
+  --accent-green: #188038;
+  --accent-purple: #8e24aa;
+  --accent-orange: #e8710a;
+}
+html[data-accent="blue"] { --red: var(--accent-blue); }
+html[data-accent="green"] { --red: var(--accent-green); }
+html[data-accent="purple"] { --red: var(--accent-purple); }
+html[data-accent="orange"] { --red: var(--accent-orange); }
 html[data-density="compact"] { font-size: 93.75%; }
 html[data-motion="reduced"] *, html[data-motion="reduced"] *::before, html[data-motion="reduced"] *::after {
   animation-duration: 1ms !important;

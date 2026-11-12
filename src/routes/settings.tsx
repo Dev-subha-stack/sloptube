@@ -6,6 +6,7 @@ import { metadataToHead } from "@/lib/seo/head";
 import { Suspense } from "react";
 import { DbNotConnected, FeatureOff, FormSkeleton } from "@/components/auth/AuthCard";
 import { AddEmail } from "@/components/settings/AddEmail";
+import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
 import { Connections } from "@/components/settings/Connections";
 import { SettingsForm, type SettingsProfile } from "@/components/settings/SettingsForm";
 import type { accountsState } from "@/lib/accounts/server";
@@ -53,6 +54,7 @@ function SettingsGate() {
           bio: user.bio,
         }}
       />
+      <AppearanceSettings />
       <Suspense fallback={null}>
         <YapinConnection />
       </Suspense>
