@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, Suspense, useContext, type ComponentType } from "react";
-import { mainGuide, railGuide, youGuide, type GuideKey } from "@/lib/guide";
+import { mainGuide, moreGuide, railGuide, youGuide, type GuideKey } from "@/lib/guide";
 import { useFlag, useSession } from "@/lib/store/session";
 import { useUi } from "@/lib/store/ui";
 import { GuideFooterLinks } from "./launch/SiteFooter";
@@ -20,6 +20,8 @@ import {
   SnipsIcon,
   SubscriptionsIcon,
   TrendingIcon,
+  StarIcon,
+  BugReportIcon,
 } from "./icons";
 import { Logo } from "./Logo";
 
@@ -36,6 +38,9 @@ const ITEMS: Record<GuideKey, Item> = {
   history: { href: "/feed/history", label: "History", Icon: HistoryIcon },
   watchLater: { href: "/feed/watch-later", label: "Watch later", Icon: ClockIcon },
   playlists: { href: "/playlists", label: "Playlists", Icon: PlaylistAddIcon },
+  topRated: { href: "/top-rated", label: "Top rated", Icon: StarIcon },
+  ratings: { href: "/feed/ratings", label: "Your ratings", Icon: StarIcon },
+  bugs: { href: "/bugs", label: "Report a bug", Icon: BugReportIcon },
 };
 
 function useShellFlags() {
@@ -96,6 +101,11 @@ function GuideContent({ onNavigate }: { onNavigate?: () => void }) {
           ))}
         </Section>
       )}
+      <Section>
+        {moreGuide(flags).map((key) => (
+          <GuideLink key={key} item={ITEMS[key]} onClick={onNavigate} />
+        ))}
+      </Section>
 
       {loaded && !user && accounts && (
         <Section>
