@@ -35,8 +35,10 @@ import { Route as WatchRouteImport } from './routes/watch'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as YapinFinishRouteImport } from './routes/yapin-finish'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminCommentsRouteImport } from './routes/admin/comments'
 import { Route as AdminLogRouteImport } from './routes/admin/log'
 import { Route as AdminMessagesRouteImport } from './routes/admin/messages'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminWordsRouteImport } from './routes/admin/words'
 import { Route as ApiCommentsRouteImport } from './routes/api/comments'
 import { Route as ApiContactRouteImport } from './routes/api/contact'
@@ -50,6 +52,8 @@ import { Route as ApiSubscriptionsRouteImport } from './routes/api/subscriptions
 import { Route as ApiVersionRouteImport } from './routes/api/version'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthYapinRouteImport } from './routes/auth/yapin'
+import { Route as BugsIndexRouteImport } from './routes/bugs/index'
+import { Route as BugsIdRouteImport } from './routes/bugs/$id'
 import { Route as ChannelIdRouteImport } from './routes/channel/$id'
 import { Route as EmbedIdRouteImport } from './routes/embed/$id'
 import { Route as FeedHistoryRouteImport } from './routes/feed/history'
@@ -65,6 +69,8 @@ import { Route as StudioChannelRouteImport } from './routes/studio/channel'
 import { Route as StudioCommentsRouteImport } from './routes/studio/comments'
 import { Route as StudioSettingsRouteImport } from './routes/studio/settings'
 import { Route as StudioVideosRouteImport } from './routes/studio/videos'
+import { Route as AdminBugsIndexRouteImport } from './routes/admin/bugs/index'
+import { Route as AdminBugsIdRouteImport } from './routes/admin/bugs/$id'
 import { Route as ApiAdminActionRouteImport } from './routes/api/admin/action'
 import { Route as ApiAdminFlagsRouteImport } from './routes/api/admin/flags'
 import { Route as ApiAdminMessagesRouteImport } from './routes/api/admin/messages'
@@ -236,6 +242,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCommentsRoute = AdminCommentsRouteImport.update({
+  id: '/admin/comments',
+  path: '/admin/comments',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLogRoute = AdminLogRouteImport.update({
   id: '/admin/log',
   path: '/admin/log',
@@ -244,6 +255,11 @@ const AdminLogRoute = AdminLogRouteImport.update({
 const AdminMessagesRoute = AdminMessagesRouteImport.update({
   id: '/admin/messages',
   path: '/admin/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminWordsRoute = AdminWordsRouteImport.update({
@@ -309,6 +325,16 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
 const AuthYapinRoute = AuthYapinRouteImport.update({
   id: '/auth/yapin',
   path: '/auth/yapin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BugsIndexRoute = BugsIndexRouteImport.update({
+  id: '/bugs/',
+  path: '/bugs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BugsIdRoute = BugsIdRouteImport.update({
+  id: '/bugs/$id',
+  path: '/bugs/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChannelIdRoute = ChannelIdRouteImport.update({
@@ -385,6 +411,16 @@ const StudioVideosRoute = StudioVideosRouteImport.update({
   id: '/videos',
   path: '/videos',
   getParentRoute: () => StudioRoute,
+} as any)
+const AdminBugsIndexRoute = AdminBugsIndexRouteImport.update({
+  id: '/admin/bugs/',
+  path: '/admin/bugs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBugsIdRoute = AdminBugsIdRouteImport.update({
+  id: '/admin/bugs/$id',
+  path: '/admin/bugs/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAdminActionRoute = ApiAdminActionRouteImport.update({
   id: '/api/admin/action',
@@ -615,8 +651,10 @@ export interface FileRoutesByFullPath {
   '/watch': typeof WatchRoute
   '/welcome': typeof WelcomeRoute
   '/yapin-finish': typeof YapinFinishRoute
+  '/admin/comments': typeof AdminCommentsRoute
   '/admin/log': typeof AdminLogRoute
   '/admin/messages': typeof AdminMessagesRoute
+  '/admin/users': typeof AdminUsersRoute
   '/admin/words': typeof AdminWordsRoute
   '/api/comments': typeof ApiCommentsRouteWithChildren
   '/api/contact': typeof ApiContactRoute
@@ -630,6 +668,7 @@ export interface FileRoutesByFullPath {
   '/api/version': typeof ApiVersionRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/yapin': typeof AuthYapinRouteWithChildren
+  '/bugs/$id': typeof BugsIdRoute
   '/channel/$id': typeof ChannelIdRoute
   '/embed/$id': typeof EmbedIdRoute
   '/feed/history': typeof FeedHistoryRoute
@@ -644,8 +683,10 @@ export interface FileRoutesByFullPath {
   '/studio/settings': typeof StudioSettingsRoute
   '/studio/videos': typeof StudioVideosRoute
   '/admin/': typeof AdminIndexRoute
+  '/bugs/': typeof BugsIndexRoute
   '/shorts/': typeof ShortsIndexRoute
   '/studio/': typeof StudioIndexRoute
+  '/admin/bugs/$id': typeof AdminBugsIdRoute
   '/api/admin/action': typeof ApiAdminActionRoute
   '/api/admin/flags': typeof ApiAdminFlagsRoute
   '/api/admin/messages': typeof ApiAdminMessagesRoute
@@ -675,6 +716,7 @@ export interface FileRoutesByFullPath {
   '/auth/yapin/start': typeof AuthYapinStartRoute
   '/c/$handle/$tab': typeof CHandleTabRoute
   '/studio/content/trash': typeof StudioContentTrashRoute
+  '/admin/bugs/': typeof AdminBugsIndexRoute
   '/c/$handle/': typeof CHandleIndexRoute
   '/studio/content/': typeof StudioContentIndexRoute
   '/api/media/$video/$': typeof ApiMediaVideoSplatRoute
@@ -712,8 +754,10 @@ export interface FileRoutesByTo {
   '/watch': typeof WatchRoute
   '/welcome': typeof WelcomeRoute
   '/yapin-finish': typeof YapinFinishRoute
+  '/admin/comments': typeof AdminCommentsRoute
   '/admin/log': typeof AdminLogRoute
   '/admin/messages': typeof AdminMessagesRoute
+  '/admin/users': typeof AdminUsersRoute
   '/admin/words': typeof AdminWordsRoute
   '/api/comments': typeof ApiCommentsRouteWithChildren
   '/api/contact': typeof ApiContactRoute
@@ -727,6 +771,7 @@ export interface FileRoutesByTo {
   '/api/version': typeof ApiVersionRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/yapin': typeof AuthYapinRouteWithChildren
+  '/bugs/$id': typeof BugsIdRoute
   '/channel/$id': typeof ChannelIdRoute
   '/embed/$id': typeof EmbedIdRoute
   '/feed/history': typeof FeedHistoryRoute
@@ -741,8 +786,10 @@ export interface FileRoutesByTo {
   '/studio/settings': typeof StudioSettingsRoute
   '/studio/videos': typeof StudioVideosRoute
   '/admin': typeof AdminIndexRoute
+  '/bugs': typeof BugsIndexRoute
   '/shorts': typeof ShortsIndexRoute
   '/studio': typeof StudioIndexRoute
+  '/admin/bugs/$id': typeof AdminBugsIdRoute
   '/api/admin/action': typeof ApiAdminActionRoute
   '/api/admin/flags': typeof ApiAdminFlagsRoute
   '/api/admin/messages': typeof ApiAdminMessagesRoute
@@ -772,6 +819,7 @@ export interface FileRoutesByTo {
   '/auth/yapin/start': typeof AuthYapinStartRoute
   '/c/$handle/$tab': typeof CHandleTabRoute
   '/studio/content/trash': typeof StudioContentTrashRoute
+  '/admin/bugs': typeof AdminBugsIndexRoute
   '/c/$handle': typeof CHandleIndexRoute
   '/studio/content': typeof StudioContentIndexRoute
   '/api/media/$video/$': typeof ApiMediaVideoSplatRoute
@@ -811,8 +859,10 @@ export interface FileRoutesById {
   '/watch': typeof WatchRoute
   '/welcome': typeof WelcomeRoute
   '/yapin-finish': typeof YapinFinishRoute
+  '/admin/comments': typeof AdminCommentsRoute
   '/admin/log': typeof AdminLogRoute
   '/admin/messages': typeof AdminMessagesRoute
+  '/admin/users': typeof AdminUsersRoute
   '/admin/words': typeof AdminWordsRoute
   '/api/comments': typeof ApiCommentsRouteWithChildren
   '/api/contact': typeof ApiContactRoute
@@ -826,6 +876,7 @@ export interface FileRoutesById {
   '/api/version': typeof ApiVersionRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/yapin': typeof AuthYapinRouteWithChildren
+  '/bugs/$id': typeof BugsIdRoute
   '/channel/$id': typeof ChannelIdRoute
   '/embed/$id': typeof EmbedIdRoute
   '/feed/history': typeof FeedHistoryRoute
@@ -840,8 +891,10 @@ export interface FileRoutesById {
   '/studio/settings': typeof StudioSettingsRoute
   '/studio/videos': typeof StudioVideosRoute
   '/admin/': typeof AdminIndexRoute
+  '/bugs/': typeof BugsIndexRoute
   '/shorts/': typeof ShortsIndexRoute
   '/studio/': typeof StudioIndexRoute
+  '/admin/bugs/$id': typeof AdminBugsIdRoute
   '/api/admin/action': typeof ApiAdminActionRoute
   '/api/admin/flags': typeof ApiAdminFlagsRoute
   '/api/admin/messages': typeof ApiAdminMessagesRoute
@@ -871,6 +924,7 @@ export interface FileRoutesById {
   '/auth/yapin/start': typeof AuthYapinStartRoute
   '/c/$handle/$tab': typeof CHandleTabRoute
   '/studio/content/trash': typeof StudioContentTrashRoute
+  '/admin/bugs/': typeof AdminBugsIndexRoute
   '/c/$handle/': typeof CHandleIndexRoute
   '/studio/content/': typeof StudioContentIndexRoute
   '/api/media/$video/$': typeof ApiMediaVideoSplatRoute
@@ -911,8 +965,10 @@ export interface FileRouteTypes {
     | '/watch'
     | '/welcome'
     | '/yapin-finish'
+    | '/admin/comments'
     | '/admin/log'
     | '/admin/messages'
+    | '/admin/users'
     | '/admin/words'
     | '/api/comments'
     | '/api/contact'
@@ -926,6 +982,7 @@ export interface FileRouteTypes {
     | '/api/version'
     | '/auth/callback'
     | '/auth/yapin'
+    | '/bugs/$id'
     | '/channel/$id'
     | '/embed/$id'
     | '/feed/history'
@@ -940,8 +997,10 @@ export interface FileRouteTypes {
     | '/studio/settings'
     | '/studio/videos'
     | '/admin/'
+    | '/bugs/'
     | '/shorts/'
     | '/studio/'
+    | '/admin/bugs/$id'
     | '/api/admin/action'
     | '/api/admin/flags'
     | '/api/admin/messages'
@@ -971,6 +1030,7 @@ export interface FileRouteTypes {
     | '/auth/yapin/start'
     | '/c/$handle/$tab'
     | '/studio/content/trash'
+    | '/admin/bugs/'
     | '/c/$handle/'
     | '/studio/content/'
     | '/api/media/$video/$'
@@ -1008,8 +1068,10 @@ export interface FileRouteTypes {
     | '/watch'
     | '/welcome'
     | '/yapin-finish'
+    | '/admin/comments'
     | '/admin/log'
     | '/admin/messages'
+    | '/admin/users'
     | '/admin/words'
     | '/api/comments'
     | '/api/contact'
@@ -1023,6 +1085,7 @@ export interface FileRouteTypes {
     | '/api/version'
     | '/auth/callback'
     | '/auth/yapin'
+    | '/bugs/$id'
     | '/channel/$id'
     | '/embed/$id'
     | '/feed/history'
@@ -1037,8 +1100,10 @@ export interface FileRouteTypes {
     | '/studio/settings'
     | '/studio/videos'
     | '/admin'
+    | '/bugs'
     | '/shorts'
     | '/studio'
+    | '/admin/bugs/$id'
     | '/api/admin/action'
     | '/api/admin/flags'
     | '/api/admin/messages'
@@ -1068,6 +1133,7 @@ export interface FileRouteTypes {
     | '/auth/yapin/start'
     | '/c/$handle/$tab'
     | '/studio/content/trash'
+    | '/admin/bugs'
     | '/c/$handle'
     | '/studio/content'
     | '/api/media/$video/$'
@@ -1106,8 +1172,10 @@ export interface FileRouteTypes {
     | '/watch'
     | '/welcome'
     | '/yapin-finish'
+    | '/admin/comments'
     | '/admin/log'
     | '/admin/messages'
+    | '/admin/users'
     | '/admin/words'
     | '/api/comments'
     | '/api/contact'
@@ -1121,6 +1189,7 @@ export interface FileRouteTypes {
     | '/api/version'
     | '/auth/callback'
     | '/auth/yapin'
+    | '/bugs/$id'
     | '/channel/$id'
     | '/embed/$id'
     | '/feed/history'
@@ -1135,8 +1204,10 @@ export interface FileRouteTypes {
     | '/studio/settings'
     | '/studio/videos'
     | '/admin/'
+    | '/bugs/'
     | '/shorts/'
     | '/studio/'
+    | '/admin/bugs/$id'
     | '/api/admin/action'
     | '/api/admin/flags'
     | '/api/admin/messages'
@@ -1166,6 +1237,7 @@ export interface FileRouteTypes {
     | '/auth/yapin/start'
     | '/c/$handle/$tab'
     | '/studio/content/trash'
+    | '/admin/bugs/'
     | '/c/$handle/'
     | '/studio/content/'
     | '/api/media/$video/$'
@@ -1205,8 +1277,10 @@ export interface RootRouteChildren {
   WatchRoute: typeof WatchRoute
   WelcomeRoute: typeof WelcomeRoute
   YapinFinishRoute: typeof YapinFinishRoute
+  AdminCommentsRoute: typeof AdminCommentsRoute
   AdminLogRoute: typeof AdminLogRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
+  AdminUsersRoute: typeof AdminUsersRoute
   AdminWordsRoute: typeof AdminWordsRoute
   ApiCommentsRoute: typeof ApiCommentsRouteWithChildren
   ApiContactRoute: typeof ApiContactRoute
@@ -1220,6 +1294,7 @@ export interface RootRouteChildren {
   ApiVersionRoute: typeof ApiVersionRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthYapinRoute: typeof AuthYapinRouteWithChildren
+  BugsIdRoute: typeof BugsIdRoute
   ChannelIdRoute: typeof ChannelIdRoute
   EmbedIdRoute: typeof EmbedIdRoute
   FeedHistoryRoute: typeof FeedHistoryRoute
@@ -1228,7 +1303,9 @@ export interface RootRouteChildren {
   ShortsIdRoute: typeof ShortsIdRoute
   SitemapsNameRoute: typeof SitemapsNameRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  BugsIndexRoute: typeof BugsIndexRoute
   ShortsIndexRoute: typeof ShortsIndexRoute
+  AdminBugsIdRoute: typeof AdminBugsIdRoute
   ApiAdminActionRoute: typeof ApiAdminActionRoute
   ApiAdminFlagsRoute: typeof ApiAdminFlagsRoute
   ApiAdminMessagesRoute: typeof ApiAdminMessagesRoute
@@ -1247,6 +1324,7 @@ export interface RootRouteChildren {
   ApiYapinUnlinkRoute: typeof ApiYapinUnlinkRoute
   ApiYapinWebhookRoute: typeof ApiYapinWebhookRoute
   CHandleTabRoute: typeof CHandleTabRoute
+  AdminBugsIndexRoute: typeof AdminBugsIndexRoute
   CHandleIndexRoute: typeof CHandleIndexRoute
   ApiMediaVideoSplatRoute: typeof ApiMediaVideoSplatRoute
   ApiPublicEncoderRpcRoute: typeof ApiPublicEncoderRpcRoute
@@ -1438,6 +1516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/comments': {
+      id: '/admin/comments'
+      path: '/admin/comments'
+      fullPath: '/admin/comments'
+      preLoaderRoute: typeof AdminCommentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/log': {
       id: '/admin/log'
       path: '/admin/log'
@@ -1450,6 +1535,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/messages'
       fullPath: '/admin/messages'
       preLoaderRoute: typeof AdminMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/words': {
@@ -1541,6 +1633,20 @@ declare module '@tanstack/react-router' {
       path: '/auth/yapin'
       fullPath: '/auth/yapin'
       preLoaderRoute: typeof AuthYapinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bugs/': {
+      id: '/bugs/'
+      path: '/bugs'
+      fullPath: '/bugs/'
+      preLoaderRoute: typeof BugsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bugs/$id': {
+      id: '/bugs/$id'
+      path: '/bugs/$id'
+      fullPath: '/bugs/$id'
+      preLoaderRoute: typeof BugsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/channel/$id': {
@@ -1647,6 +1753,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/studio/videos'
       preLoaderRoute: typeof StudioVideosRouteImport
       parentRoute: typeof StudioRoute
+    }
+    '/admin/bugs/': {
+      id: '/admin/bugs/'
+      path: '/admin/bugs'
+      fullPath: '/admin/bugs/'
+      preLoaderRoute: typeof AdminBugsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/bugs/$id': {
+      id: '/admin/bugs/$id'
+      path: '/admin/bugs/$id'
+      fullPath: '/admin/bugs/$id'
+      preLoaderRoute: typeof AdminBugsIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/admin/action': {
       id: '/api/admin/action'
@@ -2091,8 +2211,10 @@ const rootRouteChildren: RootRouteChildren = {
   WatchRoute: WatchRoute,
   WelcomeRoute: WelcomeRoute,
   YapinFinishRoute: YapinFinishRoute,
+  AdminCommentsRoute: AdminCommentsRoute,
   AdminLogRoute: AdminLogRoute,
   AdminMessagesRoute: AdminMessagesRoute,
+  AdminUsersRoute: AdminUsersRoute,
   AdminWordsRoute: AdminWordsRoute,
   ApiCommentsRoute: ApiCommentsRouteWithChildren,
   ApiContactRoute: ApiContactRoute,
@@ -2106,6 +2228,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiVersionRoute: ApiVersionRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   AuthYapinRoute: AuthYapinRouteWithChildren,
+  BugsIdRoute: BugsIdRoute,
   ChannelIdRoute: ChannelIdRoute,
   EmbedIdRoute: EmbedIdRoute,
   FeedHistoryRoute: FeedHistoryRoute,
@@ -2114,7 +2237,9 @@ const rootRouteChildren: RootRouteChildren = {
   ShortsIdRoute: ShortsIdRoute,
   SitemapsNameRoute: SitemapsNameRoute,
   AdminIndexRoute: AdminIndexRoute,
+  BugsIndexRoute: BugsIndexRoute,
   ShortsIndexRoute: ShortsIndexRoute,
+  AdminBugsIdRoute: AdminBugsIdRoute,
   ApiAdminActionRoute: ApiAdminActionRoute,
   ApiAdminFlagsRoute: ApiAdminFlagsRoute,
   ApiAdminMessagesRoute: ApiAdminMessagesRoute,
@@ -2133,6 +2258,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiYapinUnlinkRoute: ApiYapinUnlinkRoute,
   ApiYapinWebhookRoute: ApiYapinWebhookRoute,
   CHandleTabRoute: CHandleTabRoute,
+  AdminBugsIndexRoute: AdminBugsIndexRoute,
   CHandleIndexRoute: CHandleIndexRoute,
   ApiMediaVideoSplatRoute: ApiMediaVideoSplatRoute,
   ApiPublicEncoderRpcRoute: ApiPublicEncoderRpcRoute,
