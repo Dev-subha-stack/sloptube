@@ -29,6 +29,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StudioRouteImport } from './routes/studio'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TopRatedRouteImport } from './routes/top-rated'
 import { Route as TrendingRouteImport } from './routes/trending'
 import { Route as UploadRouteImport } from './routes/upload'
 import { Route as WatchRouteImport } from './routes/watch'
@@ -57,6 +58,7 @@ import { Route as BugsIdRouteImport } from './routes/bugs/$id'
 import { Route as ChannelIdRouteImport } from './routes/channel/$id'
 import { Route as EmbedIdRouteImport } from './routes/embed/$id'
 import { Route as FeedHistoryRouteImport } from './routes/feed/history'
+import { Route as FeedRatingsRouteImport } from './routes/feed/ratings'
 import { Route as FeedSubscriptionsRouteImport } from './routes/feed/subscriptions'
 import { Route as FeedWatchLaterRouteImport } from './routes/feed/watch-later'
 import { Route as ShortsIndexRouteImport } from './routes/shorts/index'
@@ -212,6 +214,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TopRatedRoute = TopRatedRouteImport.update({
+  id: '/top-rated',
+  path: '/top-rated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrendingRoute = TrendingRouteImport.update({
   id: '/trending',
   path: '/trending',
@@ -350,6 +357,11 @@ const EmbedIdRoute = EmbedIdRouteImport.update({
 const FeedHistoryRoute = FeedHistoryRouteImport.update({
   id: '/feed/history',
   path: '/feed/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedRatingsRoute = FeedRatingsRouteImport.update({
+  id: '/feed/ratings',
+  path: '/feed/ratings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FeedSubscriptionsRoute = FeedSubscriptionsRouteImport.update({
@@ -646,6 +658,7 @@ export interface FileRoutesByFullPath {
   '/studio': typeof StudioRouteWithChildren
   '/subscriptions': typeof SubscriptionsRoute
   '/terms': typeof TermsRoute
+  '/top-rated': typeof TopRatedRoute
   '/trending': typeof TrendingRoute
   '/upload': typeof UploadRoute
   '/watch': typeof WatchRoute
@@ -672,6 +685,7 @@ export interface FileRoutesByFullPath {
   '/channel/$id': typeof ChannelIdRoute
   '/embed/$id': typeof EmbedIdRoute
   '/feed/history': typeof FeedHistoryRoute
+  '/feed/ratings': typeof FeedRatingsRoute
   '/feed/subscriptions': typeof FeedSubscriptionsRoute
   '/feed/watch-later': typeof FeedWatchLaterRoute
   '/shorts/$id': typeof ShortsIdRoute
@@ -749,6 +763,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/terms': typeof TermsRoute
+  '/top-rated': typeof TopRatedRoute
   '/trending': typeof TrendingRoute
   '/upload': typeof UploadRoute
   '/watch': typeof WatchRoute
@@ -775,6 +790,7 @@ export interface FileRoutesByTo {
   '/channel/$id': typeof ChannelIdRoute
   '/embed/$id': typeof EmbedIdRoute
   '/feed/history': typeof FeedHistoryRoute
+  '/feed/ratings': typeof FeedRatingsRoute
   '/feed/subscriptions': typeof FeedSubscriptionsRoute
   '/feed/watch-later': typeof FeedWatchLaterRoute
   '/shorts/$id': typeof ShortsIdRoute
@@ -854,6 +870,7 @@ export interface FileRoutesById {
   '/studio': typeof StudioRouteWithChildren
   '/subscriptions': typeof SubscriptionsRoute
   '/terms': typeof TermsRoute
+  '/top-rated': typeof TopRatedRoute
   '/trending': typeof TrendingRoute
   '/upload': typeof UploadRoute
   '/watch': typeof WatchRoute
@@ -880,6 +897,7 @@ export interface FileRoutesById {
   '/channel/$id': typeof ChannelIdRoute
   '/embed/$id': typeof EmbedIdRoute
   '/feed/history': typeof FeedHistoryRoute
+  '/feed/ratings': typeof FeedRatingsRoute
   '/feed/subscriptions': typeof FeedSubscriptionsRoute
   '/feed/watch-later': typeof FeedWatchLaterRoute
   '/shorts/$id': typeof ShortsIdRoute
@@ -960,6 +978,7 @@ export interface FileRouteTypes {
     | '/studio'
     | '/subscriptions'
     | '/terms'
+    | '/top-rated'
     | '/trending'
     | '/upload'
     | '/watch'
@@ -986,6 +1005,7 @@ export interface FileRouteTypes {
     | '/channel/$id'
     | '/embed/$id'
     | '/feed/history'
+    | '/feed/ratings'
     | '/feed/subscriptions'
     | '/feed/watch-later'
     | '/shorts/$id'
@@ -1063,6 +1083,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/subscriptions'
     | '/terms'
+    | '/top-rated'
     | '/trending'
     | '/upload'
     | '/watch'
@@ -1089,6 +1110,7 @@ export interface FileRouteTypes {
     | '/channel/$id'
     | '/embed/$id'
     | '/feed/history'
+    | '/feed/ratings'
     | '/feed/subscriptions'
     | '/feed/watch-later'
     | '/shorts/$id'
@@ -1167,6 +1189,7 @@ export interface FileRouteTypes {
     | '/studio'
     | '/subscriptions'
     | '/terms'
+    | '/top-rated'
     | '/trending'
     | '/upload'
     | '/watch'
@@ -1193,6 +1216,7 @@ export interface FileRouteTypes {
     | '/channel/$id'
     | '/embed/$id'
     | '/feed/history'
+    | '/feed/ratings'
     | '/feed/subscriptions'
     | '/feed/watch-later'
     | '/shorts/$id'
@@ -1272,6 +1296,7 @@ export interface RootRouteChildren {
   StudioRoute: typeof StudioRouteWithChildren
   SubscriptionsRoute: typeof SubscriptionsRoute
   TermsRoute: typeof TermsRoute
+  TopRatedRoute: typeof TopRatedRoute
   TrendingRoute: typeof TrendingRoute
   UploadRoute: typeof UploadRoute
   WatchRoute: typeof WatchRoute
@@ -1298,6 +1323,7 @@ export interface RootRouteChildren {
   ChannelIdRoute: typeof ChannelIdRoute
   EmbedIdRoute: typeof EmbedIdRoute
   FeedHistoryRoute: typeof FeedHistoryRoute
+  FeedRatingsRoute: typeof FeedRatingsRoute
   FeedSubscriptionsRoute: typeof FeedSubscriptionsRoute
   FeedWatchLaterRoute: typeof FeedWatchLaterRoute
   ShortsIdRoute: typeof ShortsIdRoute
@@ -1472,6 +1498,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/top-rated': {
+      id: '/top-rated'
+      path: '/top-rated'
+      fullPath: '/top-rated'
+      preLoaderRoute: typeof TopRatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trending': {
@@ -1668,6 +1701,13 @@ declare module '@tanstack/react-router' {
       path: '/feed/history'
       fullPath: '/feed/history'
       preLoaderRoute: typeof FeedHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed/ratings': {
+      id: '/feed/ratings'
+      path: '/feed/ratings'
+      fullPath: '/feed/ratings'
+      preLoaderRoute: typeof FeedRatingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feed/subscriptions': {
@@ -2206,6 +2246,7 @@ const rootRouteChildren: RootRouteChildren = {
   StudioRoute: StudioRouteWithChildren,
   SubscriptionsRoute: SubscriptionsRoute,
   TermsRoute: TermsRoute,
+  TopRatedRoute: TopRatedRoute,
   TrendingRoute: TrendingRoute,
   UploadRoute: UploadRoute,
   WatchRoute: WatchRoute,
@@ -2232,6 +2273,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChannelIdRoute: ChannelIdRoute,
   EmbedIdRoute: EmbedIdRoute,
   FeedHistoryRoute: FeedHistoryRoute,
+  FeedRatingsRoute: FeedRatingsRoute,
   FeedSubscriptionsRoute: FeedSubscriptionsRoute,
   FeedWatchLaterRoute: FeedWatchLaterRoute,
   ShortsIdRoute: ShortsIdRoute,
