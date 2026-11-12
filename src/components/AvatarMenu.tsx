@@ -41,12 +41,13 @@ export function AvatarMenu({ user, email }: { user: SessionUser; email: string |
   const switchTo = useAccounts((s) => s.switchTo);
   const addAnother = useAccounts((s) => s.addAnother);
   const forget = useAccounts((s) => s.forget);
-  const [staff, setStaff] = useState(false);
+  const [roles, setRoles] = useState<string[]>([]);
+  const staff = roles.includes("admin") || roles.includes("moderator");
 
   useEffect(() => {
     load();
     void remember({ name: user.displayName, username: user.username, avatarUrl: user.avatarUrl });
-    void myRoles().then((r) => setStaff(r.includes("admin") || r.includes("moderator")));
+    void myRoles().then(setRoles);
   }, [load, remember, user.id, user.displayName, user.username, user.avatarUrl]);
 
   const others = accounts.filter((a) => a.userId !== user.id);
@@ -154,7 +155,7 @@ export function AvatarMenu({ user, email }: { user: SessionUser; email: string |
               icon={<ShieldIcon className="h-6 w-6" />}
               onClick={() => {
                 close();
-                router.push("/admin");
+                router.push(roles.includes("admin") ? "/admin/users" : "/admin/bugs");
               }}
             >
               Admin panel
