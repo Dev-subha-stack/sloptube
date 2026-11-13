@@ -94,6 +94,13 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
   const [started, setStarted] = useState(false);
   const [ended, setEnded] = useState(false);
   const [waiting, setWaiting] = useState(false);
+  /** false until the first frame actually plays: the loading spinner stays up until then. */
+  const [rolling, setRolling] = useState(false);
+  /** The draggable miniplayer (i), and where it sits. */
+  const [mini, setMini] = useState(false);
+  const [miniPos, setMiniPos] = useState<{ x: number; y: number } | null>(null);
+  const slotRef = useRef<HTMLDivElement>(null);
+  const miniDrag = useRef<{ dx: number; dy: number; id: number } | null>(null);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(durationS ?? 0);
   const [buffered, setBuffered] = useState(0);
@@ -185,7 +192,17 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
         }
         return;
       }
-      hls = new HlsClass({ xhrSetup: hlsXhrSetup, startPosition: start > 0 ? start : -1, maxBufferLength: 30, backBufferLength: 60 });
+      hls = new HlsClass({
+        xhrSetup: hlsXhrSetup,
+        startPosition: start > 0 ? start : -1,
+        // Start fast: fetch the first piece while the manifest settles, never pick a picture bigger than the player.
+        startFragPrefetch: true,
+        capLevelToPlayerSize: true,
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+        backBufferLength: 60,
+        enableWorker: true,
+      });
       hlsRef.current = hls;
       hls.on(HlsClass.Events.MANIFEST_PARSED, (_e, data) => {
         const opts = qualityOptions(data.levels.map((l) => ({ height: l.height, width: l.width, bitrate: l.bitrate })));
@@ -306,6 +323,12 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
     else void video.requestPictureInPicture().catch(() => {});
   }, []);
 
+  /** i: the miniplayer on or off. */
+  const toggleMini = useCallback(() => {
+    if (embed) return;
+    setMini((m) => !m);
+  }, [embed]);
+
   /** c: subtitles on or off, from hls.js or the video's own text tracks; a note when the video has none. */
   const toggleCaptions = useCallback(() => {
     const video = videoRef.current;
@@ -348,12 +371,12 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
         case "theater":
           return embed ? undefined : toggleTheater();
         case "pip":
-          return togglePip();
+          return toggleMini();
         case "captions":
           return toggleCaptions();
       }
     },
-    [duration, embed, flash, seekTo, toggleCaptions, toggleFullscreen, togglePip, togglePlay, toggleTheater],
+    [duration, embed, flash, seekTo, toggleCaptions, toggleFullscreen, toggleMini, togglePlay, toggleTheater],
   );
 
   // Keyboard shortcuts, page wide like YouTube, but never while typing or in a dialog.
@@ -460,20 +483,85 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
     ? { backgroundImage: `url("${cue.url}")`, backgroundPosition: `-${cue.x}px -${cue.y}px`, width: cue.w, height: cue.h }
     : undefined;
 
+  const miniStyle = mini && miniPos ? { left: miniPos.x, top: miniPos.y } : undefined;
+
   return (
+    <div ref={slotRef} className="relative h-full w-full" data-player-slot data-mini={mini ? "1" : undefined}>
+      {mini && (
+        <button
+          type="button"
+          onClick={() => setMini(false)}
+          className="absolute inset-0 grid place-items-center bg-black text-[14px] text-[#aaaaaa]"
+        >
+          Playing in the miniplayer. Click to bring it back.
+        </button>
+      )}
     <div
       ref={wrapRef}
       data-player
+      style={miniStyle}
       data-player-state={ended ? "ended" : playing ? "playing" : "paused"}
       data-quality={summary}
       data-level={playingLevel}
       data-native={native ? "1" : undefined}
       onPointerMove={poke}
       onPointerLeave={() => playing && setActive(false)}
-      className={`group/player relative h-full w-full select-none overflow-hidden bg-black text-white ${
-        showChrome ? "" : "cursor-none"
-      }`}
+      className={`group/player select-none overflow-hidden bg-black text-white ${
+        mini
+          ? "fixed z-[60] aspect-video w-[min(400px,calc(100vw-24px))] rounded-lg shadow-[0_8px_28px_rgba(0,0,0,0.45)]" + (miniPos ? "" : " bottom-4 right-4")
+          : "relative h-full w-full"
+      } ${showChrome ? "" : "cursor-none"}`}
     >
+      {mini && (
+        <div
+          data-mini-handle
+          onPointerDown={(e) => {
+            const box = wrapRef.current?.getBoundingClientRect();
+            if (!box) return;
+            miniDrag.current = { dx: e.clientX - box.left, dy: e.clientY - box.top, id: e.pointerId };
+            e.currentTarget.setPointerCapture(e.pointerId);
+          }}
+          onPointerMove={(e) => {
+            const d = miniDrag.current;
+            const box = wrapRef.current?.getBoundingClientRect();
+            if (!d || d.id !== e.pointerId || !box) return;
+            const x = Math.min(Math.max(0, e.clientX - d.dx), window.innerWidth - box.width);
+            const y = Math.min(Math.max(0, e.clientY - d.dy), window.innerHeight - box.height);
+            setMiniPos({ x, y });
+          }}
+          onPointerUp={() => (miniDrag.current = null)}
+          onPointerCancel={() => (miniDrag.current = null)}
+          className="absolute inset-x-0 top-0 z-20 flex h-9 cursor-grab touch-none items-center justify-between bg-gradient-to-b from-black/70 to-transparent px-2 active:cursor-grabbing"
+          title="Drag to move"
+        >
+          <span className="pl-1 text-[12px] text-[#dddddd]">Miniplayer · drag to move</span>
+          <span className="flex gap-1">
+            <button
+              type="button"
+              aria-label="Expand (i)"
+              title="Expand (i)"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => setMini(false)}
+              className="grid h-7 w-7 place-items-center rounded-full hover:bg-white/20"
+            >
+              <DefaultViewIcon className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              aria-label="Close miniplayer"
+              title="Close"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => {
+                videoRef.current?.pause();
+                setMini(false);
+              }}
+              className="grid h-7 w-7 place-items-center rounded-full text-[18px] hover:bg-white/20"
+            >
+              ×
+            </button>
+          </span>
+        </div>
+      )}
       <video
         ref={videoRef}
         poster={poster ?? undefined}
@@ -498,7 +586,10 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
           saveResume(videoId, e.currentTarget.duration, e.currentTarget.duration);
         }}
         onWaiting={() => setWaiting(true)}
-        onPlaying={() => setWaiting(false)}
+        onPlaying={() => {
+          setWaiting(false);
+          setRolling(true);
+        }}
         onCanPlay={() => setWaiting(false)}
         onTimeUpdate={(e) => {
           const v = e.currentTarget;
@@ -561,8 +652,14 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
         {note ?? ""}
       </div>
 
-      {waiting && playing && (
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-4 border-white/30 border-t-white" />
+      {/* Loading: from pressing play until the picture really moves, and again whenever it stalls. */}
+      {playing && (waiting || !rolling) && !error && (
+        <div data-player-loading className="pointer-events-none absolute inset-0 grid place-items-center bg-black/20">
+          <svg viewBox="0 0 50 50" className="h-16 w-16 animate-spin [animation-duration:900ms]" aria-label="Loading">
+            <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" />
+            <path d="M25 5a20 20 0 0 1 20 20" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+          </svg>
+        </div>
       )}
 
       {/* The big play button, while paused. */}
@@ -730,8 +827,13 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
                 {theater ? <DefaultViewIcon className="h-6 w-6" /> : <TheaterIcon className="h-6 w-6" />}
               </CtrlButton>
             )}
+            {!embed && (
+              <CtrlButton label={mini ? "Expand (i)" : "Miniplayer (i)"} onClick={toggleMini} data-miniplayer>
+                <MiniplayerIcon className="h-[22px] w-[22px]" />
+              </CtrlButton>
+            )}
             {pipOk && (
-              <CtrlButton label="Picture in picture (i)" onClick={togglePip} data-pip>
+              <CtrlButton label="Picture in picture" onClick={togglePip} data-pip>
                 <PipIcon className="h-[22px] w-[22px]" />
               </CtrlButton>
             )}
@@ -783,6 +885,15 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
         </div>
       )}
     </div>
+    </div>
+  );
+}
+
+function MiniplayerIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>
+      <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-2-8h-8v6h8v-6z" />
+    </svg>
   );
 }
 
