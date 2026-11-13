@@ -6,6 +6,7 @@ import { metadataToHead } from "@/lib/seo/head";
 import { Suspense } from "react";
 import { AuthCard, DbNotConnected, FeatureOff, FormSkeleton } from "@/components/auth/AuthCard";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { SavedAccounts } from "@/components/auth/SavedAccounts";
 import { safeNext } from "@/lib/accounts/redirect";
 import type { accountsState } from "@/lib/accounts/server";
 import { yapinNote } from "@/lib/yapin/rules";
@@ -26,17 +27,20 @@ function LoginGate() {
   if (state.user) return null;
   const note = typeof params.yapin === "string" ? yapinNote(params.yapin) : null;
   return (
+    <>
+    <SavedAccounts />
     <LoginForm
       next={next}
       yapin={yapin}
       initialError={params.banned ? bannedError : params.error ? callbackError : note}
     />
+    </>
   );
 }
 
 function LoginPage() {
   return (
-    <AuthCard title="Sign in" subtitle="to continue to sloptube">
+    <AuthCard title={Route.useSearch().add ? "Add an account" : "Sign in"} subtitle="to continue to sloptube">
       <Suspense fallback={<FormSkeleton />}>
         <LoginGate />
       </Suspense>
