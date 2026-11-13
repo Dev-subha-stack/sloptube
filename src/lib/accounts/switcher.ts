@@ -126,7 +126,13 @@ export const useAccounts = create<AccountsState>((set, get) => ({
       return;
     }
     // A full reload so every page, cache and menu belongs to the new account.
-    window.location.reload();
+    const here = window.location;
+    if (here.pathname === "/login" || here.pathname === "/signup") {
+      const next = new URLSearchParams(here.search).get("next");
+      here.assign(next && next.startsWith("/") && !next.startsWith("//") ? next : "/");
+    } else {
+      here.reload();
+    }
   },
 
   async addAnother(next) {
