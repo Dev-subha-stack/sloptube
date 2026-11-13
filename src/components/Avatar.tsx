@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
 
 // The 2019 default avatar: the first letter on a colored circle.
 const colors = ["#ef6c00", "#5e35b1", "#00897b", "#3949ab", "#c2185b", "#7cb342", "#6d4c41", "#039be5"];
@@ -21,7 +24,8 @@ export function Avatar({
   /** Empty when the name is written next to it (the usual case); else the name. */
   alt?: string;
 }) {
-  if (url) {
+  const [broken, setBroken] = useState<string | null>(null);
+  if (url && broken !== url) {
     return (
       // unoptimized: avatars come from Supabase Storage, already cropped and
       // resized to 176 px by us, and the Supabase address is only known at
@@ -33,6 +37,8 @@ export function Avatar({
         height={size}
         sizes={`${size}px`}
         unoptimized
+        referrerPolicy="no-referrer"
+        onError={() => setBroken(url)}
         className="shrink-0 rounded-full object-cover"
         style={{ width: size, height: size }}
       />
