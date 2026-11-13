@@ -569,7 +569,7 @@ html:has([data-embed-page]) [data-site-footer] {
 
 /* Appearance: accent colour and compact layout (Settings -> Appearance). */
 :root {
-  --accent-red: #ff0000;
+  --accent-red: #cc0000;
   --accent-blue: #1a73e8;
   --accent-green: #188038;
   --accent-purple: #8e24aa;
