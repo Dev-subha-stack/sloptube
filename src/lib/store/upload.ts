@@ -10,6 +10,7 @@ import { SpeedMeter, UploadCancelled, uploadParts, xhrPutPart, type SignedPart }
 import {
   detailsProblem,
   fileProblem,
+  MAX_UPLOAD_BYTES,
   titleFromFileName,
   uploadErrorText,
   videoTypeFor,
@@ -153,6 +154,9 @@ export const useUpload = create<UploadState>((set, get) => ({
           },
         });
         const sizeProblem = fileProblem(upload);
+        if (sizeProblem && !result.compressed && result.reason === "unsupported" && upload.size > MAX_UPLOAD_BYTES) {
+          throw new Error("This browser can't compress video and the file is over 50 MB. Open sloptube in Chrome, Edge or Safari and it compresses automatically.");
+        }
         if (sizeProblem) throw new Error(sizeProblem);
         const mime = videoTypeFor(upload)!;
 
