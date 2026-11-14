@@ -41,6 +41,8 @@ type UploadState = {
   details: Details;
   videoId: string | null;
   watchUrl: string | null;
+  /** The video plays already (built-in storage publishes straight away). */
+  ready?: boolean;
   error: string | null;
   /** A short line under the drop zone, like "Upload cancelled". */
   notice: string | null;
@@ -216,7 +218,7 @@ export const useUpload = create<UploadState>((set, get) => ({
         set({ phase: "finishing", sent: upload.size });
         const d = get().details;
         const finalDetails = detailsProblem(d) ? { ...d, title: d.title.trim() || details.title } : d;
-        const done = await postJson<{ watchUrl: string }>(
+        const done = await postJson<{ watchUrl: string; status?: string }>(
           "/api/upload/complete",
           {
             videoId: signed.videoId,
@@ -231,7 +233,7 @@ export const useUpload = create<UploadState>((set, get) => ({
           controller.signal,
         );
         running = null;
-        set({ phase: "done", watchUrl: done.watchUrl, details: finalDetails });
+        set({ phase: "done", watchUrl: done.watchUrl, details: finalDetails, ready: done.status === "ready" });
         // The "Upload as a Snip" box. Only a file that qualifies has a say;
         // the rest is decided by shape after processing either way.
         const box = get().short;

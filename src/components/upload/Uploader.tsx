@@ -321,17 +321,17 @@ function ProgressFooter() {
 }
 
 function DoneView() {
-  const { watchUrl, details, reset } = useUpload();
+  const { watchUrl, details, reset, ready } = useUpload();
   // Only ever rendered in the browser, after an upload: window is there.
   const origin = typeof window === "undefined" ? "" : window.location.origin;
   return (
     <div data-upload-phase="done" className="flex min-h-[420px] flex-col items-center justify-center px-6 py-12 text-center">
       <CheckCircle className="h-16 w-16 text-[#2ba640]" />
-      <p className="mt-5 text-[20px] leading-7 text-text">Video uploaded. Processing starts soon.</p>
+      <p className="mt-5 text-[20px] leading-7 text-text">{ready ? "Video uploaded and ready to watch." : "Video uploaded. Processing starts soon."}</p>
       <p className="mt-2 max-w-[520px] text-[14px] leading-5 text-text-2">
         <span className="font-medium text-text">{details.title}</span> is{" "}
-        {details.visibility === "private" ? "private" : details.visibility}. It can be watched once processing is
-        finished.
+        {details.visibility === "private" ? "private" : details.visibility}.
+        {ready ? " Change who can see it any time in Studio." : " It can be watched once processing is finished."}
       </p>
       {watchUrl && (
         <div className="mt-6 w-full max-w-[420px] rounded-[2px] bg-[var(--hover)] px-4 py-3 text-left">

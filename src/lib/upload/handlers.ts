@@ -260,6 +260,7 @@ export async function completeUpload(rawBody: unknown, ctx: UploadContext): Prom
   if (ctx.afterUpload) {
     const after = await ctx.afterUpload({ id: video.id, sourceKey: video.sourceKey }, body);
     if (after) return fail(statusForCode(after), after);
+    return { status: 200, body: { ...done(video.id).body, status: "ready" } };
   }
   return done(video.id);
 }
