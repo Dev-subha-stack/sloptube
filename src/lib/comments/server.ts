@@ -194,7 +194,7 @@ export async function studioComments(): Promise<StudioCommentsState> {
   if (!gate.userId) return { kind: "signed-out" };
   const supabase = await createClient();
   if (!supabase) return { kind: "no-db" };
-  const { data, error } = await supabase.rpc("studio_comments", { lim: STUDIO_LIMIT });
+  const { data, error } = await supabase.rpc("studio_comments_all", { lim: 200 });
   if (error) return notSetUp(error.code) ? { kind: "not-set-up" } : { kind: "ready", comments: [], channelDefault: "on", now: Date.now() };
   const list = (Array.isArray(data) ? data : []) as StudioRow[];
   let channelDefault = list[0]?.channel_default ?? null;

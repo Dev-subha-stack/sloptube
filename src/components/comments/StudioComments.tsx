@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { EyeIcon } from "@/components/icons";
 import { Avatar } from "@/components/Avatar";
 import { DeleteIcon, HeartIcon, PinIcon } from "@/components/icons";
 import { commentsErrorMessage, type CommentsMode } from "@/lib/comments/rules";
@@ -23,7 +25,7 @@ async function send(url: string, method: string, body: unknown) {
   return json;
 }
 
-/** /studio/comments: the latest comments on the owner's videos, with heart and delete. */
+/** /studio/comments: every comment on the owner's videos in one list, with reply, heart, hide and delete. */
 export function StudioComments({ comments, channelDefault, now }: { comments: StudioComment[]; channelDefault: CommentsMode; now: number }) {
   const [list, setList] = useState(comments);
   const [mode, setMode] = useState(channelDefault);
@@ -49,6 +51,47 @@ export function StudioComments({ comments, channelDefault, now }: { comments: St
       fail(err);
     }
   };
+  const [filter, setFilter] = useState<"all" | "visible" | "hidden">("all");
+  const [q, setQ] = useState("");
+  const [replyTo, setReplyTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [sending, setSending] = useState(false);
+  const shown = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return list.filter(
+      (c) =>
+        (filter === "all" || (filter === "hidden") === c.hidden) &&
+        (!term || (c.body ?? "").toLowerCase().includes(term) || (c.author?.name ?? "").toLowerCase().includes(term) || c.videoTitle.toLowerCase().includes(term)),
+    );
+  }, [list, filter, q]);
+
+  const toggleHidden = async (c: StudioComment) => {
+    const hidden = !c.hidden;
+    setList((l) => l.map((x) => (x.id === c.id ? { ...x, hidden } : x)));
+    const { error } = await supabase.rpc("creator_hide_comment", { comment_id: c.id, hidden });
+    if (error) {
+      setList((l) => l.map((x) => (x.id === c.id ? { ...x, hidden: !hidden } : x)));
+      return fail(new Error("failed"));
+    }
+    showToast(hidden ? "Comment hidden. Viewers no longer see it." : "Comment visible again.");
+  };
+
+  const reply = async (c: StudioComment) => {
+    const text = replyText.trim();
+    if (!text) return;
+    setSending(true);
+    try {
+      await send("/api/comments", "POST", { videoId: c.videoId, body: text, parentId: c.parentId ?? c.id });
+      setReplyTo(null);
+      setReplyText("");
+      showToast("Reply posted");
+    } catch (err) {
+      fail(err);
+    } finally {
+      setSending(false);
+    }
+  };
+
   const changeMode = async (next: CommentsMode) => {
     const before = mode;
     setMode(next);
@@ -79,14 +122,34 @@ export function StudioComments({ comments, channelDefault, now }: { comments: St
         </select>
       </label>
 
+      <div className="mb-4 flex flex-wrap items-center gap-2" data-studio-comment-filters>
+        {(["all", "visible", "hidden"] as const).map((f) => (
+          <button
+            key={f}
+            type="button"
+            onClick={() => setFilter(f)}
+            aria-pressed={filter === f}
+            className={`rounded-full border px-3 py-1 text-[13px] ${filter === f ? "border-[var(--link)] text-[var(--link)]" : "border-divider text-text-2"}`}
+          >
+            {f === "all" ? `All (${list.length})` : f === "visible" ? "Published" : `Hidden (${list.filter((c) => c.hidden).length})`}
+          </button>
+        ))}
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search comments"
+          className="ml-auto h-9 w-full max-w-[260px] rounded-sm border border-[var(--input-border)] bg-transparent px-3 text-[14px] text-text outline-none"
+        />
+      </div>
+
       {list.length === 0 ? (
         <p className="rounded-sm border border-divider bg-surface px-4 py-6 text-center text-[14px] text-text-2" data-studio-comments-empty>
           No comments on your videos yet.
         </p>
       ) : (
         <ul className="divide-y divide-divider rounded-sm border border-divider bg-surface">
-          {list.map((c) => (
-            <li key={c.id} className="flex gap-4 px-4 py-4" data-studio-comment={c.id}>
+          {shown.map((c) => (
+            <li key={c.id} className={`flex gap-4 px-4 py-4 ${c.hidden ? "opacity-60" : ""}`} data-studio-comment={c.id} data-hidden={c.hidden ? "1" : undefined}>
               <Avatar name={c.author?.name ?? "?"} url={c.author?.avatarUrl} size={40} />
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] leading-[18px]">
@@ -95,6 +158,7 @@ export function StudioComments({ comments, channelDefault, now }: { comments: St
                     {timeAgo(c.createdAt, now)}
                     {c.parentId ? " · reply" : ""}
                     {c.pinned ? " · pinned" : ""}
+                    {c.hidden ? " · hidden" : ""}
                   </span>
                 </p>
                 <div className="mt-0.5">
@@ -102,10 +166,36 @@ export function StudioComments({ comments, channelDefault, now }: { comments: St
                 </div>
                 <p className="mt-1 truncate text-[12px] text-text-2">
                   on{" "}
-                  <Link href={`/watch?v=${c.videoId}`} className="text-link">
+                  <Link href={`/watch?v=${c.videoId}&lc=${c.id}`} className="text-link">
                     {c.videoTitle}
                   </Link>
                 </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReplyTo(replyTo === c.id ? null : c.id);
+                    setReplyText(c.author?.handle ? `@${c.author.handle} ` : "");
+                  }}
+                  className="mt-1 text-[12px] font-medium uppercase text-text-2 hover:text-text"
+                  data-studio-reply
+                >
+                  Reply
+                </button>
+                {replyTo === c.id && (
+                  <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                    <input
+                      autoFocus
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && void reply(c)}
+                      placeholder="Add a reply..."
+                      className="h-9 flex-1 border-b border-[var(--input-border)] bg-transparent text-[14px] text-text outline-none focus:border-[var(--text)]"
+                    />
+                    <button type="button" disabled={sending || !replyText.trim()} onClick={() => void reply(c)} className="btn-blue">
+                      Reply
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="flex shrink-0 items-start gap-1">
                 {c.pinned && <PinIcon className="mt-2 h-4 w-4 text-icon" />}
@@ -119,6 +209,17 @@ export function StudioComments({ comments, channelDefault, now }: { comments: St
                   className="grid h-9 w-9 place-items-center rounded-full hover:bg-hover"
                 >
                   <HeartIcon className={`h-5 w-5 ${c.hearted ? "text-[#ff0000]" : "text-icon"}`} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void toggleHidden(c)}
+                  aria-pressed={c.hidden}
+                  aria-label={c.hidden ? "Show comment" : "Hide comment"}
+                  title={c.hidden ? "Show to viewers again" : "Hide from viewers"}
+                  data-studio-hide
+                  className="grid h-9 w-9 place-items-center rounded-full hover:bg-hover"
+                >
+                  <EyeIcon className={`h-5 w-5 ${c.hidden ? "text-[var(--link)]" : "text-icon"}`} />
                 </button>
                 <button
                   type="button"

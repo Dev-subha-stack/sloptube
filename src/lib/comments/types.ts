@@ -110,13 +110,14 @@ export function toMode(v: unknown): CommentsMode {
 }
 
 /** A comment on /studio/comments: which video it is under, and the comment. */
-export type StudioComment = Comment & { videoTitle: string };
+export type StudioComment = Comment & { videoTitle: string; hidden: boolean };
 
-export type StudioRow = Omit<CommentRow, "deleted" | "mine" | "liked"> & { video_title: string; channel_default: string | null };
+export type StudioRow = Omit<CommentRow, "deleted" | "mine" | "liked"> & { video_title: string; channel_default: string | null; hidden?: boolean | null };
 
 export function rowToStudioComment(row: StudioRow): StudioComment {
   return {
     ...rowToComment({ ...row, deleted: false, mine: row.by_owner, liked: false }),
     videoTitle: row.video_title,
+    hidden: row.hidden === true,
   };
 }
