@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { probeVideoFile } from "@/lib/shorts/probe";
-import { CompressCancelled, compressVideo, grabFrames } from "@/lib/upload/compress";
+import { CompressCancelled, compressVideo, grabFrames, posterAndMeta } from "@/lib/upload/compress";
 import { supabase } from "@/integrations/supabase/client";
 import { shortProblem } from "@/lib/shorts/rules";
 import { useSession } from "@/lib/store/session";
@@ -162,7 +162,7 @@ export const useUpload = create<UploadState>((set, get) => ({
 
         // 2. The content check, on a few stills from the video.
         set({ phase: "checking" });
-        const frames = await grabFrames(upload);
+        const [frames, poster] = await Promise.all([grabFrames(upload), posterAndMeta(upload)]);
 
         set({ phase: "signing" });
         const signed = await postJson<SignResponse>(
@@ -201,6 +201,7 @@ export const useUpload = create<UploadState>((set, get) => ({
           parts: signed.parts,
           putPart: xhrPutPart,
           signal: controller.signal,
+          partSize: signed.partSize,
           onProgress: (sent) => {
             const speed = meter.add(sent);
             const now = Date.now();
@@ -217,7 +218,16 @@ export const useUpload = create<UploadState>((set, get) => ({
         const finalDetails = detailsProblem(d) ? { ...d, title: d.title.trim() || details.title } : d;
         const done = await postJson<{ watchUrl: string }>(
           "/api/upload/complete",
-          { videoId: signed.videoId, uploadId: signed.uploadId, parts, ...finalDetails },
+          {
+            videoId: signed.videoId,
+            uploadId: signed.uploadId,
+            parts,
+            ...finalDetails,
+            thumbnail: poster.thumbnail,
+            durationS: poster.durationS,
+            width: poster.width,
+            height: poster.height,
+          },
           controller.signal,
         );
         running = null;

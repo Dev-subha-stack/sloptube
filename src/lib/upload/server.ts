@@ -8,7 +8,6 @@ import { jobsFor } from "@/lib/processing/server";
 import { progressFor, type JobInfo } from "@/lib/processing/status";
 import { readSupabaseConfig } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
-import { readR2Config } from "./env";
 import type { VideoStatus, Visibility } from "./rules";
 
 export type UploadPageState =
