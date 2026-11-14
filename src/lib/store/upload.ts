@@ -30,7 +30,7 @@ export type CompressInfo = { fraction: number; originalBytes: number; finalBytes
  */
 export type ShortBox = { state: "checking" | "ready"; problem: string | null; on: boolean };
 
-type SignResponse = { videoId: string; uploadId: string; parts: SignedPart[] };
+type SignResponse = { videoId: string; uploadId: string; parts: SignedPart[]; partSize?: number };
 
 type UploadState = {
   phase: UploadPhase;
