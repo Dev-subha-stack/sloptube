@@ -26,6 +26,8 @@ export type UploadStorage = {
   abortMultipart(key: string, uploadId: string): Promise<void>;
   /** The object's size in bytes, or null when it does not exist. */
   objectSize(key: string): Promise<number | null>;
+  /** The whole file goes up in one PUT (the built-in storage). */
+  singlePart?: boolean;
 };
 
 export type VideoRow = {
@@ -57,6 +59,11 @@ export type UploadContext = {
   /** The signed in user id, or null. */
   userId: () => Promise<string | null>;
   flagOn: (userId: string) => Promise<boolean>;
+  /**
+   * Runs once the file is in and the video is marked uploaded. The built-in
+   * storage publishes the video here (no outside encoder). Returns an error code or null.
+   */
+  afterUpload?: (video: { id: string; sourceKey: string }, body: Record<string, unknown>) => Promise<string | null>;
 };
 
 export type HandlerResult = { status: number; body: Record<string, unknown> };
@@ -149,7 +156,8 @@ export async function signUpload(rawBody: unknown, ctx: UploadContext): Promise<
     return fail(502, "storage_error");
   }
 
-  const plan = planParts(bytes);
+  const partSize = g.storage.singlePart ? Math.max(1, bytes) : PART_SIZE;
+  const plan = planParts(bytes, partSize);
   const urls = await Promise.all(
     plan.map((p) => g.storage.presignPart(key, uploadId, p.partNumber, PART_URL_TTL_S)),
   );
@@ -159,7 +167,7 @@ export async function signUpload(rawBody: unknown, ctx: UploadContext): Promise<
       videoId,
       key,
       uploadId,
-      partSize: PART_SIZE,
+      partSize,
       expiresAt: new Date(Date.now() + PART_URL_TTL_S * 1000).toISOString(),
       parts: plan.map((p, i) => ({ partNumber: p.partNumber, url: urls[i] })),
     },
@@ -227,7 +235,8 @@ export async function completeUpload(rawBody: unknown, ctx: UploadContext): Prom
   if (video.status === "uploaded") return done(video.id);
   if (video.status !== "uploading") return fail(409, "not_uploading");
 
-  const parts = readParts(body.parts, planParts(video.sourceBytes ?? 0).length);
+  const partSize = g.storage.singlePart ? Math.max(1, video.sourceBytes ?? 1) : PART_SIZE;
+  const parts = readParts(body.parts, planParts(video.sourceBytes ?? 0, partSize).length);
   if (!parts) return fail(400, "bad_parts");
 
   try {
@@ -248,6 +257,11 @@ export async function completeUpload(rawBody: unknown, ctx: UploadContext): Prom
   }
   const err = await g.db.finishUpload(video.id);
   if (err) return fail(statusForCode(err), err);
+  if (ctx.afterUpload) {
+    const after = await ctx.afterUpload({ id: video.id, sourceKey: video.sourceKey }, body);
+    if (after) return fail(statusForCode(after), after);
+    return { status: 200, body: { ...done(video.id).body, status: "ready" } };
+  }
   return done(video.id);
 }
 

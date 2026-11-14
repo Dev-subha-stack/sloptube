@@ -8,8 +8,9 @@ import { mediaContext } from "@/lib/watch/server";
 // Only for people who may watch the video: public and unlisted once ready,
 // the owner always. See serveMedia in lib/watch/media.ts and "Watch page" in
 // README.md for why it works this way.
-export async function GET(_request: Request, ctx: RouteContext<"/api/media/[video]/[...path]">) {
+export async function GET(request: Request, ctx: RouteContext<"/api/media/[video]/[...path]">) {
   const { video, path } = await ctx.params;
-  const result = await serveMedia(video, path, await mediaContext());
+  const link = new URL(request.url).searchParams.has("link");
+  const result = await serveMedia(video, path, await mediaContext(), { link });
   return new Response(result.body, { status: result.status, headers: result.headers });
 }

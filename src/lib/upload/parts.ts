@@ -122,6 +122,8 @@ export const xhrPutPart: PutPart = (url, body, onLoaded, signal) =>
       if (xhr.status < 200 || xhr.status >= 300) return reject(new Error(`R2 answered ${xhr.status}`));
       const etag = xhr.getResponseHeader("ETag");
       // Without "ExposeHeaders: ETag" in the bucket CORS rule the header is hidden.
+      // The built-in storage answers a signed upload without an ETag: the whole file is one part.
+      if (!etag && url.includes("/object/upload/sign/")) return resolve("cloud");
       if (!etag) return reject(new Error("no ETag in the answer, check the bucket CORS rule"));
       resolve(etag);
     };

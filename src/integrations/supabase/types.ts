@@ -331,6 +331,7 @@ export type Database = {
           deleted_at: string | null
           edited_at: string | null
           hearted: boolean
+          hidden_at: string | null
           id: string
           like_count: number
           parent_id: string | null
@@ -346,6 +347,7 @@ export type Database = {
           deleted_at?: string | null
           edited_at?: string | null
           hearted?: boolean
+          hidden_at?: string | null
           id?: string
           like_count?: number
           parent_id?: string | null
@@ -361,6 +363,7 @@ export type Database = {
           deleted_at?: string | null
           edited_at?: string | null
           hearted?: boolean
+          hidden_at?: string | null
           id?: string
           like_count?: number
           parent_id?: string | null
@@ -1623,6 +1626,7 @@ export type Database = {
           deleted: boolean | null
           edited_at: string | null
           hearted: boolean | null
+          hidden: boolean | null
           id: string | null
           like_count: number | null
           liked: boolean | null
@@ -1842,6 +1846,7 @@ export type Database = {
           deleted_at: string | null
           edited_at: string | null
           hearted: boolean
+          hidden_at: string | null
           id: string
           like_count: number
           parent_id: string | null
@@ -1882,6 +1887,7 @@ export type Database = {
           deleted: boolean | null
           edited_at: string | null
           hearted: boolean | null
+          hidden: boolean | null
           id: string | null
           like_count: number | null
           liked: boolean | null
@@ -1920,8 +1926,21 @@ export type Database = {
           video_id: string
         }[]
       }
+      creator_hide_comment: {
+        Args: { comment_id: string; hidden: boolean }
+        Returns: undefined
+      }
       delete_account: { Args: never; Returns: undefined }
       delete_comment: { Args: { comment_id: string }; Returns: boolean }
+      direct_publish: {
+        Args: {
+          duration_s: number
+          height: number
+          video_id: string
+          width: number
+        }
+        Returns: string
+      }
       edit_comment: {
         Args: { body: string; comment_id: string }
         Returns: {
@@ -1934,6 +1953,7 @@ export type Database = {
           deleted: boolean | null
           edited_at: string | null
           hearted: boolean | null
+          hidden: boolean | null
           id: string | null
           like_count: number | null
           liked: boolean | null
@@ -2079,6 +2099,7 @@ export type Database = {
           deleted: boolean | null
           edited_at: string | null
           hearted: boolean | null
+          hidden: boolean | null
           id: string | null
           like_count: number | null
           liked: boolean | null
@@ -2108,6 +2129,7 @@ export type Database = {
           deleted: boolean | null
           edited_at: string | null
           hearted: boolean | null
+          hidden: boolean | null
           id: string | null
           like_count: number | null
           liked: boolean | null
@@ -2303,6 +2325,7 @@ export type Database = {
           deleted: boolean | null
           edited_at: string | null
           hearted: boolean | null
+          hidden: boolean | null
           id: string | null
           like_count: number | null
           liked: boolean | null
@@ -2540,6 +2563,28 @@ export type Database = {
           created_at: string
           edited_at: string
           hearted: boolean
+          id: string
+          like_count: number
+          parent_id: string
+          pinned: boolean
+          reply_count: number
+          video_id: string
+          video_title: string
+        }[]
+      }
+      studio_comments_all: {
+        Args: { lim?: number }
+        Returns: {
+          author_avatar_url: string
+          author_handle: string
+          author_name: string
+          body: string
+          by_owner: boolean
+          channel_default: string
+          created_at: string
+          edited_at: string
+          hearted: boolean
+          hidden: boolean
           id: string
           like_count: number
           parent_id: string

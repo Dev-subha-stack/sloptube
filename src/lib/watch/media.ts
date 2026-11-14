@@ -37,7 +37,7 @@ const PROXIED: Record<string, string> = {
   vtt: "text/vtt; charset=utf-8",
 };
 /** Files the route redirects to R2 for. */
-const REDIRECTED = new Set(["m4s", "mp4", "webp", "jpg"]);
+const REDIRECTED = new Set(["m4s", "mp4", "webm", "mov", "webp", "jpg"]);
 
 function fail(status: number, error: string): MediaResult {
   return {
@@ -67,7 +67,10 @@ export function folderOf(hlsKey: string): string | null {
  * That is public and unlisted videos once they are ready, and the owner always.
  * Everything else (private, not ready, missing) is the same 404.
  */
-export async function serveMedia(videoId: string, parts: string[], ctx: MediaContext): Promise<MediaResult> {
+/** A whole video file played straight from storage: the link has to last a long watch. */
+export const FILE_URL_TTL_S = 6 * 60 * 60;
+
+export async function serveMedia(videoId: string, parts: string[], ctx: MediaContext, opts: { link?: boolean } = {}): Promise<MediaResult> {
   if (!ctx.db) return fail(503, "no_db");
   if (!(await ctx.flagOn())) return fail(403, "watch_off");
   if (!UUID.test(videoId)) return fail(404, "not_found");
@@ -89,6 +92,11 @@ export async function serveMedia(videoId: string, parts: string[], ctx: MediaCon
       if (text === null) return fail(404, "not_found");
       const body = file.ext === "m3u8" ? rewritePlaylist(text, file.path, mediaBase(id)) : text;
       return { status: 200, headers: { "content-type": PROXIED[file.ext], "cache-control": cache }, body };
+    }
+    if (opts.link) {
+      // The player asks with its sign-in attached (owners watching private videos), then plays the link.
+      const url = await ctx.storage.presign(key, FILE_URL_TTL_S);
+      return { status: 200, headers: { "content-type": "application/json", "cache-control": "private, no-store" }, body: JSON.stringify({ url }) };
     }
     const url = await ctx.storage.presign(key, MEDIA_URL_TTL_S);
     // The link works for 10 minutes, so the browser may reuse the redirect for 5.

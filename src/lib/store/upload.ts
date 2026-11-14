@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { probeVideoFile } from "@/lib/shorts/probe";
-import { CompressCancelled, compressVideo, grabFrames } from "@/lib/upload/compress";
+import { CompressCancelled, compressVideo, grabFrames, posterAndMeta } from "@/lib/upload/compress";
 import { supabase } from "@/integrations/supabase/client";
 import { shortProblem } from "@/lib/shorts/rules";
 import { useSession } from "@/lib/store/session";
@@ -30,7 +30,7 @@ export type CompressInfo = { fraction: number; originalBytes: number; finalBytes
  */
 export type ShortBox = { state: "checking" | "ready"; problem: string | null; on: boolean };
 
-type SignResponse = { videoId: string; uploadId: string; parts: SignedPart[] };
+type SignResponse = { videoId: string; uploadId: string; parts: SignedPart[]; partSize?: number };
 
 type UploadState = {
   phase: UploadPhase;
@@ -41,6 +41,8 @@ type UploadState = {
   details: Details;
   videoId: string | null;
   watchUrl: string | null;
+  /** The video plays already (built-in storage publishes straight away). */
+  ready?: boolean;
   error: string | null;
   /** A short line under the drop zone, like "Upload cancelled". */
   notice: string | null;
@@ -162,7 +164,7 @@ export const useUpload = create<UploadState>((set, get) => ({
 
         // 2. The content check, on a few stills from the video.
         set({ phase: "checking" });
-        const frames = await grabFrames(upload);
+        const [frames, poster] = await Promise.all([grabFrames(upload), posterAndMeta(upload)]);
 
         set({ phase: "signing" });
         const signed = await postJson<SignResponse>(
@@ -201,6 +203,7 @@ export const useUpload = create<UploadState>((set, get) => ({
           parts: signed.parts,
           putPart: xhrPutPart,
           signal: controller.signal,
+          partSize: signed.partSize,
           onProgress: (sent) => {
             const speed = meter.add(sent);
             const now = Date.now();
@@ -215,13 +218,22 @@ export const useUpload = create<UploadState>((set, get) => ({
         set({ phase: "finishing", sent: upload.size });
         const d = get().details;
         const finalDetails = detailsProblem(d) ? { ...d, title: d.title.trim() || details.title } : d;
-        const done = await postJson<{ watchUrl: string }>(
+        const done = await postJson<{ watchUrl: string; status?: string }>(
           "/api/upload/complete",
-          { videoId: signed.videoId, uploadId: signed.uploadId, parts, ...finalDetails },
+          {
+            videoId: signed.videoId,
+            uploadId: signed.uploadId,
+            parts,
+            ...finalDetails,
+            thumbnail: poster.thumbnail,
+            durationS: poster.durationS,
+            width: poster.width,
+            height: poster.height,
+          },
           controller.signal,
         );
         running = null;
-        set({ phase: "done", watchUrl: done.watchUrl, details: finalDetails });
+        set({ phase: "done", watchUrl: done.watchUrl, details: finalDetails, ready: done.status === "ready" });
         // The "Upload as a Snip" box. Only a file that qualifies has a say;
         // the rest is decided by shape after processing either way.
         const box = get().short;

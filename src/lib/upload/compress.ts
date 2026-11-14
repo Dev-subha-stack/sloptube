@@ -184,3 +184,43 @@ export async function grabFrames(file: File, count = 4, maxSide = 384): Promise<
     URL.revokeObjectURL(url);
   }
 }
+
+/** The poster frame (a JPEG about 1280 px wide) plus the length and size, read in the browser. */
+export async function posterAndMeta(file: File): Promise<{ thumbnail: string | null; durationS: number; width: number; height: number }> {
+  const empty = { thumbnail: null, durationS: 0, width: 0, height: 0 };
+  if (typeof document === "undefined") return empty;
+  const url = URL.createObjectURL(file);
+  const video = document.createElement("video");
+  video.muted = true;
+  video.playsInline = true;
+  video.preload = "auto";
+  video.src = url;
+  const wait = (ev: string, ms = 10000) =>
+    new Promise<boolean>((resolve) => {
+      const t = setTimeout(() => resolve(false), ms);
+      video.addEventListener(ev, () => { clearTimeout(t); resolve(true); }, { once: true });
+      video.addEventListener("error", () => { clearTimeout(t); resolve(false); }, { once: true });
+    });
+  try {
+    if (!(await wait("loadeddata"))) return empty;
+    const d = Number.isFinite(video.duration) ? video.duration : 0;
+    const meta = { durationS: d, width: video.videoWidth, height: video.videoHeight };
+    if (!video.videoWidth) return { ...empty, ...meta };
+    video.currentTime = Math.min(Math.max(0, d - 0.05), Math.max(1, d * 0.25));
+    await wait("seeked");
+    const scale = Math.min(1, 1280 / Math.max(video.videoWidth, video.videoHeight));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(video.videoWidth * scale);
+    canvas.height = Math.round(video.videoHeight * scale);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return { ...empty, ...meta };
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return { thumbnail: canvas.toDataURL("image/jpeg", 0.82), ...meta };
+  } catch {
+    return empty;
+  } finally {
+    video.removeAttribute("src");
+    video.load();
+    URL.revokeObjectURL(url);
+  }
+}
