@@ -155,6 +155,13 @@
       "when": 1794627815841,
       "tag": "0021_creator_hide_comments",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794627992453,
+      "tag": "0022_direct_publish_cloud_videos",
+      "breakpoints": true
     }
   ]
 }

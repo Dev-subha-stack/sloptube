@@ -1932,6 +1932,15 @@ export type Database = {
       }
       delete_account: { Args: never; Returns: undefined }
       delete_comment: { Args: { comment_id: string }; Returns: boolean }
+      direct_publish: {
+        Args: {
+          duration_s: number
+          height: number
+          video_id: string
+          width: number
+        }
+        Returns: string
+      }
       edit_comment: {
         Args: { body: string; comment_id: string }
         Returns: {
