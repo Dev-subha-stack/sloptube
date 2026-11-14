@@ -167,7 +167,19 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
     if (preferNative(video) || direct) {
       setNative(!direct);
       setOptions(qualityOptions([]));
-      video.src = src;
+      if (direct && src.startsWith("/api/media/")) {
+        // Ask for a signed link with the sign-in attached, so owners can watch their private videos too.
+        void fetch(`${src}?link=1`)
+          .then((r) => (r.ok ? (r.json() as Promise<{ url?: string }>) : null))
+          .then((j) => {
+            if (cancelled) return;
+            if (j?.url) video.src = j.url;
+            else setError("This video isn't available right now. Reload the page to try again.");
+          })
+          .catch(() => !cancelled && setError("This video couldn't load. Check your connection and reload."));
+      } else {
+        video.src = src;
+      }
       video.addEventListener(
         "loadedmetadata",
         () => {
