@@ -162,8 +162,10 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
       });
     };
 
-    if (preferNative(video)) {
-      setNative(true);
+    // A plain video file (the built-in storage) plays as it is; HLS goes through hls.js.
+    const direct = !/\.m3u8(\?|$)/i.test(src);
+    if (preferNative(video) || direct) {
+      setNative(!direct);
       setOptions(qualityOptions([]));
       video.src = src;
       video.addEventListener(
