@@ -37,7 +37,7 @@ const PROXIED: Record<string, string> = {
   vtt: "text/vtt; charset=utf-8",
 };
 /** Files the route redirects to R2 for. */
-const REDIRECTED = new Set(["m4s", "mp4", "webp", "jpg"]);
+const REDIRECTED = new Set(["m4s", "mp4", "webm", "mov", "webp", "jpg"]);
 
 function fail(status: number, error: string): MediaResult {
   return {

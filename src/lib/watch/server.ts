@@ -41,7 +41,7 @@ export async function mediaContext(): Promise<MediaContext> {
         }
       : null,
     flagOn: () => flagOn("watch"),
-    storage: r2 ? createMediaStorage(createR2Client(r2), r2.bucket) : null,
+    storage: r2 ? createMediaStorage(createR2Client(r2), r2.bucket) : (await import("@/lib/upload/cloud")).createCloudMediaStorage(),
   };
 }
 

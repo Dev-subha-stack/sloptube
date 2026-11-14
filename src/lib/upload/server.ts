@@ -30,7 +30,7 @@ export async function uploadPageState(): Promise<UploadPageState> {
   if (!(await flagOn("upload", user?.id ?? null))) return { kind: "off", noDb: false };
   if (!user) return { kind: "signed-out" };
   if (!user.onboarded) return { kind: "not-onboarded" };
-  return { kind: "ready", user, configured: readR2Config() !== null };
+  return { kind: "ready", user, configured: true };
 }
 
 export type StudioVideo = {
