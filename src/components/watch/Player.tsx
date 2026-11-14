@@ -189,6 +189,7 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
         { once: true },
       );
       return () => {
+        cancelled = true;
         video.removeAttribute("src");
         video.load();
       };
