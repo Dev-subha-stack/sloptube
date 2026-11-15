@@ -169,6 +169,20 @@
       "when": 1794719569768,
       "tag": "0023_profiles_read_scoped",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1794720061759,
+      "tag": "0024_fix_admin_set_role",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1794720127991,
+      "tag": "0025_fix_rate_video_conflict",
+      "breakpoints": true
     }
   ]
 }
