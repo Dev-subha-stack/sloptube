@@ -40,3 +40,6 @@ use the editor.
 - Profile pictures and banners sit in private buckets and are served by `/api/public/images/$bucket/$`. Why: the workspace blocks public buckets.
 - The encoder worker (`worker/`) never holds database keys; it calls `/api/public/encoder/rpc` with `ENCODER_SECRET`, limited to the queue functions. Why: the service role key is not available outside Lovable Cloud.
 - Banned accounts are refused by the database on every Data API request (`moderation_pre_request`).
+
+- Without R2 settings, uploads use the private Cloud bucket `videos`: one signed PUT, then `direct_publish` (service role) makes the compressed MP4 playable as is; the player fetches `/api/media/<id>/<file>?link=1` with the bearer to get a signed link. Why: no outside encoder or R2 needed to upload.
+- Account switching keeps each saved session in this browser (`sloptube-accounts`); staff powers are always checked in the database, never from browser storage. Why: fast switching without weakening admin checks.
