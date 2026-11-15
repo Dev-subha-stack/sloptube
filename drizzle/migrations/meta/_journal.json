@@ -162,6 +162,13 @@
       "when": 1794627992453,
       "tag": "0022_direct_publish_cloud_videos",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1794719569768,
+      "tag": "0023_profiles_read_scoped",
+      "breakpoints": true
     }
   ]
 }
