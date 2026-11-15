@@ -35,5 +35,5 @@ Hosting: stay on the Lovable database for now (user may move to own Supabase lat
 ## Blocked on user
 - [ ] Optional: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, MEDIA_PUBLIC_URL, SITE_URL, YAPIN_CLIENT_ID, YAPIN_CLIENT_SECRET, ENCODER_SECRET (then verify upload, playback, Yapin', encoder)
 - [ ] Data export (per-table CSV/JSON) + users export, avatar/banner files
-- [ ] Feature switches: all start off like a fresh install (accounts on); confirm which to turn on
+- [x] Feature switches: all on except maintenance, Yapin and the flag panel
 - [ ] GitHub: user connects in Project settings -> Git
