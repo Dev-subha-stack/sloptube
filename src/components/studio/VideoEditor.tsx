@@ -7,6 +7,7 @@ import { DESCRIPTION_MAX, TITLE_MAX } from "@/lib/upload/rules";
 import { parseTags, studioErrorMessage, TAGS_MAX, tagsProblem, thumbnailFileProblem } from "@/lib/studio/rules";
 import type { CommentsMode, StudioRow, Visibility } from "@/lib/studio/types";
 import { formatTime } from "@/lib/watch/format";
+import { SharePanel } from "@/components/share/SharePanel";
 import { ArrowBackIcon, CheckIcon, CloseIcon, EyeIcon, ImageIcon, LinkIcon, LockIcon } from "../icons";
 
 export type Still = { name: string; url: string };
@@ -450,6 +451,7 @@ export function VideoEditor({
               ))}
             </div>
           </div>
+          {!preview && <SharePanel videoId={video.id} watchHref={watchHref} visibility={saved.visibility} />}
         </aside>
       </div>
     </div>
