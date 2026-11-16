@@ -43,3 +43,6 @@ use the editor.
 
 - Without R2 settings, uploads use the private Cloud bucket `videos`: one signed PUT, then `direct_publish` (service role) makes the compressed MP4 playable as is; the player fetches `/api/media/<id>/<file>?link=1` with the bearer to get a signed link. Why: no outside encoder or R2 needed to upload.
 - Account switching keeps each saved session in this browser (`sloptube-accounts`); staff powers are always checked in the database, never from browser storage. Why: fast switching without weakening admin checks.
+- New uploads are saved private with no publish date (a draft); the Publish button applies the chosen visibility. Why: nothing goes live by accident.
+- Private videos can be shared with named accounts through `video_shares`; `watch_video` grants those accounts playback. Why: trusted viewing without making the video unlisted.
+- Channel emojis live in the private `emojis` bucket, served by the image proxy, and are written as `:name:` in comment text. Why: comments stay plain text.
