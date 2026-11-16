@@ -65,7 +65,7 @@ export function EmojiPicker({ onPick }: { onPick: (code: string) => void }) {
         </svg>
       </button>
       {open && (
-        <div className="absolute left-0 top-10 z-30 grid w-[248px] grid-cols-6 gap-1 rounded-[8px] bg-[var(--menu)] p-2 shadow-lg ring-1 ring-divider" role="menu" data-emoji-menu>
+        <div className="absolute left-0 top-10 z-30 grid w-[248px] grid-cols-6 gap-1 rounded-[8px] bg-surface p-2 shadow-[var(--menu-shadow)]" role="menu" data-emoji-menu>
           {[...map.entries()].map(([name, url]) => (
             <button
               key={name}
