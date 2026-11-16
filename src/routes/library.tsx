@@ -4,16 +4,20 @@ import { createServerFn } from "@tanstack/react-start";
 import { metadataToHead } from "@/lib/seo/head";
 
 import { EmptyState } from "@/components/EmptyState";
+import { SharedWithYou } from "@/components/share/SharedWithYou";
 
 const metadata = { title: "Library | sloptube" };
 
 function Library() {
   return (
-    <EmptyState
-      title="Your library is empty."
-      hint="Videos you watch show up in History, and the channels you follow in Subscriptions."
-      cards={0}
-    />
+    <>
+      <SharedWithYou />
+      <EmptyState
+        title="Your library is empty."
+        hint="Videos you watch show up in History, and the channels you follow in Subscriptions."
+        cards={0}
+      />
+    </>
   );
 }
 
