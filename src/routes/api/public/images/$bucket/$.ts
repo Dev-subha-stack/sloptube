@@ -1,8 +1,8 @@
 // Public image address for profile pictures and channel banners. The files sit in
-// private storage; this serves only those two folders' images, read only.
+// private storage; this serves only those folders' images (and channel emojis), read only.
 import { createFileRoute } from "@tanstack/react-router";
 
-const BUCKETS = new Set(["avatars", "banners"]);
+const BUCKETS = new Set(["avatars", "banners", "emojis"]);
 const PATH = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/\d{1,16}\.(png|webp)$/;
 const TYPES: Record<string, string> = { png: "image/png", webp: "image/webp" };
 
