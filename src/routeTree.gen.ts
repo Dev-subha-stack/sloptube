@@ -71,8 +71,12 @@ import { Route as StudioChannelRouteImport } from './routes/studio/channel'
 import { Route as StudioCommentsRouteImport } from './routes/studio/comments'
 import { Route as StudioSettingsRouteImport } from './routes/studio/settings'
 import { Route as StudioVideosRouteImport } from './routes/studio/videos'
+import { Route as SuggestionsIndexRouteImport } from './routes/suggestions/index'
+import { Route as SuggestionsIdRouteImport } from './routes/suggestions/$id'
 import { Route as AdminBugsIndexRouteImport } from './routes/admin/bugs/index'
 import { Route as AdminBugsIdRouteImport } from './routes/admin/bugs/$id'
+import { Route as AdminSuggestionsIndexRouteImport } from './routes/admin/suggestions/index'
+import { Route as AdminSuggestionsIdRouteImport } from './routes/admin/suggestions/$id'
 import { Route as ApiAdminActionRouteImport } from './routes/api/admin/action'
 import { Route as ApiAdminFlagsRouteImport } from './routes/api/admin/flags'
 import { Route as ApiAdminMessagesRouteImport } from './routes/api/admin/messages'
@@ -424,6 +428,16 @@ const StudioVideosRoute = StudioVideosRouteImport.update({
   path: '/videos',
   getParentRoute: () => StudioRoute,
 } as any)
+const SuggestionsIndexRoute = SuggestionsIndexRouteImport.update({
+  id: '/suggestions/',
+  path: '/suggestions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuggestionsIdRoute = SuggestionsIdRouteImport.update({
+  id: '/suggestions/$id',
+  path: '/suggestions/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminBugsIndexRoute = AdminBugsIndexRouteImport.update({
   id: '/admin/bugs/',
   path: '/admin/bugs/',
@@ -432,6 +446,16 @@ const AdminBugsIndexRoute = AdminBugsIndexRouteImport.update({
 const AdminBugsIdRoute = AdminBugsIdRouteImport.update({
   id: '/admin/bugs/$id',
   path: '/admin/bugs/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSuggestionsIndexRoute = AdminSuggestionsIndexRouteImport.update({
+  id: '/admin/suggestions/',
+  path: '/admin/suggestions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSuggestionsIdRoute = AdminSuggestionsIdRouteImport.update({
+  id: '/admin/suggestions/$id',
+  path: '/admin/suggestions/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAdminActionRoute = ApiAdminActionRouteImport.update({
@@ -696,11 +720,14 @@ export interface FileRoutesByFullPath {
   '/studio/comments': typeof StudioCommentsRoute
   '/studio/settings': typeof StudioSettingsRoute
   '/studio/videos': typeof StudioVideosRoute
+  '/suggestions/$id': typeof SuggestionsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/bugs/': typeof BugsIndexRoute
   '/shorts/': typeof ShortsIndexRoute
   '/studio/': typeof StudioIndexRoute
+  '/suggestions/': typeof SuggestionsIndexRoute
   '/admin/bugs/$id': typeof AdminBugsIdRoute
+  '/admin/suggestions/$id': typeof AdminSuggestionsIdRoute
   '/api/admin/action': typeof ApiAdminActionRoute
   '/api/admin/flags': typeof ApiAdminFlagsRoute
   '/api/admin/messages': typeof ApiAdminMessagesRoute
@@ -731,6 +758,7 @@ export interface FileRoutesByFullPath {
   '/c/$handle/$tab': typeof CHandleTabRoute
   '/studio/content/trash': typeof StudioContentTrashRoute
   '/admin/bugs/': typeof AdminBugsIndexRoute
+  '/admin/suggestions/': typeof AdminSuggestionsIndexRoute
   '/c/$handle/': typeof CHandleIndexRoute
   '/studio/content/': typeof StudioContentIndexRoute
   '/api/media/$video/$': typeof ApiMediaVideoSplatRoute
@@ -801,11 +829,14 @@ export interface FileRoutesByTo {
   '/studio/comments': typeof StudioCommentsRoute
   '/studio/settings': typeof StudioSettingsRoute
   '/studio/videos': typeof StudioVideosRoute
+  '/suggestions/$id': typeof SuggestionsIdRoute
   '/admin': typeof AdminIndexRoute
   '/bugs': typeof BugsIndexRoute
   '/shorts': typeof ShortsIndexRoute
   '/studio': typeof StudioIndexRoute
+  '/suggestions': typeof SuggestionsIndexRoute
   '/admin/bugs/$id': typeof AdminBugsIdRoute
+  '/admin/suggestions/$id': typeof AdminSuggestionsIdRoute
   '/api/admin/action': typeof ApiAdminActionRoute
   '/api/admin/flags': typeof ApiAdminFlagsRoute
   '/api/admin/messages': typeof ApiAdminMessagesRoute
@@ -836,6 +867,7 @@ export interface FileRoutesByTo {
   '/c/$handle/$tab': typeof CHandleTabRoute
   '/studio/content/trash': typeof StudioContentTrashRoute
   '/admin/bugs': typeof AdminBugsIndexRoute
+  '/admin/suggestions': typeof AdminSuggestionsIndexRoute
   '/c/$handle': typeof CHandleIndexRoute
   '/studio/content': typeof StudioContentIndexRoute
   '/api/media/$video/$': typeof ApiMediaVideoSplatRoute
@@ -908,11 +940,14 @@ export interface FileRoutesById {
   '/studio/comments': typeof StudioCommentsRoute
   '/studio/settings': typeof StudioSettingsRoute
   '/studio/videos': typeof StudioVideosRoute
+  '/suggestions/$id': typeof SuggestionsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/bugs/': typeof BugsIndexRoute
   '/shorts/': typeof ShortsIndexRoute
   '/studio/': typeof StudioIndexRoute
+  '/suggestions/': typeof SuggestionsIndexRoute
   '/admin/bugs/$id': typeof AdminBugsIdRoute
+  '/admin/suggestions/$id': typeof AdminSuggestionsIdRoute
   '/api/admin/action': typeof ApiAdminActionRoute
   '/api/admin/flags': typeof ApiAdminFlagsRoute
   '/api/admin/messages': typeof ApiAdminMessagesRoute
@@ -943,6 +978,7 @@ export interface FileRoutesById {
   '/c/$handle/$tab': typeof CHandleTabRoute
   '/studio/content/trash': typeof StudioContentTrashRoute
   '/admin/bugs/': typeof AdminBugsIndexRoute
+  '/admin/suggestions/': typeof AdminSuggestionsIndexRoute
   '/c/$handle/': typeof CHandleIndexRoute
   '/studio/content/': typeof StudioContentIndexRoute
   '/api/media/$video/$': typeof ApiMediaVideoSplatRoute
@@ -1016,11 +1052,14 @@ export interface FileRouteTypes {
     | '/studio/comments'
     | '/studio/settings'
     | '/studio/videos'
+    | '/suggestions/$id'
     | '/admin/'
     | '/bugs/'
     | '/shorts/'
     | '/studio/'
+    | '/suggestions/'
     | '/admin/bugs/$id'
+    | '/admin/suggestions/$id'
     | '/api/admin/action'
     | '/api/admin/flags'
     | '/api/admin/messages'
@@ -1051,6 +1090,7 @@ export interface FileRouteTypes {
     | '/c/$handle/$tab'
     | '/studio/content/trash'
     | '/admin/bugs/'
+    | '/admin/suggestions/'
     | '/c/$handle/'
     | '/studio/content/'
     | '/api/media/$video/$'
@@ -1121,11 +1161,14 @@ export interface FileRouteTypes {
     | '/studio/comments'
     | '/studio/settings'
     | '/studio/videos'
+    | '/suggestions/$id'
     | '/admin'
     | '/bugs'
     | '/shorts'
     | '/studio'
+    | '/suggestions'
     | '/admin/bugs/$id'
+    | '/admin/suggestions/$id'
     | '/api/admin/action'
     | '/api/admin/flags'
     | '/api/admin/messages'
@@ -1156,6 +1199,7 @@ export interface FileRouteTypes {
     | '/c/$handle/$tab'
     | '/studio/content/trash'
     | '/admin/bugs'
+    | '/admin/suggestions'
     | '/c/$handle'
     | '/studio/content'
     | '/api/media/$video/$'
@@ -1227,11 +1271,14 @@ export interface FileRouteTypes {
     | '/studio/comments'
     | '/studio/settings'
     | '/studio/videos'
+    | '/suggestions/$id'
     | '/admin/'
     | '/bugs/'
     | '/shorts/'
     | '/studio/'
+    | '/suggestions/'
     | '/admin/bugs/$id'
+    | '/admin/suggestions/$id'
     | '/api/admin/action'
     | '/api/admin/flags'
     | '/api/admin/messages'
@@ -1262,6 +1309,7 @@ export interface FileRouteTypes {
     | '/c/$handle/$tab'
     | '/studio/content/trash'
     | '/admin/bugs/'
+    | '/admin/suggestions/'
     | '/c/$handle/'
     | '/studio/content/'
     | '/api/media/$video/$'
@@ -1328,10 +1376,13 @@ export interface RootRouteChildren {
   FeedWatchLaterRoute: typeof FeedWatchLaterRoute
   ShortsIdRoute: typeof ShortsIdRoute
   SitemapsNameRoute: typeof SitemapsNameRoute
+  SuggestionsIdRoute: typeof SuggestionsIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
   BugsIndexRoute: typeof BugsIndexRoute
   ShortsIndexRoute: typeof ShortsIndexRoute
+  SuggestionsIndexRoute: typeof SuggestionsIndexRoute
   AdminBugsIdRoute: typeof AdminBugsIdRoute
+  AdminSuggestionsIdRoute: typeof AdminSuggestionsIdRoute
   ApiAdminActionRoute: typeof ApiAdminActionRoute
   ApiAdminFlagsRoute: typeof ApiAdminFlagsRoute
   ApiAdminMessagesRoute: typeof ApiAdminMessagesRoute
@@ -1351,6 +1402,7 @@ export interface RootRouteChildren {
   ApiYapinWebhookRoute: typeof ApiYapinWebhookRoute
   CHandleTabRoute: typeof CHandleTabRoute
   AdminBugsIndexRoute: typeof AdminBugsIndexRoute
+  AdminSuggestionsIndexRoute: typeof AdminSuggestionsIndexRoute
   CHandleIndexRoute: typeof CHandleIndexRoute
   ApiMediaVideoSplatRoute: typeof ApiMediaVideoSplatRoute
   ApiPublicEncoderRpcRoute: typeof ApiPublicEncoderRpcRoute
@@ -1794,6 +1846,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudioVideosRouteImport
       parentRoute: typeof StudioRoute
     }
+    '/suggestions/': {
+      id: '/suggestions/'
+      path: '/suggestions'
+      fullPath: '/suggestions/'
+      preLoaderRoute: typeof SuggestionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suggestions/$id': {
+      id: '/suggestions/$id'
+      path: '/suggestions/$id'
+      fullPath: '/suggestions/$id'
+      preLoaderRoute: typeof SuggestionsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/bugs/': {
       id: '/admin/bugs/'
       path: '/admin/bugs'
@@ -1806,6 +1872,20 @@ declare module '@tanstack/react-router' {
       path: '/admin/bugs/$id'
       fullPath: '/admin/bugs/$id'
       preLoaderRoute: typeof AdminBugsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/suggestions/': {
+      id: '/admin/suggestions/'
+      path: '/admin/suggestions'
+      fullPath: '/admin/suggestions/'
+      preLoaderRoute: typeof AdminSuggestionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/suggestions/$id': {
+      id: '/admin/suggestions/$id'
+      path: '/admin/suggestions/$id'
+      fullPath: '/admin/suggestions/$id'
+      preLoaderRoute: typeof AdminSuggestionsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin/action': {
@@ -2278,10 +2358,13 @@ const rootRouteChildren: RootRouteChildren = {
   FeedWatchLaterRoute: FeedWatchLaterRoute,
   ShortsIdRoute: ShortsIdRoute,
   SitemapsNameRoute: SitemapsNameRoute,
+  SuggestionsIdRoute: SuggestionsIdRoute,
   AdminIndexRoute: AdminIndexRoute,
   BugsIndexRoute: BugsIndexRoute,
   ShortsIndexRoute: ShortsIndexRoute,
+  SuggestionsIndexRoute: SuggestionsIndexRoute,
   AdminBugsIdRoute: AdminBugsIdRoute,
+  AdminSuggestionsIdRoute: AdminSuggestionsIdRoute,
   ApiAdminActionRoute: ApiAdminActionRoute,
   ApiAdminFlagsRoute: ApiAdminFlagsRoute,
   ApiAdminMessagesRoute: ApiAdminMessagesRoute,
@@ -2301,6 +2384,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiYapinWebhookRoute: ApiYapinWebhookRoute,
   CHandleTabRoute: CHandleTabRoute,
   AdminBugsIndexRoute: AdminBugsIndexRoute,
+  AdminSuggestionsIndexRoute: AdminSuggestionsIndexRoute,
   CHandleIndexRoute: CHandleIndexRoute,
   ApiMediaVideoSplatRoute: ApiMediaVideoSplatRoute,
   ApiPublicEncoderRpcRoute: ApiPublicEncoderRpcRoute,
