@@ -4,9 +4,9 @@ import { getCurrentUser, type CurrentUser } from "@/lib/auth";
 import { flagOn } from "@/lib/flags";
 import { readSupabaseConfig } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
-import { readPublicBase } from "@/lib/watch/media";
+import { folderOf, readPublicBase } from "@/lib/watch/media";
 import { previewOverview, previewRows } from "./preview";
-import { deleteObject, headObject, signedGet, signedPut, storageConfigured } from "./storage";
+import { deleteObject, headObject, signedGet, signedPut, storageConfigured, usesR2 } from "./storage";
 import { readOverview, rowToStudio, type CommentsMode, type Overview, type StudioRow, type Visibility } from "./types";
 import {
   BULK_MAX,
@@ -39,12 +39,25 @@ function codeOf(error: { code?: string; message?: string }): string {
  * file straight from MEDIA_PUBLIC_URL, else a signed R2 link (the studio
  * does not depend on the watch flag the way /api/media does).
  */
-export async function thumbnailLink(id: string, name: string | null, url: string | null): Promise<string | null> {
-  if (url) return url;
+/**
+ * Where a thumbnail file sits: hls/<id>/<name> in R2, or next to the source
+ * file in the built-in storage (the folder of hls_key, which /api/media reads).
+ */
+function fileKey(id: string, name: string, hlsKey: string | null | undefined): string {
+  if (!usesR2() && hlsKey) {
+    const folder = folderOf(hlsKey);
+    if (folder) return `${folder}/${name}`;
+  }
+  return thumbnailKey(id, name);
+}
+
+export async function thumbnailLink(id: string, name: string | null, url: string | null, hlsKey?: string | null): Promise<string | null> {
   const file = name ?? "thumb-1.webp";
+  // The stored link goes through /api/media, which only serves public videos to a picture tag: sign one for the owner.
+  if (url && (usesR2() || !url.includes("/api/media/"))) return url;
   const base = publicBase();
   if (base) return `${base}/${thumbnailKey(id, file)}`;
-  return signedGet(thumbnailKey(id, file));
+  return (await signedGet(fileKey(id, file, hlsKey))) ?? url;
 }
 
 /** rowToStudio and readOverview take a sync function, so the links are worked out first. */
@@ -53,7 +66,7 @@ async function withLinks(rows: Record<string, unknown>[]) {
   await Promise.all(
     rows
       .filter((r) => r && r.status === "ready")
-      .map(async (r) => links.set(String(r.id), await thumbnailLink(String(r.id), (r.thumbnail_name as string) ?? null, (r.thumbnail_url as string) ?? null))),
+      .map(async (r) => links.set(String(r.id), await thumbnailLink(String(r.id), (r.thumbnail_name as string) ?? null, (r.thumbnail_url as string) ?? null, (r.hls_key as string) ?? null))),
   );
   return (id: string) => links.get(id) ?? null;
 }
@@ -154,7 +167,7 @@ export async function studioVideo(id: string): Promise<EditState> {
   const stills: Still[] = [];
   if (video.status === "ready") {
     for (const name of STILLS) {
-      const url = await thumbnailLink(video.id, name, null);
+      const url = await thumbnailLink(video.id, name, null, (raw.hls_key as string) ?? null);
       if (url) stills.push({ name, url });
     }
   }
@@ -236,7 +249,16 @@ export async function pickThumbnail(id: string, name: string | null, origin: str
   const url = storedUrl(id, chosen, origin);
   const { error } = await w.supabase.rpc("set_video_thumbnail", { video_id: id, name: chosen, url });
   if (error) return { error: codeOf(error) };
-  return { url: await thumbnailLink(id, chosen, url) };
+  const own = await ownVideo(w, id);
+  return { url: await thumbnailLink(id, chosen, url, own && !("error" in own) ? (own.hls_key as string) : null) };
+}
+
+/** One of the caller's own videos (studio_videos only lists those). */
+async function ownVideo(w: { supabase: Db }, id: string): Promise<Record<string, unknown> | Fail> {
+  const { data, error } = await w.supabase.rpc("studio_videos", { trash: false });
+  if (error) return { error: codeOf(error) };
+  const v = ((Array.isArray(data) ? data : []) as Record<string, unknown>[]).find((r) => r.id === id);
+  return v ?? { error: "not_found" };
 }
 
 /** Step 1 of a custom thumbnail: a name and a PUT link. */
@@ -246,13 +268,11 @@ export async function signThumbnail(id: string, mime: string, bytes: number): Pr
   if ("error" in w) return w;
   if (!storageConfigured()) return { error: "storage_not_configured" };
   // Only the owner of a ready video gets a link: studio_videos only lists the caller's own.
-  const { data, error } = await w.supabase.rpc("studio_videos", { trash: false });
-  if (error) return { error: codeOf(error) };
-  const v = ((Array.isArray(data) ? data : []) as Record<string, unknown>[]).find((r) => r.id === id);
-  if (!v) return { error: "not_found" };
+  const v = await ownVideo(w, id);
+  if ("error" in v) return v;
   if (v.status !== "ready" || !v.hls_key) return { error: "not_ready" };
   const name = customThumbnailName(mime, crypto.getRandomValues(new Uint8Array(16)));
-  const url = name ? await signedPut(thumbnailKey(id, name), mime) : null;
+  const url = name ? await signedPut(fileKey(id, name, v.hls_key as string), mime) : null;
   return name && url ? { name, url } : { error: "storage_not_configured" };
 }
 
@@ -261,7 +281,9 @@ export async function finishThumbnail(id: string, name: string, origin: string |
   if (!isThumbnailName(name) || !name.startsWith("custom-")) return { error: "thumbnail_invalid" };
   const w = await writer();
   if ("error" in w) return w;
-  const key = thumbnailKey(id, name);
+  const v = await ownVideo(w, id);
+  if ("error" in v) return v;
+  const key = fileKey(id, name, v.hls_key as string | null);
   const head = await headObject(key).catch(() => null);
   if (!head) return { error: "upload_failed" };
   if (head.bytes <= 0 || head.bytes > THUMBNAIL_MAX_BYTES || !head.type || !THUMBNAIL_TYPES[head.type]) {
@@ -274,5 +296,5 @@ export async function finishThumbnail(id: string, name: string, origin: string |
     await deleteObject(key);
     return { error: codeOf(error) };
   }
-  return { url: await thumbnailLink(id, name, url) };
+  return { url: await thumbnailLink(id, name, url, v.hls_key as string | null) };
 }
