@@ -418,6 +418,8 @@ export function ContentView({
               const vis = VIS[v.visibility];
               const expiry = v.deletedAt ? trashExpiry(v.deletedAt, now) : null;
               const watchHref = v.isShort ? `/shorts/${v.id}` : `/watch?v=${v.id}`;
+              // A draft: uploaded, never published, still private.
+              const draft = !trash && !v.removedAt && v.status === "ready" && v.visibility === "private" && !v.publishedAt;
               return (
                 <li
                   key={v.id}
@@ -453,6 +455,20 @@ export function ContentView({
                       <p className={`mt-0.5 line-clamp-1 text-[12px] leading-4 text-text-2 ${trash ? "" : "md:group-hover:hidden"}`}>
                         {trash && expiry ? trashLabel(expiry) : v.description || "Add description"}
                       </p>
+                      {draft && (
+                        <div className="mt-1.5 flex items-center gap-2" data-draft>
+                          <span className="rounded-[2px] bg-[var(--hover)] px-1.5 py-0.5 text-[11px] font-medium uppercase text-text-2">Draft</span>
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => run({ kind: "visibility", visibility: "public" }, [v.id])}
+                            className="btn-blue !h-7 !px-3 !text-[12px]"
+                            data-publish={v.id}
+                          >
+                            Publish
+                          </button>
+                        </div>
+                      )}
                       {!trash && v.removedAt && <RemovedNotice videoId={v.id} title={v.title} reason={v.removedReason ?? null} appeal={v.appeal ?? null} />}
                       <div className={`mt-1 flex ${trash ? "" : "md:hidden md:group-hover:flex md:group-focus-within:flex"}`} data-row-actions>
                         {trash ? (
@@ -504,7 +520,7 @@ export function ContentView({
                   <span className="hidden text-[13px] text-text md:block">
                     {formatDate(rowDate(v))}
                     <span className="block text-[12px] text-text-2">
-                      {v.deletedAt ? (expiry?.daysLeft ?? 0) + " days left" : v.publishedAt ? "Published" : "Uploaded"}
+                      {v.deletedAt ? (expiry?.daysLeft ?? 0) + " days left" : v.publishedAt ? "Published" : draft ? "Draft" : "Uploaded"}
                     </span>
                   </span>
                   <span className="hidden justify-self-end text-[13px] text-text md:block" data-cell="views">
