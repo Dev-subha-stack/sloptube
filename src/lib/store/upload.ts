@@ -55,7 +55,8 @@ type UploadState = {
   reset: () => void;
 };
 
-const emptyDetails: Details = { title: "", description: "", visibility: "private" };
+// The visibility here is what the Publish button applies; the upload itself is always saved as a private draft.
+const emptyDetails: Details = { title: "", description: "", visibility: "public" };
 const checkingShort: ShortBox = { state: "checking", problem: null, on: false };
 const emptyCompress: CompressInfo = { fraction: 0, originalBytes: 0, finalBytes: null, compressed: null, note: null };
 
@@ -225,6 +226,8 @@ export const useUpload = create<UploadState>((set, get) => ({
             uploadId: signed.uploadId,
             parts,
             ...finalDetails,
+            // Saved as a draft: nothing goes live until the creator presses Publish.
+            visibility: "private",
             thumbnail: poster.thumbnail,
             durationS: poster.durationS,
             width: poster.width,

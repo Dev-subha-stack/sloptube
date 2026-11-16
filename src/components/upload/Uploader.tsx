@@ -219,7 +219,9 @@ function DetailsForm() {
 
         <fieldset className="mt-6">
           <legend className="text-[16px] font-medium leading-[22px] text-text">Visibility</legend>
-          <p className="mt-1 text-[13px] leading-[18px] text-text-2">Choose who can watch your video once it is ready.</p>
+          <p className="mt-1 text-[13px] leading-[18px] text-text-2">
+            Your video is saved as a draft. Nobody sees it until you press Publish, then it becomes:
+          </p>
           <div className="mt-3 space-y-1">
             {VISIBILITY_OPTIONS.map((o) => (
               <label key={o.value} className="flex cursor-pointer items-start gap-3 rounded-[2px] px-1 py-2 hover:bg-hover">
@@ -321,18 +323,55 @@ function ProgressFooter() {
 }
 
 function DoneView() {
-  const { watchUrl, details, reset, ready } = useUpload();
+  const { watchUrl, details, reset, ready, videoId } = useUpload();
+  const [published, setPublished] = useState<Visibility | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
   // Only ever rendered in the browser, after an upload: window is there.
   const origin = typeof window === "undefined" ? "" : window.location.origin;
+  const label = VISIBILITY_OPTIONS.find((o) => o.value === details.visibility)?.label ?? "Public";
+
+  async function publish() {
+    if (!videoId || busy) return;
+    setBusy(true);
+    setProblem(null);
+    try {
+      const res = await fetch("/api/studio/bulk", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ids: [videoId], action: "visibility", visibility: details.visibility }),
+      });
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok || body.error) throw new Error(body.error ?? "failed");
+      setPublished(details.visibility);
+    } catch (err) {
+      setProblem(studioErrorMessage(err instanceof Error ? err.message : "failed"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div data-upload-phase="done" className="flex min-h-[420px] flex-col items-center justify-center px-6 py-12 text-center">
       <CheckCircle className="h-16 w-16 text-[#2ba640]" />
-      <p className="mt-5 text-[20px] leading-7 text-text">{ready ? "Video uploaded and ready to watch." : "Video uploaded. Processing starts soon."}</p>
-      <p className="mt-2 max-w-[520px] text-[14px] leading-5 text-text-2">
-        <span className="font-medium text-text">{details.title}</span> is{" "}
-        {details.visibility === "private" ? "private" : details.visibility}.
-        {ready ? " Change who can see it any time in Studio." : " It can be watched once processing is finished."}
+      <p className="mt-5 text-[20px] leading-7 text-text">
+        {published ? "Published!" : ready ? "Video uploaded and saved as a draft." : "Video uploaded. Processing starts soon."}
       </p>
+      <p className="mt-2 max-w-[520px] text-[14px] leading-5 text-text-2" data-draft-note>
+        <span className="font-medium text-text">{details.title}</span>{" "}
+        {published
+          ? published === "private"
+            ? "is published as private: only you can watch it."
+            : published === "unlisted"
+              ? "is unlisted: anyone with the link can watch it."
+              : "is public: everyone can find and watch it."
+          : "is a draft. Only you can see it until you publish it."}
+      </p>
+      {problem && (
+        <p role="alert" className="mt-2 text-[13px] text-[var(--error)]">
+          {problem}
+        </p>
+      )}
       {watchUrl && (
         <div className="mt-6 w-full max-w-[420px] rounded-[2px] bg-[var(--hover)] px-4 py-3 text-left">
           <p className="text-[12px] leading-4 text-text-2">Video link</p>
@@ -346,10 +385,22 @@ function DoneView() {
         <button type="button" onClick={reset} className="btn-text">
           Upload another
         </button>
-        <Link href="/studio/videos" className="btn-blue">
-          Go to your videos
-        </Link>
+        {videoId && (
+          <Link href={`/studio/video/${videoId}/edit`} className="btn-text" data-add-thumbnail>
+            Add thumbnail
+          </Link>
+        )}
+        {published ? (
+          <Link href="/studio/videos" className="btn-blue">
+            Go to your videos
+          </Link>
+        ) : (
+          <button type="button" onClick={() => void publish()} disabled={busy || !videoId} className="btn-blue" data-publish>
+            {busy ? "Publishing..." : `Publish as ${label.toLowerCase()}`}
+          </button>
+        )}
       </div>
+      {!published && <p className="mt-3 text-[12px] text-text-3">You can also publish it later from Studio.</p>}
     </div>
   );
 }
