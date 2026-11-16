@@ -3,7 +3,7 @@
 // one feature at a time (Trending appears when feed goes on, and so on).
 // No imports on purpose, so `node --test` can load it directly.
 
-export type GuideKey = "home" | "shorts" | "trending" | "subscriptions" | "library" | "history" | "watchLater" | "playlists" | "topRated" | "ratings" | "bugs";
+export type GuideKey = "home" | "shorts" | "trending" | "subscriptions" | "library" | "history" | "watchLater" | "playlists" | "topRated" | "ratings" | "bugs" | "suggestions";
 
 export type ShellFlags = {
   feed?: boolean;
@@ -38,7 +38,7 @@ export function searchShown(f: ShellFlags): boolean {
   return f.search === true;
 }
 
-/** Extra links: Top rated and your ratings (with engagement), and Report a bug, which is always there. */
+/** Extra links: Top rated and your ratings (with engagement), and Report a bug and Suggest a feature, which are always there. */
 export function moreGuide(f: ShellFlags): GuideKey[] {
-  return f.engagement ? ["topRated", "ratings", "bugs"] : ["bugs"];
+  return f.engagement ? ["topRated", "ratings", "bugs", "suggestions"] : ["bugs", "suggestions"];
 }

@@ -22,6 +22,10 @@ export function Thumb({ src, alt, sizes, eager = false, className = "" }: { src:
       loading={eager ? "eager" : "lazy"}
       fetchPriority={eager ? "high" : undefined}
       className={`object-cover ${className}`}
+      // A video without a picture yet: show the grey box instead of a broken image.
+      onError={(e) => {
+        e.currentTarget.style.visibility = "hidden";
+      }}
     />
   );
 }

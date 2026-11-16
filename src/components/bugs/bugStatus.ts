@@ -3,12 +3,13 @@ export type BugStatus = "pending" | "in_review" | "resolved" | "dismissed";
 
 export const BUG_STATUSES: BugStatus[] = ["pending", "in_review", "resolved", "dismissed"];
 
-export function bugStatusLabel(s: string): string {
+/** `idea`: the words for a feature suggestion instead of a bug. */
+export function bugStatusLabel(s: string, idea = false): string {
   switch (s) {
     case "in_review":
-      return "Checked / in review";
+      return idea ? "Being considered" : "Checked / in review";
     case "resolved":
-      return "Fixed";
+      return idea ? "Added" : "Fixed";
     case "dismissed":
       return "Closed";
     default:

@@ -77,6 +77,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          kind: string
           reporter_id: string
           status: string
           title: string
@@ -87,6 +88,7 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          kind?: string
           reporter_id: string
           status?: string
           title: string
@@ -97,6 +99,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          kind?: string
           reporter_id?: string
           status?: string
           title?: string
@@ -106,6 +109,48 @@ export type Database = {
           {
             foreignKeyName: "bug_reports_reporter_id_fkey"
             columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channel_emojis: {
+        Row: {
+          channel_id: string
+          created_at: string
+          id: string
+          image_path: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          id?: string
+          image_path: string
+          name: string
+          owner_id: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          id?: string
+          image_path?: string
+          name?: string
+          owner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_emojis_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_emojis_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1198,6 +1243,49 @@ export type Database = {
           },
         ]
       }
+      video_shares: {
+        Row: {
+          created_at: string
+          shared_by: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          created_at?: string
+          shared_by: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          created_at?: string
+          shared_by?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_shares_shared_by_fkey"
+            columns: ["shared_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_shares_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_shares_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       video_source_daily: {
         Row: {
           day: string
@@ -2074,6 +2162,7 @@ export type Database = {
       }
       history_paused: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      is_shared_with_me: { Args: { _video_id: string }; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
       launch_flag_on: { Args: { uid: string }; Returns: boolean }
       like_comment: {
@@ -2467,6 +2556,34 @@ export type Database = {
         Returns: undefined
       }
       set_yapin_webhook: { Args: { url: string }; Returns: string }
+      share_video: {
+        Args: { person: string; target_video: string }
+        Returns: {
+          shared_avatar_url: string
+          shared_display_name: string
+          shared_user_id: string
+          shared_username: string
+        }[]
+      }
+      shared_with_me: {
+        Args: { lim?: number }
+        Returns: {
+          channel_avatar_url: string
+          channel_handle: string
+          channel_id: string
+          channel_name: string
+          duration_s: number
+          hls_key: string
+          id: string
+          is_short: boolean
+          preview_sprite_key: string
+          published_at: string
+          score: number
+          thumbnail_url: string
+          title: string
+          views: number
+        }[]
+      }
       shorts_flag_on: { Args: { uid: string }; Returns: boolean }
       shorts_score: {
         Args: {
@@ -2687,6 +2804,10 @@ export type Database = {
         }[]
       }
       unlink_yapin: { Args: never; Returns: undefined }
+      unshare_video: {
+        Args: { person_id: string; target_video: string }
+        Returns: undefined
+      }
       unsubscribe: {
         Args: { channel_id: string }
         Returns: {
@@ -2722,6 +2843,13 @@ export type Database = {
         Returns: Json
       }
       video_comments_mode: { Args: { video_id: string }; Returns: string }
+      video_emojis: {
+        Args: { target_video: string }
+        Returns: {
+          image_path: string
+          name: string
+        }[]
+      }
       video_engagement: {
         Args: { video_id: string }
         Returns: {
@@ -2748,6 +2876,16 @@ export type Database = {
           average: number
           my_stars: number
           ratings: number
+        }[]
+      }
+      video_shared_with: {
+        Args: { target_video: string }
+        Returns: {
+          shared_at: string
+          shared_avatar_url: string
+          shared_display_name: string
+          shared_user_id: string
+          shared_username: string
         }[]
       }
       video_tags_are_valid: { Args: { tags: string[] }; Returns: boolean }

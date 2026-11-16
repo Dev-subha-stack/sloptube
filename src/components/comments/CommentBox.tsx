@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { EmojiPicker } from "@/components/emojis/EmojiContext";
 import { Avatar } from "@/components/Avatar";
 import { BODY_MAX, bodyProblem, cleanBody } from "@/lib/comments/rules";
 
@@ -97,11 +98,19 @@ export function CommentBox({
         </div>
         {open && (
           <div className="mt-2 flex items-center justify-end gap-2">
+            <div className="mr-auto flex items-center gap-2">
+              <EmojiPicker
+                onPick={(code) => {
+                  setText((t) => (t && !t.endsWith(" ") ? `${t} ${code}` : `${t}${code}`));
+                  ref.current?.focus();
+                }}
+              />
             {tooLong && (
-              <span className="mr-auto text-[12px] text-error" data-comment-too-long>
+              <span className="text-[12px] text-error" data-comment-too-long>
                 {[...cleanBody(text)].length.toLocaleString("en-US")} / {BODY_MAX.toLocaleString("en-US")}
               </span>
             )}
+            </div>
             <button type="button" onClick={cancel} className="btn-text" data-comment-cancel>
               Cancel
             </button>

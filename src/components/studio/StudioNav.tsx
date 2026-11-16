@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Suspense, useEffect, type ComponentType } from "react";
 import { useUi } from "@/lib/store/ui";
 import { Avatar } from "../Avatar";
-import { AnalyticsIcon, CalendarIcon, CommentIcon, DashboardIcon, PaletteIcon, SettingsIcon, VideoLibraryIcon } from "../icons";
+import { AnalyticsIcon, CalendarIcon, CommentIcon, DashboardIcon, PaletteIcon, SettingsIcon, SmileIcon, VideoLibraryIcon } from "../icons";
 
 type Item = { href: string; label: string; Icon: ComponentType<{ className?: string }>; also?: string[]; flag?: "stats" };
 
@@ -16,6 +16,7 @@ export const STUDIO_NAV: Item[] = [
   { href: "/studio/comments", label: "Comments", Icon: CommentIcon },
   { href: "/studio/calendar", label: "Calendar", Icon: CalendarIcon },
   { href: "/studio/channel", label: "Customization", Icon: PaletteIcon },
+  { href: "/studio/emojis", label: "Emojis", Icon: SmileIcon },
   { href: "/studio/settings", label: "Settings", Icon: SettingsIcon },
 ];
 

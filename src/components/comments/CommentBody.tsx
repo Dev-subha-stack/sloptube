@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useLayoutEffect, useRef, useState } from "react";
 import { needsReadMore, READ_MORE_LINES, splitMention } from "@/lib/comments/rules";
+import { EmojiText } from "@/components/emojis/EmojiContext";
 
 /**
  * A comment's text, folded to four lines with "Read more" like 2019. The
@@ -39,7 +40,7 @@ export function CommentBody({ text }: { text: string }) {
             {mention}
           </Link>
         )}
-        {mention ? rest : text}
+        <EmojiText text={mention ? rest : text} />
       </div>
       {(long || open) && (
         <button

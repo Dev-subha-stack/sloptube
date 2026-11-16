@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { EmojiProvider } from "@/components/emojis/EmojiContext";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Avatar } from "@/components/Avatar";
 import { AccountCircleIcon, SortIcon } from "@/components/icons";
@@ -159,6 +160,7 @@ export function CommentsSection({
   const held = initial.mode === "held" && !initial.isOwner;
 
   return (
+    <EmojiProvider videoId={videoId}>
     <section className="px-3 pb-8 pt-6 tab:px-0" data-comments data-comments-state={off ? "turned-off" : "ready"} aria-label="Comments">
       {off ? (
         <p className="border-t border-divider pt-6 text-center text-[14px] text-text-2" data-comments-off>
@@ -231,6 +233,7 @@ export function CommentsSection({
         </>
       )}
     </section>
+    </EmojiProvider>
   );
 }
 
