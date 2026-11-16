@@ -69,6 +69,7 @@ import { Route as StudioAnalyticsRouteImport } from './routes/studio/analytics'
 import { Route as StudioCalendarRouteImport } from './routes/studio/calendar'
 import { Route as StudioChannelRouteImport } from './routes/studio/channel'
 import { Route as StudioCommentsRouteImport } from './routes/studio/comments'
+import { Route as StudioEmojisRouteImport } from './routes/studio/emojis'
 import { Route as StudioSettingsRouteImport } from './routes/studio/settings'
 import { Route as StudioVideosRouteImport } from './routes/studio/videos'
 import { Route as SuggestionsIndexRouteImport } from './routes/suggestions/index'
@@ -418,6 +419,11 @@ const StudioCommentsRoute = StudioCommentsRouteImport.update({
   path: '/comments',
   getParentRoute: () => StudioRoute,
 } as any)
+const StudioEmojisRoute = StudioEmojisRouteImport.update({
+  id: '/emojis',
+  path: '/emojis',
+  getParentRoute: () => StudioRoute,
+} as any)
 const StudioSettingsRoute = StudioSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -718,6 +724,7 @@ export interface FileRoutesByFullPath {
   '/studio/calendar': typeof StudioCalendarRoute
   '/studio/channel': typeof StudioChannelRoute
   '/studio/comments': typeof StudioCommentsRoute
+  '/studio/emojis': typeof StudioEmojisRoute
   '/studio/settings': typeof StudioSettingsRoute
   '/studio/videos': typeof StudioVideosRoute
   '/suggestions/$id': typeof SuggestionsIdRoute
@@ -827,6 +834,7 @@ export interface FileRoutesByTo {
   '/studio/calendar': typeof StudioCalendarRoute
   '/studio/channel': typeof StudioChannelRoute
   '/studio/comments': typeof StudioCommentsRoute
+  '/studio/emojis': typeof StudioEmojisRoute
   '/studio/settings': typeof StudioSettingsRoute
   '/studio/videos': typeof StudioVideosRoute
   '/suggestions/$id': typeof SuggestionsIdRoute
@@ -938,6 +946,7 @@ export interface FileRoutesById {
   '/studio/calendar': typeof StudioCalendarRoute
   '/studio/channel': typeof StudioChannelRoute
   '/studio/comments': typeof StudioCommentsRoute
+  '/studio/emojis': typeof StudioEmojisRoute
   '/studio/settings': typeof StudioSettingsRoute
   '/studio/videos': typeof StudioVideosRoute
   '/suggestions/$id': typeof SuggestionsIdRoute
@@ -1050,6 +1059,7 @@ export interface FileRouteTypes {
     | '/studio/calendar'
     | '/studio/channel'
     | '/studio/comments'
+    | '/studio/emojis'
     | '/studio/settings'
     | '/studio/videos'
     | '/suggestions/$id'
@@ -1159,6 +1169,7 @@ export interface FileRouteTypes {
     | '/studio/calendar'
     | '/studio/channel'
     | '/studio/comments'
+    | '/studio/emojis'
     | '/studio/settings'
     | '/studio/videos'
     | '/suggestions/$id'
@@ -1269,6 +1280,7 @@ export interface FileRouteTypes {
     | '/studio/calendar'
     | '/studio/channel'
     | '/studio/comments'
+    | '/studio/emojis'
     | '/studio/settings'
     | '/studio/videos'
     | '/suggestions/$id'
@@ -1832,6 +1844,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudioCommentsRouteImport
       parentRoute: typeof StudioRoute
     }
+    '/studio/emojis': {
+      id: '/studio/emojis'
+      path: '/emojis'
+      fullPath: '/studio/emojis'
+      preLoaderRoute: typeof StudioEmojisRouteImport
+      parentRoute: typeof StudioRoute
+    }
     '/studio/settings': {
       id: '/studio/settings'
       path: '/settings'
@@ -2176,6 +2195,7 @@ interface StudioRouteChildren {
   StudioCalendarRoute: typeof StudioCalendarRoute
   StudioChannelRoute: typeof StudioChannelRoute
   StudioCommentsRoute: typeof StudioCommentsRoute
+  StudioEmojisRoute: typeof StudioEmojisRoute
   StudioSettingsRoute: typeof StudioSettingsRoute
   StudioVideosRoute: typeof StudioVideosRoute
   StudioIndexRoute: typeof StudioIndexRoute
@@ -2190,6 +2210,7 @@ const StudioRouteChildren: StudioRouteChildren = {
   StudioCalendarRoute: StudioCalendarRoute,
   StudioChannelRoute: StudioChannelRoute,
   StudioCommentsRoute: StudioCommentsRoute,
+  StudioEmojisRoute: StudioEmojisRoute,
   StudioSettingsRoute: StudioSettingsRoute,
   StudioVideosRoute: StudioVideosRoute,
   StudioIndexRoute: StudioIndexRoute,
