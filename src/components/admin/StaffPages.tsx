@@ -143,8 +143,10 @@ export function AdminUsers() {
   );
 }
 
-/** /admin/bugs: every bug report. Admins and moderators. */
-export function AdminBugs() {
+/** /admin/bugs and /admin/suggestions: every report of that kind. Admins and moderators. */
+export function AdminBugs({ kind = "bug" }: { kind?: "bug" | "idea" }) {
+  const idea = kind === "idea";
+  const base = idea ? "/admin/suggestions" : "/admin/bugs";
   const [filter, setFilter] = useState<string>("open");
   const [rows, setRows] = useState<BugRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -154,6 +156,7 @@ export function AdminBugs() {
     let query = supabase
       .from("bug_reports")
       .select("*, reporter:profiles!bug_reports_reporter_id_fkey(username, display_name, avatar_url)")
+      .eq("kind", kind)
       .order("created_at", { ascending: false })
       .limit(200);
     if (filter === "open") query = query.in("status", ["pending", "in_review"]);
@@ -166,7 +169,7 @@ export function AdminBugs() {
     return () => {
       live = false;
     };
-  }, [filter]);
+  }, [filter, kind]);
 
   return (
     <div data-admin-bugs>
@@ -179,23 +182,23 @@ export function AdminBugs() {
             aria-pressed={filter === f}
             className={`rounded-full border px-3 py-1 text-[13px] ${filter === f ? "border-[var(--link)] text-[var(--link)]" : "border-[var(--divider)] text-text-2"}`}
           >
-            {f === "open" ? "Open" : f === "all" ? "All" : bugStatusLabel(f)}
+            {f === "open" ? "Open" : f === "all" ? "All" : bugStatusLabel(f, idea)}
           </button>
         ))}
       </div>
       {error && <p className="mb-3 text-[13px] text-[var(--error)]">{error}</p>}
       <div className={`${card} divide-y divide-[var(--divider)]`}>
         {rows === null && <p className="px-4 py-6 text-[14px] text-text-2">Loading...</p>}
-        {rows?.length === 0 && <p className="px-4 py-6 text-[14px] text-text-2">No bug reports here.</p>}
+        {rows?.length === 0 && <p className="px-4 py-6 text-[14px] text-text-2">{idea ? "No suggestions here." : "No bug reports here."}</p>}
         {rows?.map((b) => (
-          <Link key={b.id} href={`/admin/bugs/${b.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-hover" data-admin-bug={b.id}>
+          <Link key={b.id} href={`${base}/${b.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-hover" data-admin-bug={b.id}>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[14px] font-medium text-text">{b.title}</span>
               <span className="block truncate text-[12px] text-text-2">
                 @{b.reporter?.username ?? "unknown"} · {timeAgo(b.created_at)} · {b.description.slice(0, 120)}
               </span>
             </span>
-            <StatusPill status={b.status} />
+            <StatusPill status={b.status} idea={idea} />
           </Link>
         ))}
       </div>
