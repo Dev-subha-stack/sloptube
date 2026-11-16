@@ -31,7 +31,7 @@ function writeSeen(value: number) {
 /** One row in the bell menu: a comment, a reply, a bug report update or an upload. */
 type Item = {
   key: string;
-  kind: "comment" | "reply" | "bug" | "upload" | "other";
+  kind: "comment" | "reply" | "bug" | "share" | "upload" | "other";
   text: string;
   at: string;
   href: string;
@@ -80,7 +80,7 @@ async function fetchAll(): Promise<Item[]> {
   const items: Item[] = [
     ...db.map<Item>((n) => ({
       key: `n:${n.id}`,
-      kind: n.type === "comment" || n.type === "reply" || n.type === "bug" ? n.type : "other",
+      kind: n.type === "comment" || n.type === "reply" || n.type === "bug" || n.type === "share" ? n.type : "other",
       text: n.message,
       at: n.created_at,
       href: dbHref(n),

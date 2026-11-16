@@ -39,11 +39,11 @@ Hosting: stay on the Lovable database for now (user may move to own Supabase lat
 - [ ] GitHub: user connects in Project settings -> Git
 
 ## Round 3 (Nov 15)
-- [ ] FIX: home page must show all videos
-- [ ] FIX: giving someone moderator fails with an error
-- [ ] Custom emoji per channel
-- [ ] Suggestions tab (users suggest features, admins see them)
-- [ ] Share link for unlisted videos with trusted people
-- [ ] Add-thumbnail button
-- [ ] Publish button (videos don't auto-publish)
-- [ ] Livestreaming + connect YouTube/other apps (do last)
+- [x] FIX: home page must show all videos
+- [x] FIX: giving someone moderator fails with an error
+- [x] Custom emoji per channel
+- [x] Suggestions tab (users suggest features, admins see them)
+- [x] Share link for unlisted videos with trusted people
+- [x] Add-thumbnail button
+- [x] Publish button (videos don't auto-publish)
+- [ ] Livestreaming + connect YouTube/other apps (do last) — waiting on the user's choice of live video service
