@@ -2843,6 +2843,13 @@ export type Database = {
         Returns: Json
       }
       video_comments_mode: { Args: { video_id: string }; Returns: string }
+      video_emojis: {
+        Args: { target_video: string }
+        Returns: {
+          image_path: string
+          name: string
+        }[]
+      }
       video_engagement: {
         Args: { video_id: string }
         Returns: {
