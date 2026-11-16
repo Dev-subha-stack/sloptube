@@ -250,15 +250,17 @@ export async function pickThumbnail(id: string, name: string | null, origin: str
   const { error } = await w.supabase.rpc("set_video_thumbnail", { video_id: id, name: chosen, url });
   if (error) return { error: codeOf(error) };
   const own = await ownVideo(w, id);
-  return { url: await thumbnailLink(id, chosen, url, own && !("error" in own) ? (own.hls_key as string) : null) };
+  return { url: await thumbnailLink(id, chosen, url, "ok" in own ? own.hlsKey : null) };
 }
 
 /** One of the caller's own videos (studio_videos only lists those). */
-async function ownVideo(w: { supabase: Db }, id: string): Promise<Record<string, unknown> | Fail> {
+type OwnVideo = { ok: true; status: string; hlsKey: string | null };
+async function ownVideo(w: { supabase: Db }, id: string): Promise<OwnVideo | Fail> {
   const { data, error } = await w.supabase.rpc("studio_videos", { trash: false });
   if (error) return { error: codeOf(error) };
   const v = ((Array.isArray(data) ? data : []) as Record<string, unknown>[]).find((r) => r.id === id);
-  return v ?? { error: "not_found" };
+  if (!v) return { error: "not_found" };
+  return { ok: true, status: String(v.status), hlsKey: typeof v.hls_key === "string" ? v.hls_key : null };
 }
 
 /** Step 1 of a custom thumbnail: a name and a PUT link. */
@@ -269,10 +271,10 @@ export async function signThumbnail(id: string, mime: string, bytes: number): Pr
   if (!storageConfigured()) return { error: "storage_not_configured" };
   // Only the owner of a ready video gets a link: studio_videos only lists the caller's own.
   const v = await ownVideo(w, id);
-  if ("error" in v) return v;
-  if (v.status !== "ready" || !v.hls_key) return { error: "not_ready" };
+  if (!("ok" in v)) return v;
+  if (v.status !== "ready" || !v.hlsKey) return { error: "not_ready" };
   const name = customThumbnailName(mime, crypto.getRandomValues(new Uint8Array(16)));
-  const url = name ? await signedPut(fileKey(id, name, v.hls_key as string), mime) : null;
+  const url = name ? await signedPut(fileKey(id, name, v.hlsKey), mime) : null;
   return name && url ? { name, url } : { error: "storage_not_configured" };
 }
 
@@ -282,8 +284,8 @@ export async function finishThumbnail(id: string, name: string, origin: string |
   const w = await writer();
   if ("error" in w) return w;
   const v = await ownVideo(w, id);
-  if ("error" in v) return v;
-  const key = fileKey(id, name, v.hls_key as string | null);
+  if (!("ok" in v)) return v;
+  const key = fileKey(id, name, v.hlsKey);
   const head = await headObject(key).catch(() => null);
   if (!head) return { error: "upload_failed" };
   if (head.bytes <= 0 || head.bytes > THUMBNAIL_MAX_BYTES || !head.type || !THUMBNAIL_TYPES[head.type]) {
@@ -296,5 +298,5 @@ export async function finishThumbnail(id: string, name: string, origin: string |
     await deleteObject(key);
     return { error: codeOf(error) };
   }
-  return { url: await thumbnailLink(id, name, url, v.hls_key as string | null) };
+  return { url: await thumbnailLink(id, name, url, v.hlsKey) };
 }
