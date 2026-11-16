@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type DragEvent, type ReactNode } from "react";
 import { useFlag } from "@/lib/store/session";
 import { useUpload } from "@/lib/store/upload";
+import { studioErrorMessage } from "@/lib/studio/rules";
 import {
   ACCEPT,
   DESCRIPTION_MAX,
