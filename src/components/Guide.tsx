@@ -22,6 +22,7 @@ import {
   TrendingIcon,
   StarIcon,
   BugReportIcon,
+  LightbulbIcon,
 } from "./icons";
 import { Logo } from "./Logo";
 
@@ -41,6 +42,7 @@ const ITEMS: Record<GuideKey, Item> = {
   topRated: { href: "/top-rated", label: "Top rated", Icon: StarIcon },
   ratings: { href: "/feed/ratings", label: "Your ratings", Icon: StarIcon },
   bugs: { href: "/bugs", label: "Report a bug", Icon: BugReportIcon },
+  suggestions: { href: "/suggestions", label: "Suggest a feature", Icon: LightbulbIcon },
 };
 
 function useShellFlags() {

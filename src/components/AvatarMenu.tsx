@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Avatar } from "./Avatar";
 import {
   BugReportIcon,
+  LightbulbIcon,
   ChannelIcon,
   CheckIcon,
   PaletteIcon,
@@ -169,6 +170,15 @@ export function AvatarMenu({ user, email }: { user: SessionUser; email: string |
             }}
           >
             Report a bug
+          </MenuItem>
+          <MenuItem
+            icon={<LightbulbIcon className="h-6 w-6" />}
+            onClick={() => {
+              close();
+              router.push("/suggestions");
+            }}
+          >
+            Suggest a feature
           </MenuItem>
           <MenuItem
             icon={<SettingsIcon className="h-6 w-6" />}
