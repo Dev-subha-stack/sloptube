@@ -183,6 +183,13 @@
       "when": 1794720127991,
       "tag": "0025_fix_rate_video_conflict",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1794800275822,
+      "tag": "0026_suggestions_sharing_emojis",
+      "breakpoints": true
     }
   ]
 }
