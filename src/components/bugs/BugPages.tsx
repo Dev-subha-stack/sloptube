@@ -216,6 +216,14 @@ export function BugThread({ id, staffView = false }: { id: string; staffView?: b
     if (user) void refresh();
   }, [refresh, user]);
 
+  // Notifications link every report to /bugs/<id>; a suggestion belongs on its own page.
+  useEffect(() => {
+    if (!bug || bug.kind !== "idea") return;
+    const path = window.location.pathname;
+    if (path.startsWith("/bugs/")) window.location.replace(`/suggestions/${id}`);
+    else if (path.startsWith("/admin/bugs/")) window.location.replace(`/admin/suggestions/${id}`);
+  }, [bug, id]);
+
   async function send(e: FormEvent) {
     e.preventDefault();
     if (!user || !reply.trim()) return;
