@@ -18,3 +18,25 @@ describe("channel emojis", () => {
     expect(splitEmojis("hi :wave: and :nope:", map)).toEqual(["hi ", { name: "wave", url: "/w.webp" }, " and :nope:"]);
   });
 });
+
+import { drawRect, fillSize, leavesGaps, startFrame } from "@/lib/thumbnails/frame";
+
+describe("thumbnail editor", () => {
+  it("starts a tall picture filling the whole 1280x720 frame", () => {
+    const f = startFrame(900, 1200);
+    expect(leavesGaps(900, 1200, f)).toBe(false);
+    const r = drawRect(900, 1200, f);
+    expect(Math.round(r.w)).toBe(1280);
+  });
+
+  it("height stretches only the height", () => {
+    const base = drawRect(1280, 720, { size: 1, width: 1, height: 1, x: 0, y: 0 });
+    const tall = drawRect(1280, 720, { size: 1, width: 1, height: 1.5, x: 0, y: 0 });
+    expect(tall.w).toBe(base.w);
+    expect(tall.h).toBe(base.h * 1.5);
+  });
+
+  it("a 16:9 picture already fills at 100%", () => {
+    expect(fillSize(1920, 1080)).toBe(1);
+  });
+});
