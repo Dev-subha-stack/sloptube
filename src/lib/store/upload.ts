@@ -6,6 +6,8 @@ import { CompressCancelled, compressVideo, grabFrames, posterAndMeta } from "@/l
 import { supabase } from "@/integrations/supabase/client";
 import { shortProblem } from "@/lib/shorts/rules";
 import { useSession } from "@/lib/store/session";
+import { saveCustomThumbnail } from "@/lib/studio/customThumbnail";
+import { studioErrorMessage } from "@/lib/studio/rules";
 import { SpeedMeter, UploadCancelled, uploadParts, xhrPutPart, type SignedPart } from "@/lib/upload/parts";
 import {
   detailsProblem,
@@ -30,6 +32,13 @@ export type CompressInfo = { fraction: number; originalBytes: number; finalBytes
  */
 export type ShortBox = { state: "checking" | "ready"; problem: string | null; on: boolean };
 
+/**
+ * The creator's own thumbnail, made in the thumbnail editor. Picked while the
+ * video uploads, it is saved as soon as the video is ready.
+ * "later": the video is still processing, so it can be set in Studio afterwards.
+ */
+export type CustomThumb = { blob: Blob; url: string; state: "waiting" | "saving" | "saved" | "failed" | "later"; error: string | null };
+
 type SignResponse = { videoId: string; uploadId: string; parts: SignedPart[]; partSize?: number };
 
 type UploadState = {
@@ -48,6 +57,9 @@ type UploadState = {
   notice: string | null;
   short: ShortBox;
   compress: CompressInfo;
+  thumb: CustomThumb | null;
+  setThumb: (blob: Blob, url: string) => void;
+  clearThumb: () => void;
   pick: (file: File) => void;
   setDetails: (patch: Partial<Details>) => void;
   setShortOn: (on: boolean) => void;
@@ -90,6 +102,20 @@ export const useUpload = create<UploadState>((set, get) => ({
   notice: null,
   short: checkingShort,
   compress: emptyCompress,
+  thumb: null,
+
+  setThumb(blob, url) {
+    const old = get().thumb;
+    if (old) URL.revokeObjectURL(old.url);
+    set({ thumb: { blob, url, state: "waiting", error: null } });
+    void applyThumb();
+  },
+
+  clearThumb() {
+    const old = get().thumb;
+    if (old) URL.revokeObjectURL(old.url);
+    set({ thumb: null });
+  },
 
   pick(file) {
     if (running) return;
@@ -237,6 +263,7 @@ export const useUpload = create<UploadState>((set, get) => ({
         );
         running = null;
         set({ phase: "done", watchUrl: done.watchUrl, details: finalDetails, ready: done.status === "ready" });
+        void applyThumb();
         // The "Upload as a Snip" box. Only a file that qualifies has a say;
         // the rest is decided by shape after processing either way.
         const box = get().short;
@@ -274,6 +301,7 @@ export const useUpload = create<UploadState>((set, get) => ({
     running = null;
     if (!job) return;
     job.controller.abort();
+    get().clearThumb();
     set({ ...initialView(), notice: "Upload cancelled." });
     if (job.videoId && job.uploadId) {
       await postJson("/api/upload/abort", { videoId: job.videoId, uploadId: job.uploadId }).catch(() => undefined);
@@ -282,9 +310,29 @@ export const useUpload = create<UploadState>((set, get) => ({
 
   reset() {
     if (running) return;
+    get().clearThumb();
     set(initialView());
   },
 }));
+
+/** Saves the waiting custom thumbnail once the video is uploaded and ready. */
+async function applyThumb() {
+  const { thumb, phase, ready, videoId } = useUpload.getState();
+  if (!thumb || thumb.state !== "waiting" || phase !== "done" || !videoId) return;
+  if (!ready) {
+    useUpload.setState({ thumb: { ...thumb, state: "later" } });
+    return;
+  }
+  useUpload.setState({ thumb: { ...thumb, state: "saving" } });
+  const file = new File([thumb.blob], "thumbnail.jpg", { type: thumb.blob.type || "image/jpeg" });
+  try {
+    await saveCustomThumbnail(videoId, file);
+    if (useUpload.getState().thumb?.blob === thumb.blob) useUpload.setState({ thumb: { ...thumb, state: "saved" } });
+  } catch (err) {
+    if (useUpload.getState().thumb?.blob === thumb.blob)
+      useUpload.setState({ thumb: { ...thumb, state: "failed", error: studioErrorMessage(err instanceof Error ? err.message : "failed") } });
+  }
+}
 
 function initialView() {
   return {
@@ -300,5 +348,6 @@ function initialView() {
     notice: null,
     short: checkingShort,
     compress: emptyCompress,
+    thumb: null,
   };
 }
