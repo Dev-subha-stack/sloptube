@@ -31,6 +31,7 @@ import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TopRatedRouteImport } from './routes/top-rated'
 import { Route as TrendingRouteImport } from './routes/trending'
+import { Route as UpdatesRouteImport } from './routes/updates'
 import { Route as UploadRouteImport } from './routes/upload'
 import { Route as WatchRouteImport } from './routes/watch'
 import { Route as WelcomeRouteImport } from './routes/welcome'
@@ -227,6 +228,11 @@ const TopRatedRoute = TopRatedRouteImport.update({
 const TrendingRoute = TrendingRouteImport.update({
   id: '/trending',
   path: '/trending',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UpdatesRoute = UpdatesRouteImport.update({
+  id: '/updates',
+  path: '/updates',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UploadRoute = UploadRouteImport.update({
@@ -690,6 +696,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/top-rated': typeof TopRatedRoute
   '/trending': typeof TrendingRoute
+  '/updates': typeof UpdatesRoute
   '/upload': typeof UploadRoute
   '/watch': typeof WatchRoute
   '/welcome': typeof WelcomeRoute
@@ -800,6 +807,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/top-rated': typeof TopRatedRoute
   '/trending': typeof TrendingRoute
+  '/updates': typeof UpdatesRoute
   '/upload': typeof UploadRoute
   '/watch': typeof WatchRoute
   '/welcome': typeof WelcomeRoute
@@ -912,6 +920,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/top-rated': typeof TopRatedRoute
   '/trending': typeof TrendingRoute
+  '/updates': typeof UpdatesRoute
   '/upload': typeof UploadRoute
   '/watch': typeof WatchRoute
   '/welcome': typeof WelcomeRoute
@@ -1025,6 +1034,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/top-rated'
     | '/trending'
+    | '/updates'
     | '/upload'
     | '/watch'
     | '/welcome'
@@ -1135,6 +1145,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/top-rated'
     | '/trending'
+    | '/updates'
     | '/upload'
     | '/watch'
     | '/welcome'
@@ -1246,6 +1257,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/top-rated'
     | '/trending'
+    | '/updates'
     | '/upload'
     | '/watch'
     | '/welcome'
@@ -1358,6 +1370,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TopRatedRoute: typeof TopRatedRoute
   TrendingRoute: typeof TrendingRoute
+  UpdatesRoute: typeof UpdatesRoute
   UploadRoute: typeof UploadRoute
   WatchRoute: typeof WatchRoute
   WelcomeRoute: typeof WelcomeRoute
@@ -1576,6 +1589,13 @@ declare module '@tanstack/react-router' {
       path: '/trending'
       fullPath: '/trending'
       preLoaderRoute: typeof TrendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/updates': {
+      id: '/updates'
+      path: '/updates'
+      fullPath: '/updates'
+      preLoaderRoute: typeof UpdatesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/upload': {
@@ -2349,6 +2369,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TopRatedRoute: TopRatedRoute,
   TrendingRoute: TrendingRoute,
+  UpdatesRoute: UpdatesRoute,
   UploadRoute: UploadRoute,
   WatchRoute: WatchRoute,
   WelcomeRoute: WelcomeRoute,

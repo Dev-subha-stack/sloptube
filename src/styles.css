@@ -585,3 +585,10 @@ html[data-motion="reduced"] *, html[data-motion="reduced"] *::before, html[data-
   transition-duration: 1ms !important;
 }
 .comment-highlight { background: color-mix(in srgb, var(--link) 14%, transparent); transition: background 600ms ease; border-radius: 8px; }
+
+/* Announcement banner slides in under the top bar. */
+@keyframes announce-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+.announce-banner { animation: announce-in 220ms ease-out both; }
