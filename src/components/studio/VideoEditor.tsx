@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ThumbnailEditor } from "@/components/upload/ThumbnailEditor";
 import { useRouter } from "next/navigation";
 import { useRef, useState, type ReactNode } from "react";
 import { DESCRIPTION_MAX, TITLE_MAX } from "@/lib/upload/rules";
@@ -110,6 +111,7 @@ export function VideoEditor({
   const [thumbUrl, setThumbUrl] = useState<string | null>(video.thumbnail);
   const [customStill, setCustomStill] = useState<Still | null>(custom);
   const [thumbBusy, setThumbBusy] = useState<string | null>(null);
+  const [editorOpen, setEditorOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
@@ -218,6 +220,16 @@ export function VideoEditor({
 
   return (
     <div data-video-editor={video.id}>
+      {editorOpen && (
+        <ThumbnailEditor
+          onClose={() => setEditorOpen(false)}
+          onDone={(blob, url) => {
+            URL.revokeObjectURL(url);
+            setEditorOpen(false);
+            void upload(new File([blob], "thumbnail.jpg", { type: blob.type || "image/jpeg" }));
+          }}
+        />
+      )}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <Link href="/studio/content" aria-label="Back to channel content" className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-icon hover:bg-hover">
@@ -279,7 +291,7 @@ export function VideoEditor({
                 <button
                   type="button"
                   disabled={preview || !uploadsConfigured || thumbBusy !== null}
-                  onClick={() => fileInput.current?.click()}
+                  onClick={() => setEditorOpen(true)}
                   title={uploadsConfigured ? "Upload a JPG, PNG or WebP up to 2 MB" : "Uploads aren't configured on this server"}
                   className="grid aspect-video w-[140px] place-items-center rounded-[2px] border border-dashed border-[var(--input-border)] text-[12px] text-text-2 hover:bg-hover disabled:opacity-50"
                   data-upload-thumbnail
