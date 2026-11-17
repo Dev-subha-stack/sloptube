@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type DragEvent, type ReactNode } from "rea
 import { useFlag } from "@/lib/store/session";
 import { useUpload } from "@/lib/store/upload";
 import { studioErrorMessage } from "@/lib/studio/rules";
+import { ThumbnailEditor } from "./ThumbnailEditor";
 import {
   ACCEPT,
   DESCRIPTION_MAX,
@@ -175,11 +176,79 @@ function ShortChoice() {
   );
 }
 
+/** What happened to the custom thumbnail, in words. */
+function thumbLine(state: string | undefined, error: string | null | undefined): string | null {
+  if (state === "saving") return "Saving thumbnail...";
+  if (state === "saved") return "Thumbnail saved.";
+  if (state === "failed") return `The thumbnail didn't save: ${error ?? "try again"}.`;
+  if (state === "later") return "Your video is still processing. Add the thumbnail from Studio once it's ready.";
+  return null;
+}
+
+/** The "Add thumbnail" button and the picked thumbnail, with Change and Remove. */
+function ThumbnailField() {
+  const thumb = useUpload((s) => s.thumb);
+  const setThumb = useUpload((s) => s.setThumb);
+  const clearThumb = useUpload((s) => s.clearThumb);
+  const [open, setOpen] = useState(false);
+  const line = thumbLine(thumb?.state, thumb?.error);
+  return (
+    <div className="mt-6" data-thumbnail-field>
+      <h3 className="text-[16px] font-medium leading-[22px] text-text">Thumbnail</h3>
+      <p className="mt-1 text-[13px] leading-[18px] text-text-2">
+        Pick a picture that shows what's in your video. You can set its size and position before saving.
+      </p>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        {thumb ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={thumb.url} alt="Your thumbnail" className="aspect-video w-[168px] rounded-[2px] object-cover shadow-[0_0_0_1px_var(--divider)]" data-thumb-chosen />
+            <div className="flex flex-col items-start gap-1">
+              <button type="button" onClick={() => setOpen(true)} className="btn-text !px-2" disabled={thumb.state === "saving"}>
+                Change
+              </button>
+              {thumb.state !== "saved" && thumb.state !== "saving" && (
+                <button type="button" onClick={clearThumb} className="btn-text !px-2">
+                  Remove
+                </button>
+              )}
+            </div>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="grid aspect-video w-[168px] place-items-center rounded-[2px] border border-dashed border-[var(--input-border)] text-[13px] text-text-2 hover:bg-hover"
+            data-add-thumbnail
+          >
+            Add thumbnail
+          </button>
+        )}
+      </div>
+      {line && (
+        <p className={`mt-2 text-[12px] ${thumb?.state === "failed" ? "text-[var(--error)]" : "text-text-2"}`} data-thumb-state={thumb?.state}>
+          {line}
+        </p>
+      )}
+      {open && (
+        <ThumbnailEditor
+          onClose={() => setOpen(false)}
+          onDone={(blob, url) => {
+            setThumb(blob, url);
+            setOpen(false);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
 function DetailsForm() {
   const details = useUpload((s) => s.details);
   const setDetails = useUpload((s) => s.setDetails);
   const fileName = useUpload((s) => s.fileName);
   const phase = useUpload((s) => s.phase);
+  const thumb = useUpload((s) => s.thumb);
   const titleMissing = details.title.trim() === "";
 
   return (
@@ -218,6 +287,8 @@ function DetailsForm() {
           />
         </label>
 
+        <ThumbnailField />
+
         <fieldset className="mt-6">
           <legend className="text-[16px] font-medium leading-[22px] text-text">Visibility</legend>
           <p className="mt-1 text-[13px] leading-[18px] text-text-2">
@@ -248,8 +319,14 @@ function DetailsForm() {
 
       <aside className="min-w-0">
         <div className="overflow-hidden rounded-[2px] bg-[var(--hover)]">
-          <div className="grid aspect-video place-items-center bg-black text-[13px] text-[#aaaaaa]">
-            {phase === "compressing" ? "Compressing video" : phase === "checking" ? "Checking video" : phase === "finishing" ? "Finishing up" : "Uploading video"}
+          <div className="relative grid aspect-video place-items-center overflow-hidden bg-black text-[13px] text-[#aaaaaa]">
+            {thumb && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={thumb.url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
+            )}
+            <span className="relative">
+              {phase === "compressing" ? "Compressing video" : phase === "checking" ? "Checking video" : phase === "finishing" ? "Finishing up" : "Uploading video"}
+            </span>
           </div>
           <div className="px-4 py-3">
             <p className="text-[12px] leading-4 text-text-2">Filename</p>
@@ -324,7 +401,10 @@ function ProgressFooter() {
 }
 
 function DoneView() {
-  const { watchUrl, details, reset, ready, videoId } = useUpload();
+  const { watchUrl, details, reset, ready, videoId, thumb } = useUpload();
+  const setThumb = useUpload((s) => s.setThumb);
+  const [editing, setEditing] = useState(false);
+  const thumbNote = thumbLine(thumb?.state, thumb?.error);
   const [published, setPublished] = useState<Visibility | null>(null);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
@@ -354,7 +434,12 @@ function DoneView() {
 
   return (
     <div data-upload-phase="done" className="flex min-h-[420px] flex-col items-center justify-center px-6 py-12 text-center">
-      <CheckCircle className="h-16 w-16 text-[#2ba640]" />
+      {thumb ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={thumb.url} alt="Your thumbnail" className="aspect-video w-[240px] rounded-[2px] object-cover shadow-[0_0_0_1px_var(--divider)]" data-thumb-done />
+      ) : (
+        <CheckCircle className="h-16 w-16 text-[#2ba640]" />
+      )}
       <p className="mt-5 text-[20px] leading-7 text-text">
         {published ? "Published!" : ready ? "Video uploaded and saved as a draft." : "Video uploaded. Processing starts soon."}
       </p>
@@ -373,6 +458,11 @@ function DoneView() {
           {problem}
         </p>
       )}
+      {thumbNote && (
+        <p className={`mt-2 text-[13px] ${thumb?.state === "failed" ? "text-[var(--error)]" : "text-text-2"}`} data-thumb-state={thumb?.state}>
+          {thumbNote}
+        </p>
+      )}
       {watchUrl && (
         <div className="mt-6 w-full max-w-[420px] rounded-[2px] bg-[var(--hover)] px-4 py-3 text-left">
           <p className="text-[12px] leading-4 text-text-2">Video link</p>
@@ -386,10 +476,10 @@ function DoneView() {
         <button type="button" onClick={reset} className="btn-text">
           Upload another
         </button>
-        {videoId && (
-          <Link href={`/studio/video/${videoId}/edit`} className="btn-text" data-add-thumbnail>
-            Add thumbnail
-          </Link>
+        {videoId && ready && (
+          <button type="button" onClick={() => setEditing(true)} disabled={thumb?.state === "saving"} className="btn-text" data-add-thumbnail>
+            {thumb ? "Change thumbnail" : "Add thumbnail"}
+          </button>
         )}
         {published ? (
           <Link href="/studio/videos" className="btn-blue">
@@ -402,6 +492,15 @@ function DoneView() {
         )}
       </div>
       {!published && <p className="mt-3 text-[12px] text-text-3">You can also publish it later from Studio.</p>}
+      {editing && (
+        <ThumbnailEditor
+          onClose={() => setEditing(false)}
+          onDone={(blob, url) => {
+            setThumb(blob, url);
+            setEditing(false);
+          }}
+        />
+      )}
     </div>
   );
 }

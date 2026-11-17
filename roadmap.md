@@ -47,3 +47,34 @@ Hosting: stay on the Lovable database for now (user may move to own Supabase lat
 - [x] Add-thumbnail button
 - [x] Publish button (videos don't auto-publish)
 - [ ] Livestreaming + connect YouTube/other apps (do last) — waiting on the user's choice of live video service
+
+## Thumbnail editor (Nov 16)
+- [ ] Add thumbnail on the upload page with preview, size, width, height and position
+
+## Round 4 (Nov 17) — do in this order
+### Phase 1
+- [ ] Admin Announcements section; announcements shown to all users (dismissible banner)
+### Phase 2
+- [ ] Support Us / Patreon card in the 3-line drawer (https://www.patreon.com/cw/sloptube, new tab)
+### Phase 3
+- [ ] Custom badges and roles with colour picker, assign to users, granular permissions
+- [ ] Admin Videos tab: search by title, permanently delete
+- [ ] Fix mod panel crashes / permission glitches
+- [ ] Staff can change users' usernames
+### Phase 4
+- [ ] YouTube-style home grid; all public videos in feed
+- [ ] Username/profile changes show everywhere immediately
+- [ ] Mobile fit: no horizontal overflow, responsive spacing
+- [ ] Snappy animations (pages, buttons, modals, hover)
+- [ ] Subscriptions page lists subscribed channels only
+- [ ] Studio shortcut in nav/profile menu; like notifications (videos and comments)
+- [ ] Direct messages between all users
+- [ ] Clickable links in descriptions
+- [ ] Download button on watch page; emoji hover preview
+### Phase 5
+- [ ] Desktop profile icon opens Sign In then jumps Home
+- [ ] Remove browser PiP; miniplayer click returns to watch page
+- [ ] Paused videos resuming on their own
+- [ ] Snips not loading/playing; remove fake playlist videos
+- [ ] Upload progress bar resetting to 0%
+- [ ] Performance pass

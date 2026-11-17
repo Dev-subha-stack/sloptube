@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 const TABS = [
   { key: "users", label: "Users", href: "/admin/users" },
+  { key: "announcements", label: "Announcements", href: "/admin/announcements" },
   { key: "bugs", label: "Bugs", href: "/admin/bugs" },
   { key: "suggestions", label: "Suggestions", href: "/admin/suggestions" },
   { key: "comments", label: "Comments", href: "/admin/comments" },

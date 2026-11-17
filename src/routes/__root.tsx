@@ -20,6 +20,7 @@ import { themeScript } from "@/lib/theme";
 import { appearanceScript } from "@/lib/appearance";
 import { getSessionState } from "@/functions/session.functions";
 import { Guide } from "@/components/Guide";
+import { AnnouncementBanner } from "@/components/announcements/AnnouncementBanner";
 import { OnboardingGuard } from "@/components/OnboardingGuard";
 import { FlagPanel } from "@/components/flags/FlagPanel";
 import { SiteFooter } from "@/components/launch/SiteFooter";
@@ -167,6 +168,7 @@ function RootComponent() {
               Skip to content
             </a>
             <TopBar />
+            <AnnouncementBanner />
             <Suspense fallback={null}>
               <OnboardingGuard />
             </Suspense>

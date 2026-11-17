@@ -31,11 +31,13 @@ import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TopRatedRouteImport } from './routes/top-rated'
 import { Route as TrendingRouteImport } from './routes/trending'
+import { Route as UpdatesRouteImport } from './routes/updates'
 import { Route as UploadRouteImport } from './routes/upload'
 import { Route as WatchRouteImport } from './routes/watch'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as YapinFinishRouteImport } from './routes/yapin-finish'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminAnnouncementsRouteImport } from './routes/admin/announcements'
 import { Route as AdminCommentsRouteImport } from './routes/admin/comments'
 import { Route as AdminLogRouteImport } from './routes/admin/log'
 import { Route as AdminMessagesRouteImport } from './routes/admin/messages'
@@ -229,6 +231,11 @@ const TrendingRoute = TrendingRouteImport.update({
   path: '/trending',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UpdatesRoute = UpdatesRouteImport.update({
+  id: '/updates',
+  path: '/updates',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UploadRoute = UploadRouteImport.update({
   id: '/upload',
   path: '/upload',
@@ -252,6 +259,11 @@ const YapinFinishRoute = YapinFinishRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
+  id: '/admin/announcements',
+  path: '/admin/announcements',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminCommentsRoute = AdminCommentsRouteImport.update({
@@ -690,10 +702,12 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/top-rated': typeof TopRatedRoute
   '/trending': typeof TrendingRoute
+  '/updates': typeof UpdatesRoute
   '/upload': typeof UploadRoute
   '/watch': typeof WatchRoute
   '/welcome': typeof WelcomeRoute
   '/yapin-finish': typeof YapinFinishRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/log': typeof AdminLogRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -800,10 +814,12 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/top-rated': typeof TopRatedRoute
   '/trending': typeof TrendingRoute
+  '/updates': typeof UpdatesRoute
   '/upload': typeof UploadRoute
   '/watch': typeof WatchRoute
   '/welcome': typeof WelcomeRoute
   '/yapin-finish': typeof YapinFinishRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/log': typeof AdminLogRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -912,10 +928,12 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/top-rated': typeof TopRatedRoute
   '/trending': typeof TrendingRoute
+  '/updates': typeof UpdatesRoute
   '/upload': typeof UploadRoute
   '/watch': typeof WatchRoute
   '/welcome': typeof WelcomeRoute
   '/yapin-finish': typeof YapinFinishRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/log': typeof AdminLogRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -1025,10 +1043,12 @@ export interface FileRouteTypes {
     | '/terms'
     | '/top-rated'
     | '/trending'
+    | '/updates'
     | '/upload'
     | '/watch'
     | '/welcome'
     | '/yapin-finish'
+    | '/admin/announcements'
     | '/admin/comments'
     | '/admin/log'
     | '/admin/messages'
@@ -1135,10 +1155,12 @@ export interface FileRouteTypes {
     | '/terms'
     | '/top-rated'
     | '/trending'
+    | '/updates'
     | '/upload'
     | '/watch'
     | '/welcome'
     | '/yapin-finish'
+    | '/admin/announcements'
     | '/admin/comments'
     | '/admin/log'
     | '/admin/messages'
@@ -1246,10 +1268,12 @@ export interface FileRouteTypes {
     | '/terms'
     | '/top-rated'
     | '/trending'
+    | '/updates'
     | '/upload'
     | '/watch'
     | '/welcome'
     | '/yapin-finish'
+    | '/admin/announcements'
     | '/admin/comments'
     | '/admin/log'
     | '/admin/messages'
@@ -1358,10 +1382,12 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TopRatedRoute: typeof TopRatedRoute
   TrendingRoute: typeof TrendingRoute
+  UpdatesRoute: typeof UpdatesRoute
   UploadRoute: typeof UploadRoute
   WatchRoute: typeof WatchRoute
   WelcomeRoute: typeof WelcomeRoute
   YapinFinishRoute: typeof YapinFinishRoute
+  AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
   AdminCommentsRoute: typeof AdminCommentsRoute
   AdminLogRoute: typeof AdminLogRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
@@ -1578,6 +1604,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrendingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/updates': {
+      id: '/updates'
+      path: '/updates'
+      fullPath: '/updates'
+      preLoaderRoute: typeof UpdatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/upload': {
       id: '/upload'
       path: '/upload'
@@ -1611,6 +1644,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/announcements': {
+      id: '/admin/announcements'
+      path: '/admin/announcements'
+      fullPath: '/admin/announcements'
+      preLoaderRoute: typeof AdminAnnouncementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/comments': {
@@ -2349,10 +2389,12 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TopRatedRoute: TopRatedRoute,
   TrendingRoute: TrendingRoute,
+  UpdatesRoute: UpdatesRoute,
   UploadRoute: UploadRoute,
   WatchRoute: WatchRoute,
   WelcomeRoute: WelcomeRoute,
   YapinFinishRoute: YapinFinishRoute,
+  AdminAnnouncementsRoute: AdminAnnouncementsRoute,
   AdminCommentsRoute: AdminCommentsRoute,
   AdminLogRoute: AdminLogRoute,
   AdminMessagesRoute: AdminMessagesRoute,

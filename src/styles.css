@@ -31,6 +31,9 @@
   --red: #cc0000;
   /* The brand green (lib/brand.ts): the mark, active guide icons and thumbnail progress. */
   --mark: #16a34a;
+  --support-from: #ff5f5f;
+  --support-to: #ff9a3c;
+  --support-ink: #ffffff;
   /* "slop" in the wordmark; "tube" uses the text color. */
   --logo-word: #15803d;
   --divider: #e5e5e5;
@@ -69,6 +72,9 @@
   --link: #3ea6ff;
   --red: #cc0000;
   --mark: #22c55e;
+  --support-from: #e0484d;
+  --support-to: #e8822a;
+  --support-ink: #ffffff;
   --logo-word: #4ade80;
   --divider: #383838;
   --hover: #303030;
@@ -585,3 +591,19 @@ html[data-motion="reduced"] *, html[data-motion="reduced"] *::before, html[data-
   transition-duration: 1ms !important;
 }
 .comment-highlight { background: color-mix(in srgb, var(--link) 14%, transparent); transition: background 600ms ease; border-radius: 8px; }
+
+/* Announcement banner slides in under the top bar. */
+@keyframes announce-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+.announce-banner { animation: announce-in 220ms ease-out both; }
+
+/* The Support us card in the guide. */
+.support-card {
+  background: linear-gradient(135deg, var(--support-from), var(--support-to));
+  color: var(--support-ink);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.support-card:hover { transform: translateY(-1px); box-shadow: 0 6px 18px -8px var(--support-from); }
+.support-card:active { transform: scale(0.98); }

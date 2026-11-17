@@ -23,6 +23,8 @@ import {
   StarIcon,
   BugReportIcon,
   LightbulbIcon,
+  CampaignIcon,
+  FavoriteIcon,
 } from "./icons";
 import { Logo } from "./Logo";
 
@@ -43,6 +45,7 @@ const ITEMS: Record<GuideKey, Item> = {
   ratings: { href: "/feed/ratings", label: "Your ratings", Icon: StarIcon },
   bugs: { href: "/bugs", label: "Report a bug", Icon: BugReportIcon },
   suggestions: { href: "/suggestions", label: "Suggest a feature", Icon: LightbulbIcon },
+  updates: { href: "/updates", label: "What's new", Icon: CampaignIcon },
 };
 
 function useShellFlags() {
@@ -78,6 +81,32 @@ function GuideLink({ item, onClick }: { item: Item; onClick?: () => void }) {
 
 function Section({ children }: { children: React.ReactNode }) {
   return <div className="border-b border-divider py-3">{children}</div>;
+}
+
+export const PATREON_URL = "https://www.patreon.com/cw/sloptube";
+
+/** "Support us": the Patreon card, opens in a new tab. */
+function SupportCard() {
+  return (
+    <a
+      href={PATREON_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="support-card mx-3 block rounded-[10px] px-4 py-3"
+      data-support-card
+    >
+      <span className="flex items-center gap-2 text-[14px] font-semibold">
+        <FavoriteIcon className="h-5 w-5" />
+        Support sloptube
+      </span>
+      <span className="mt-1 block text-[12px] leading-[17px] opacity-95">
+        sloptube is free and run by a small team. Help keep it going on Patreon.
+      </span>
+      <span className="mt-2 inline-flex h-7 items-center rounded-full bg-[var(--support-ink)] px-3 text-[12px] font-semibold text-[var(--support-from)]">
+        Donate on Patreon
+      </span>
+    </a>
+  );
 }
 
 /** The full 240 px guide content, shared by the docked guide and the drawer. */
@@ -132,6 +161,10 @@ function GuideContent({ onNavigate }: { onNavigate?: () => void }) {
           <GuideSubscriptions onNavigate={onNavigate} />
         </Section>
       )}
+
+      <Section>
+        <SupportCard />
+      </Section>
 
       <GuideFooterLinks />
       <p className="px-6 py-4 text-[12px] leading-[18px] text-text-3">
