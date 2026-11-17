@@ -37,6 +37,7 @@ import { Route as WatchRouteImport } from './routes/watch'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as YapinFinishRouteImport } from './routes/yapin-finish'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminAnnouncementsRouteImport } from './routes/admin/announcements'
 import { Route as AdminCommentsRouteImport } from './routes/admin/comments'
 import { Route as AdminLogRouteImport } from './routes/admin/log'
 import { Route as AdminMessagesRouteImport } from './routes/admin/messages'
@@ -258,6 +259,11 @@ const YapinFinishRoute = YapinFinishRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
+  id: '/admin/announcements',
+  path: '/admin/announcements',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminCommentsRoute = AdminCommentsRouteImport.update({
@@ -701,6 +707,7 @@ export interface FileRoutesByFullPath {
   '/watch': typeof WatchRoute
   '/welcome': typeof WelcomeRoute
   '/yapin-finish': typeof YapinFinishRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/log': typeof AdminLogRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -812,6 +819,7 @@ export interface FileRoutesByTo {
   '/watch': typeof WatchRoute
   '/welcome': typeof WelcomeRoute
   '/yapin-finish': typeof YapinFinishRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/log': typeof AdminLogRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -925,6 +933,7 @@ export interface FileRoutesById {
   '/watch': typeof WatchRoute
   '/welcome': typeof WelcomeRoute
   '/yapin-finish': typeof YapinFinishRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/log': typeof AdminLogRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -1039,6 +1048,7 @@ export interface FileRouteTypes {
     | '/watch'
     | '/welcome'
     | '/yapin-finish'
+    | '/admin/announcements'
     | '/admin/comments'
     | '/admin/log'
     | '/admin/messages'
@@ -1150,6 +1160,7 @@ export interface FileRouteTypes {
     | '/watch'
     | '/welcome'
     | '/yapin-finish'
+    | '/admin/announcements'
     | '/admin/comments'
     | '/admin/log'
     | '/admin/messages'
@@ -1262,6 +1273,7 @@ export interface FileRouteTypes {
     | '/watch'
     | '/welcome'
     | '/yapin-finish'
+    | '/admin/announcements'
     | '/admin/comments'
     | '/admin/log'
     | '/admin/messages'
@@ -1375,6 +1387,7 @@ export interface RootRouteChildren {
   WatchRoute: typeof WatchRoute
   WelcomeRoute: typeof WelcomeRoute
   YapinFinishRoute: typeof YapinFinishRoute
+  AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
   AdminCommentsRoute: typeof AdminCommentsRoute
   AdminLogRoute: typeof AdminLogRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
@@ -1631,6 +1644,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/announcements': {
+      id: '/admin/announcements'
+      path: '/admin/announcements'
+      fullPath: '/admin/announcements'
+      preLoaderRoute: typeof AdminAnnouncementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/comments': {
@@ -2374,6 +2394,7 @@ const rootRouteChildren: RootRouteChildren = {
   WatchRoute: WatchRoute,
   WelcomeRoute: WelcomeRoute,
   YapinFinishRoute: YapinFinishRoute,
+  AdminAnnouncementsRoute: AdminAnnouncementsRoute,
   AdminCommentsRoute: AdminCommentsRoute,
   AdminLogRoute: AdminLogRoute,
   AdminMessagesRoute: AdminMessagesRoute,
