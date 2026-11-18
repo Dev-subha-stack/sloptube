@@ -1,8 +1,15 @@
+"use client";
+
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { canOpenTab } from "@/lib/admin/permissions";
+import { usePerms } from "@/lib/store/perms";
+import { useSession } from "@/lib/store/session";
 
 const TABS = [
   { key: "users", label: "Users", href: "/admin/users" },
+  { key: "roles", label: "Roles & badges", href: "/admin/roles" },
+  { key: "videos", label: "Videos", href: "/admin/videos" },
   { key: "announcements", label: "Announcements", href: "/admin/announcements" },
   { key: "bugs", label: "Bugs", href: "/admin/bugs" },
   { key: "suggestions", label: "Suggestions", href: "/admin/suggestions" },
@@ -17,6 +24,18 @@ export type AdminTab = (typeof TABS)[number]["key"];
 
 /** The admin pages: a title, the tabs, a preview line in `next dev` without a database. */
 export function AdminShell({ tab, title, hint, preview, children }: { tab: AdminTab; title: string; hint?: ReactNode; preview?: boolean; children: ReactNode }) {
+  const user = useSession((s) => s.user);
+  const loaded = useSession((s) => s.loaded);
+  const perms = usePerms((s) => s.perms);
+  const isAdmin = usePerms((s) => s.isAdmin);
+  const load = usePerms((s) => s.load);
+  useEffect(() => {
+    if (loaded) load(user?.id ?? null);
+  }, [loaded, user?.id, load]);
+  // Only the tabs this person has the power for. The database checks every action again.
+  const ready = loaded && perms !== null;
+  const tabs = ready ? TABS.filter((t) => canOpenTab(t.key, perms, isAdmin)) : [];
+  const allowed = ready && canOpenTab(tab, perms, isAdmin);
   return (
     <div className="min-h-[calc(100dvh-56px)] bg-[var(--studio-page)]" data-admin-page={tab}>
       <div className="mx-auto max-w-[1100px] px-4 py-6 sm:px-8">
@@ -28,7 +47,7 @@ export function AdminShell({ tab, title, hint, preview, children }: { tab: Admin
         <h1 className="text-[24px] font-normal leading-8 text-text">{title}</h1>
         {hint && <p className="mt-1 text-[14px] text-text-2">{hint}</p>}
         <nav aria-label="Admin" className="-mx-4 mb-6 mt-4 flex overflow-x-auto border-b border-divider sm:mx-0">
-          {TABS.map((t) => (
+          {tabs.map((t) => (
             <Link
               key={t.key}
               href={t.href}
@@ -41,7 +60,25 @@ export function AdminShell({ tab, title, hint, preview, children }: { tab: Admin
             </Link>
           ))}
         </nav>
-        {children}
+        {!ready ? (
+          <p className="text-[14px] text-text-2" data-admin-loading>
+            Loading...
+          </p>
+        ) : allowed ? (
+          children
+        ) : (
+          <p className={`${card} px-4 py-8 text-center text-[14px] text-text-2`} data-admin-denied>
+            {user ? "Your role doesn't include this page." : "Sign in with a staff account to see this page."}
+            {tabs[0] && (
+              <>
+                {" "}
+                <Link href={tabs[0].href} className="text-[var(--link)]">
+                  Go to {tabs[0].label}
+                </Link>
+              </>
+            )}
+          </p>
+        )}
       </div>
     </div>
   );

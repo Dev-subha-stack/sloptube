@@ -546,6 +546,47 @@ export type Database = {
           },
         ]
       }
+      custom_roles: {
+        Row: {
+          color: string
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          permissions: string[]
+          show_badge: boolean
+          sort_order: number
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          permissions?: string[]
+          show_badge?: boolean
+          sort_order?: number
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          permissions?: string[]
+          show_badge?: boolean
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_roles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       encode_jobs: {
         Row: {
           attempts: number
@@ -1101,6 +1142,49 @@ export type Database = {
           {
             foreignKeyName: "subscriptions_subscriber_id_fkey"
             columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_custom_roles: {
+        Row: {
+          assigned_by: string | null
+          created_at: string
+          role_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string
+          role_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string
+          role_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_custom_roles_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_custom_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "custom_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_custom_roles_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1829,6 +1913,10 @@ export type Database = {
           target_label: string
         }[]
       }
+      admin_rename_user: {
+        Args: { new_username: string; target: string }
+        Returns: string
+      }
       admin_reports: {
         Args: { lim?: number }
         Returns: {
@@ -1851,6 +1939,23 @@ export type Database = {
           target_label: string
           target_removed: boolean
           video_id: string
+        }[]
+      }
+      admin_search_videos: {
+        Args: { lim?: number; q?: string }
+        Returns: {
+          channel_handle: string
+          channel_name: string
+          created_at: string
+          deleted_at: string
+          id: string
+          is_short: boolean
+          owner_username: string
+          removed_at: string
+          status: string
+          title: string
+          views: number
+          visibility: string
         }[]
       }
       admin_set_ban: {
@@ -2062,6 +2167,16 @@ export type Database = {
         Args: { comment_id: string; hidden: boolean }
         Returns: undefined
       }
+      custom_badges: {
+        Args: never
+        Returns: {
+          badge_color: string
+          badge_name: string
+          channel_handle: string
+          sort_order: number
+          username: string
+        }[]
+      }
       delete_account: { Args: never; Returns: undefined }
       delete_comment: { Args: { comment_id: string }; Returns: boolean }
       direct_publish: {
@@ -2193,6 +2308,7 @@ export type Database = {
           width: number
         }[]
       }
+      has_permission: { Args: { perm: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2356,6 +2472,7 @@ export type Database = {
       moderation_link_limit: { Args: never; Returns: number }
       moderation_pre_request: { Args: never; Returns: undefined }
       moderation_reports_per_day: { Args: never; Returns: number }
+      moderation_staff: { Args: { perm: string }; Returns: string }
       moderation_status: { Args: never; Returns: Json }
       moderation_strike_days: { Args: never; Returns: number }
       moderation_strike_limit: { Args: never; Returns: number }
@@ -2400,6 +2517,7 @@ export type Database = {
           video_id: string
         }[]
       }
+      my_permissions: { Args: never; Returns: string[] }
       my_progress: {
         Args: { video_ids: string[] }
         Returns: {

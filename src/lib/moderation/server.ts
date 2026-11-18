@@ -91,7 +91,8 @@ export async function adminGate(): Promise<AdminGate> {
   if (!user || !(await flagOn("moderation", user.id))) return { kind: "hidden" };
   const supabase = await createClient();
   if (!supabase) return { kind: "hidden" };
-  const { data, error } = await supabase.rpc("is_admin");
+  // Any staff member gets the page; each action is checked against their own powers in the database.
+  const { data, error } = await supabase.rpc("is_staff");
   if (error || data !== true) return { kind: "hidden" };
   return { kind: "admin", user, supabase };
 }

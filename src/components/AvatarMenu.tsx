@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { canOpenTab } from "@/lib/admin/permissions";
+import { usePerms } from "@/lib/store/perms";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { StaffBadge } from "@/components/admin/RoleBadge";
@@ -43,7 +45,17 @@ export function AvatarMenu({ user, email }: { user: SessionUser; email: string |
   const addAnother = useAccounts((s) => s.addAnother);
   const forget = useAccounts((s) => s.forget);
   const [roles, setRoles] = useState<string[]>([]);
-  const staff = roles.includes("admin") || roles.includes("moderator");
+  const perms = usePerms((s) => s.perms);
+  const isAdminPerm = usePerms((s) => s.isAdmin);
+  const loadPerms = usePerms((s) => s.load);
+  useEffect(() => loadPerms(user.id), [loadPerms, user.id]);
+  // Built-in roles or a custom role with any power.
+  const staff = roles.includes("admin") || roles.includes("moderator") || (perms?.size ?? 0) > 0;
+  const firstTab = isAdminPerm || roles.includes("admin")
+    ? "/admin/users"
+    : (["users", "videos", "announcements", "bugs", "suggestions", "comments", "queue", "log", "words", "messages"]
+        .filter((t) => perms && canOpenTab(t, perms, false))
+        .map((t) => (t === "queue" ? "/admin" : `/admin/${t}`))[0] ?? "/admin/bugs");
 
   useEffect(() => {
     load();
@@ -156,7 +168,7 @@ export function AvatarMenu({ user, email }: { user: SessionUser; email: string |
               icon={<ShieldIcon className="h-6 w-6" />}
               onClick={() => {
                 close();
-                router.push(roles.includes("admin") ? "/admin/users" : "/admin/bugs");
+                router.push(firstTab);
               }}
             >
               Admin panel

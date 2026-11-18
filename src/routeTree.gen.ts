@@ -41,7 +41,9 @@ import { Route as AdminAnnouncementsRouteImport } from './routes/admin/announcem
 import { Route as AdminCommentsRouteImport } from './routes/admin/comments'
 import { Route as AdminLogRouteImport } from './routes/admin/log'
 import { Route as AdminMessagesRouteImport } from './routes/admin/messages'
+import { Route as AdminRolesRouteImport } from './routes/admin/roles'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AdminVideosRouteImport } from './routes/admin/videos'
 import { Route as AdminWordsRouteImport } from './routes/admin/words'
 import { Route as ApiCommentsRouteImport } from './routes/api/comments'
 import { Route as ApiContactRouteImport } from './routes/api/contact'
@@ -111,6 +113,7 @@ import { Route as CHandleIndexRouteImport } from './routes/c/$handle/index'
 import { Route as CHandleTabRouteImport } from './routes/c/$handle/$tab'
 import { Route as StudioContentIndexRouteImport } from './routes/studio/content/index'
 import { Route as StudioContentTrashRouteImport } from './routes/studio/content/trash'
+import { Route as ApiAdminVideosDeleteRouteImport } from './routes/api/admin/videos/delete'
 import { Route as ApiMediaVideoSplatRouteImport } from './routes/api/media/$video/$'
 import { Route as ApiPublicEncoderRpcRouteImport } from './routes/api/public/encoder/rpc'
 import { Route as ApiStudioAnalyticsRealtimeRouteImport } from './routes/api/studio/analytics/realtime'
@@ -281,9 +284,19 @@ const AdminMessagesRoute = AdminMessagesRouteImport.update({
   path: '/admin/messages',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRolesRoute = AdminRolesRouteImport.update({
+  id: '/admin/roles',
+  path: '/admin/roles',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/admin/users',
   path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminVideosRoute = AdminVideosRouteImport.update({
+  id: '/admin/videos',
+  path: '/admin/videos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminWordsRoute = AdminWordsRouteImport.update({
@@ -631,6 +644,11 @@ const StudioContentTrashRoute = StudioContentTrashRouteImport.update({
   path: '/content/trash',
   getParentRoute: () => StudioRoute,
 } as any)
+const ApiAdminVideosDeleteRoute = ApiAdminVideosDeleteRouteImport.update({
+  id: '/api/admin/videos/delete',
+  path: '/api/admin/videos/delete',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMediaVideoSplatRoute = ApiMediaVideoSplatRouteImport.update({
   id: '/api/media/$video/$',
   path: '/api/media/$video/$',
@@ -711,7 +729,9 @@ export interface FileRoutesByFullPath {
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/log': typeof AdminLogRoute
   '/admin/messages': typeof AdminMessagesRoute
+  '/admin/roles': typeof AdminRolesRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/videos': typeof AdminVideosRoute
   '/admin/words': typeof AdminWordsRoute
   '/api/comments': typeof ApiCommentsRouteWithChildren
   '/api/contact': typeof ApiContactRoute
@@ -782,6 +802,7 @@ export interface FileRoutesByFullPath {
   '/admin/suggestions/': typeof AdminSuggestionsIndexRoute
   '/c/$handle/': typeof CHandleIndexRoute
   '/studio/content/': typeof StudioContentIndexRoute
+  '/api/admin/videos/delete': typeof ApiAdminVideosDeleteRoute
   '/api/media/$video/$': typeof ApiMediaVideoSplatRoute
   '/api/public/encoder/rpc': typeof ApiPublicEncoderRpcRoute
   '/api/studio/analytics/realtime': typeof ApiStudioAnalyticsRealtimeRoute
@@ -823,7 +844,9 @@ export interface FileRoutesByTo {
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/log': typeof AdminLogRoute
   '/admin/messages': typeof AdminMessagesRoute
+  '/admin/roles': typeof AdminRolesRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/videos': typeof AdminVideosRoute
   '/admin/words': typeof AdminWordsRoute
   '/api/comments': typeof ApiCommentsRouteWithChildren
   '/api/contact': typeof ApiContactRoute
@@ -894,6 +917,7 @@ export interface FileRoutesByTo {
   '/admin/suggestions': typeof AdminSuggestionsIndexRoute
   '/c/$handle': typeof CHandleIndexRoute
   '/studio/content': typeof StudioContentIndexRoute
+  '/api/admin/videos/delete': typeof ApiAdminVideosDeleteRoute
   '/api/media/$video/$': typeof ApiMediaVideoSplatRoute
   '/api/public/encoder/rpc': typeof ApiPublicEncoderRpcRoute
   '/api/studio/analytics/realtime': typeof ApiStudioAnalyticsRealtimeRoute
@@ -937,7 +961,9 @@ export interface FileRoutesById {
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/log': typeof AdminLogRoute
   '/admin/messages': typeof AdminMessagesRoute
+  '/admin/roles': typeof AdminRolesRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/videos': typeof AdminVideosRoute
   '/admin/words': typeof AdminWordsRoute
   '/api/comments': typeof ApiCommentsRouteWithChildren
   '/api/contact': typeof ApiContactRoute
@@ -1008,6 +1034,7 @@ export interface FileRoutesById {
   '/admin/suggestions/': typeof AdminSuggestionsIndexRoute
   '/c/$handle/': typeof CHandleIndexRoute
   '/studio/content/': typeof StudioContentIndexRoute
+  '/api/admin/videos/delete': typeof ApiAdminVideosDeleteRoute
   '/api/media/$video/$': typeof ApiMediaVideoSplatRoute
   '/api/public/encoder/rpc': typeof ApiPublicEncoderRpcRoute
   '/api/studio/analytics/realtime': typeof ApiStudioAnalyticsRealtimeRoute
@@ -1052,7 +1079,9 @@ export interface FileRouteTypes {
     | '/admin/comments'
     | '/admin/log'
     | '/admin/messages'
+    | '/admin/roles'
     | '/admin/users'
+    | '/admin/videos'
     | '/admin/words'
     | '/api/comments'
     | '/api/contact'
@@ -1123,6 +1152,7 @@ export interface FileRouteTypes {
     | '/admin/suggestions/'
     | '/c/$handle/'
     | '/studio/content/'
+    | '/api/admin/videos/delete'
     | '/api/media/$video/$'
     | '/api/public/encoder/rpc'
     | '/api/studio/analytics/realtime'
@@ -1164,7 +1194,9 @@ export interface FileRouteTypes {
     | '/admin/comments'
     | '/admin/log'
     | '/admin/messages'
+    | '/admin/roles'
     | '/admin/users'
+    | '/admin/videos'
     | '/admin/words'
     | '/api/comments'
     | '/api/contact'
@@ -1235,6 +1267,7 @@ export interface FileRouteTypes {
     | '/admin/suggestions'
     | '/c/$handle'
     | '/studio/content'
+    | '/api/admin/videos/delete'
     | '/api/media/$video/$'
     | '/api/public/encoder/rpc'
     | '/api/studio/analytics/realtime'
@@ -1277,7 +1310,9 @@ export interface FileRouteTypes {
     | '/admin/comments'
     | '/admin/log'
     | '/admin/messages'
+    | '/admin/roles'
     | '/admin/users'
+    | '/admin/videos'
     | '/admin/words'
     | '/api/comments'
     | '/api/contact'
@@ -1348,6 +1383,7 @@ export interface FileRouteTypes {
     | '/admin/suggestions/'
     | '/c/$handle/'
     | '/studio/content/'
+    | '/api/admin/videos/delete'
     | '/api/media/$video/$'
     | '/api/public/encoder/rpc'
     | '/api/studio/analytics/realtime'
@@ -1391,7 +1427,9 @@ export interface RootRouteChildren {
   AdminCommentsRoute: typeof AdminCommentsRoute
   AdminLogRoute: typeof AdminLogRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
+  AdminRolesRoute: typeof AdminRolesRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  AdminVideosRoute: typeof AdminVideosRoute
   AdminWordsRoute: typeof AdminWordsRoute
   ApiCommentsRoute: typeof ApiCommentsRouteWithChildren
   ApiContactRoute: typeof ApiContactRoute
@@ -1442,6 +1480,7 @@ export interface RootRouteChildren {
   AdminBugsIndexRoute: typeof AdminBugsIndexRoute
   AdminSuggestionsIndexRoute: typeof AdminSuggestionsIndexRoute
   CHandleIndexRoute: typeof CHandleIndexRoute
+  ApiAdminVideosDeleteRoute: typeof ApiAdminVideosDeleteRoute
   ApiMediaVideoSplatRoute: typeof ApiMediaVideoSplatRoute
   ApiPublicEncoderRpcRoute: typeof ApiPublicEncoderRpcRoute
   ApiVideosIdStatusRoute: typeof ApiVideosIdStatusRoute
@@ -1674,11 +1713,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/roles': {
+      id: '/admin/roles'
+      path: '/admin/roles'
+      fullPath: '/admin/roles'
+      preLoaderRoute: typeof AdminRolesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/admin/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/videos': {
+      id: '/admin/videos'
+      path: '/admin/videos'
+      fullPath: '/admin/videos'
+      preLoaderRoute: typeof AdminVideosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/words': {
@@ -2164,6 +2217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudioContentTrashRouteImport
       parentRoute: typeof StudioRoute
     }
+    '/api/admin/videos/delete': {
+      id: '/api/admin/videos/delete'
+      path: '/api/admin/videos/delete'
+      fullPath: '/api/admin/videos/delete'
+      preLoaderRoute: typeof ApiAdminVideosDeleteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/media/$video/$': {
       id: '/api/media/$video/$'
       path: '/api/media/$video/$'
@@ -2398,7 +2458,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCommentsRoute: AdminCommentsRoute,
   AdminLogRoute: AdminLogRoute,
   AdminMessagesRoute: AdminMessagesRoute,
+  AdminRolesRoute: AdminRolesRoute,
   AdminUsersRoute: AdminUsersRoute,
+  AdminVideosRoute: AdminVideosRoute,
   AdminWordsRoute: AdminWordsRoute,
   ApiCommentsRoute: ApiCommentsRouteWithChildren,
   ApiContactRoute: ApiContactRoute,
@@ -2449,6 +2511,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminBugsIndexRoute: AdminBugsIndexRoute,
   AdminSuggestionsIndexRoute: AdminSuggestionsIndexRoute,
   CHandleIndexRoute: CHandleIndexRoute,
+  ApiAdminVideosDeleteRoute: ApiAdminVideosDeleteRoute,
   ApiMediaVideoSplatRoute: ApiMediaVideoSplatRoute,
   ApiPublicEncoderRpcRoute: ApiPublicEncoderRpcRoute,
   ApiVideosIdStatusRoute: ApiVideosIdStatusRoute,
