@@ -218,6 +218,13 @@
       "when": 1794968404936,
       "tag": "0030_moderation_powers",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1795057426946,
+      "tag": "0031_private_custom_role_details",
+      "breakpoints": true
     }
   ]
 }

@@ -53,15 +53,15 @@ Hosting: stay on the Lovable database for now (user may move to own Supabase lat
 
 ## Round 4 (Nov 17) — do in this order
 ### Phase 1
-- [ ] Admin Announcements section; announcements shown to all users (dismissible banner)
+- [x] Admin Announcements section; announcements shown to all users (dismissible banner)
 ### Phase 2
-- [ ] Support Us / Patreon card in the 3-line drawer (https://www.patreon.com/cw/sloptube, new tab)
+- [x] Support Us / Patreon card in the 3-line drawer (https://www.patreon.com/cw/sloptube, new tab)
 ### Phase 3
-- [ ] Custom badges and roles with colour picker, assign to users, granular permissions
-- [ ] Admin Videos tab: search by title, permanently delete
-- [ ] Fix mod panel crashes / permission glitches
-- [ ] Staff can change users' usernames
-- [ ] FIX: custom badges must show to every user next to names
+- [x] Custom badges and roles with colour picker, assign to users, granular permissions
+- [x] Admin Videos tab: search by title, permanently delete
+- [x] Fix mod panel crashes / permission glitches
+- [x] Staff can change users' usernames
+- [x] FIX: custom badges must show to every user next to names
 ### Phase 4
 - [ ] YouTube-style home grid; all public videos in feed
 - [ ] Username/profile changes show everywhere immediately

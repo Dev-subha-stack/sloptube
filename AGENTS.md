@@ -46,3 +46,4 @@ use the editor.
 - New uploads are saved private with no publish date (a draft); the Publish button applies the chosen visibility. Why: nothing goes live by accident.
 - Private videos can be shared with named accounts through `video_shares`; `watch_video` grants those accounts playback. Why: trusted viewing without making the video unlisted.
 - Channel emojis live in the private `emojis` bucket, served by the image proxy, and are written as `:name:` in comment text. Why: comments stay plain text.
+- Staff powers come from `has_permission(<power>)` in the database (admins all, built-in moderators a fixed set, custom roles their listed powers); the admin tabs only hide what the database would refuse anyway. Custom role details are admin-only; everyone reads badges through `custom_badges()`. Why: custom roles can't widen access by tampering with the browser.
