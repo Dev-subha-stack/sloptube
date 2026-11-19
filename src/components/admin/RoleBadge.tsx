@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import { getRoleBadge, type UserRole } from "@/lib/admin/roles";
-import { useStaff } from "@/lib/store/staff";
+import { badgeTextColor } from "@/lib/admin/permissions";
+import { useStaff, type CustomBadgeInfo } from "@/lib/store/staff";
 
 function ShieldIcon({ className }: { className?: string }) {
   return (
@@ -29,11 +30,51 @@ export function RoleBadge({ role }: { role: UserRole | "owner" | string | null |
   );
 }
 
-/** The badge for a channel handle or username, when that person is staff. */
+const NONE: CustomBadgeInfo[] = [];
+
+/** A badge from a custom role, in the colour the admin picked. */
+export function CustomRoleBadge({ name, color }: CustomBadgeInfo) {
+  return (
+    <span
+      className="ml-1 inline-flex items-center rounded-full px-1.5 py-0.5 align-middle text-[11px] font-medium leading-none"
+      style={{ backgroundColor: color, color: badgeTextColor(color) }}
+      title={name}
+      data-custom-badge={name}
+    >
+      {name}
+    </span>
+  );
+}
+
+/** The badges for a channel handle or username: the staff badge, then any custom role badges. */
 export function StaffBadge({ name }: { name: string | null | undefined }) {
   const load = useStaff((s) => s.load);
-  const badge = useStaff((s) => (name ? s.byName[name.toLowerCase()] : undefined));
+  const key = name?.toLowerCase();
+  const badge = useStaff((s) => (key ? s.byName[key] : undefined));
+  const custom = useStaff((s) => (key ? s.customByName[key] : undefined)) ?? NONE;
   useEffect(() => load(), [load]);
-  if (!badge) return null;
-  return <RoleBadge role={badge} />;
+  if (!badge && custom.length === 0) return null;
+  return (
+    <>
+      {badge && <RoleBadge role={badge} />}
+      {custom.map((b) => (
+        <CustomRoleBadge key={b.name} name={b.name} color={b.color} />
+      ))}
+    </>
+  );
+}
+
+/** Only the custom role badges for a name (the admin list shows the staff badge itself). */
+export function CustomBadgesFor({ name }: { name: string | null | undefined }) {
+  const load = useStaff((s) => s.load);
+  const key = name?.toLowerCase();
+  const custom = useStaff((s) => (key ? s.customByName[key] : undefined)) ?? NONE;
+  useEffect(() => load(), [load]);
+  return (
+    <>
+      {custom.map((b) => (
+        <CustomRoleBadge key={b.name} name={b.name} color={b.color} />
+      ))}
+    </>
+  );
 }

@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { PERMISSIONS, badgeTextColor, roleProblem } from "@/lib/admin/permissions";
+import { PERMISSIONS, roleProblem } from "@/lib/admin/permissions";
+import { CustomRoleBadge } from "./RoleBadge";
 import { useStaff } from "@/lib/store/staff";
 import { useSession } from "@/lib/store/session";
 import { card } from "./AdminShell";
@@ -12,17 +13,7 @@ type Member = { role_id: string; user_id: string; profile: { username: string; d
 
 const field = "mt-1 block w-full rounded-[4px] border border-[var(--input-border)] bg-transparent px-3 py-2 text-[14px] text-text outline-none focus:border-[var(--focus)]";
 
-export function CustomBadge({ name, color }: { name: string; color: string }) {
-  return (
-    <span
-      className="ml-1 inline-flex items-center rounded-full px-1.5 py-0.5 align-middle text-[11px] font-medium leading-none"
-      style={{ backgroundColor: color, color: badgeTextColor(color) }}
-      data-custom-badge={name}
-    >
-      {name}
-    </span>
-  );
-}
+const CustomBadge = CustomRoleBadge;
 
 const blank = { id: "", name: "", color: "#7c3aed", show_badge: true, permissions: [] as string[], sort_order: 0 };
 

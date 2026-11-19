@@ -8,7 +8,8 @@ import { BUG_STATUSES, bugStatusLabel } from "@/components/bugs/bugStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDate, timeAgo } from "@/lib/watch/format";
 import { card } from "./AdminShell";
-import { RoleBadge } from "./RoleBadge";
+import { CustomBadgesFor, RoleBadge } from "./RoleBadge";
+import { usePerms } from "@/lib/store/perms";
 
 type AdminUser = {
   id: string;
@@ -35,6 +36,8 @@ function errorText(message: string | undefined): string {
   if (message.includes("not_staff")) return "Only staff can see this.";
   if (message.includes("not_allowed")) return "The owner and your own account can't be changed here.";
   if (message.includes("reason_required")) return "Add a reason first.";
+  if (message.includes("invalid_username")) return "Usernames are 3 to 24 letters, numbers or underscores.";
+  if (message.includes("username_taken")) return "That username is taken.";
   return "Something went wrong. Try again.";
 }
 
@@ -44,6 +47,24 @@ export function AdminUsers() {
   const [rows, setRows] = useState<AdminUser[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const perms = usePerms((s) => s.perms);
+  const isAdmin = usePerms((s) => s.isAdmin);
+  const canRename = isAdmin || perms?.has("edit_usernames") === true;
+  const canBan = isAdmin || perms?.has("ban_users") === true;
+  const [renaming, setRenaming] = useState<{ id: string; value: string } | null>(null);
+
+  async function rename(u: AdminUser) {
+    if (!renaming || renaming.id !== u.id) return;
+    const next = renaming.value.trim().replace(/^@/, "").toLowerCase();
+    if (!next || next === u.username) return setRenaming(null);
+    setBusy(u.id);
+    const { error: err } = await supabase.rpc("admin_rename_user", { target: u.id, new_username: next });
+    setBusy(null);
+    if (err) return setError(errorText(err.message));
+    setError(null);
+    setRenaming(null);
+    void refresh(q);
+  }
 
   const refresh = useCallback(async (term: string) => {
     const { data, error: err } = await supabase.rpc("admin_users", { q: term, lim: 100, off: 0 });
@@ -100,11 +121,38 @@ export function AdminUsers() {
                 <p className="text-[14px] font-medium text-text">
                   {u.display_name || u.username}
                   <RoleBadge role={u.is_owner ? "owner" : admin ? "admin" : mod ? "moderator" : null} />
+                  <CustomBadgesFor name={u.username} />
                   {u.banned_at && <span className="ml-2 rounded-full bg-[var(--error)] px-1.5 py-0.5 text-[11px] text-[var(--badge-text)]">Banned</span>}
                 </p>
-                <p className="text-[12px] text-text-2">
-                  @{u.username} · {u.email ?? "no email"}
-                </p>
+                {renaming?.id === u.id ? (
+                  <form
+                    className="mt-1 flex items-center gap-1"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      void rename(u);
+                    }}
+                  >
+                    <span className="text-[12px] text-text-2">@</span>
+                    <input
+                      autoFocus
+                      value={renaming.value}
+                      maxLength={24}
+                      onChange={(e) => setRenaming({ id: u.id, value: e.target.value })}
+                      aria-label={`New username for @${u.username}`}
+                      className="w-[160px] rounded-[4px] border border-[var(--input-border)] bg-transparent px-2 py-1 text-[13px] text-text outline-none focus:border-[var(--focus)]"
+                    />
+                    <button type="submit" disabled={busy === u.id} className="btn-text !px-2">
+                      Save
+                    </button>
+                    <button type="button" onClick={() => setRenaming(null)} className="btn-text !px-2">
+                      Cancel
+                    </button>
+                  </form>
+                ) : (
+                  <p className="text-[12px] text-text-2">
+                    @{u.username} · {u.email ?? "no email"}
+                  </p>
+                )}
                 <p className="text-[12px] text-text-3">
                   Joined {formatDate(u.created_at)} · {u.last_sign_in_at ? `last seen ${timeAgo(u.last_sign_in_at)}` : "never signed in"} ·{" "}
                   {u.video_count} videos · {u.subscriber_count} subscribers
@@ -119,15 +167,24 @@ export function AdminUsers() {
                 </p>
                 {u.banned_at && u.ban_reason && <p className="text-[12px] text-[var(--error)]">Ban reason: {u.ban_reason}</p>}
               </div>
+              {canRename && (!u.is_owner || isAdmin) && renaming?.id !== u.id && (
+                <button type="button" onClick={() => setRenaming({ id: u.id, value: u.username })} className="btn-text" data-rename-user={u.username}>
+                  Change username
+                </button>
+              )}
               {!u.is_owner && (
                 <div className="flex flex-wrap gap-2">
-                  <button type="button" disabled={busy === u.id} onClick={() => void setRole(u, "moderator", !mod)} className="btn-text">
-                    {mod ? "Remove mod" : "Make mod"}
-                  </button>
-                  <button type="button" disabled={busy === u.id} onClick={() => void setRole(u, "admin", !admin)} className="btn-text">
-                    {admin ? "Remove admin" : "Make admin"}
-                  </button>
-                  {!admin && (
+                  {isAdmin && (
+                    <>
+                      <button type="button" disabled={busy === u.id} onClick={() => void setRole(u, "moderator", !mod)} className="btn-text">
+                        {mod ? "Remove mod" : "Make mod"}
+                      </button>
+                      <button type="button" disabled={busy === u.id} onClick={() => void setRole(u, "admin", !admin)} className="btn-text">
+                        {admin ? "Remove admin" : "Make admin"}
+                      </button>
+                    </>
+                  )}
+                  {!admin && canBan && (
                     <button type="button" disabled={busy === u.id} onClick={() => void setBan(u, !u.banned_at)} className="btn-text">
                       {u.banned_at ? "Unban" : "Ban"}
                     </button>

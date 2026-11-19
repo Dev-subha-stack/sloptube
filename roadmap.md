@@ -61,6 +61,7 @@ Hosting: stay on the Lovable database for now (user may move to own Supabase lat
 - [ ] Admin Videos tab: search by title, permanently delete
 - [ ] Fix mod panel crashes / permission glitches
 - [ ] Staff can change users' usernames
+- [ ] FIX: custom badges must show to every user next to names
 ### Phase 4
 - [ ] YouTube-style home grid; all public videos in feed
 - [ ] Username/profile changes show everywhere immediately
