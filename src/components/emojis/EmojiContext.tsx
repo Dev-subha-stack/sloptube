@@ -49,6 +49,10 @@ export function EmojiText({ text }: { text: string }) {
 export function EmojiPicker({ onPick }: { onPick: (code: string) => void }) {
   const map = useEmojis();
   const [open, setOpen] = useState(false);
+  const [preview, setPreview] = useState<{ name: string; url: string } | null>(null);
+  const entries = [...map.entries()];
+  const selected = preview ?? (entries[0] ? { name: entries[0][0], url: entries[0][1] } : null);
+
   if (map.size === 0) return null;
   return (
     <div className="relative">
@@ -56,7 +60,10 @@ export function EmojiPicker({ onPick }: { onPick: (code: string) => void }) {
         type="button"
         aria-label="Channel emojis"
         aria-expanded={open}
-        onClick={() => setOpen(!open)}
+        onClick={() => {
+          setOpen((value) => !value);
+          setPreview(null);
+        }}
         className="grid h-9 w-9 place-items-center rounded-full text-icon hover:bg-hover"
         data-emoji-button
       >
@@ -65,23 +72,43 @@ export function EmojiPicker({ onPick }: { onPick: (code: string) => void }) {
         </svg>
       </button>
       {open && (
-        <div className="absolute left-0 top-10 z-30 grid w-[248px] grid-cols-6 gap-1 rounded-[8px] bg-surface p-2 shadow-[var(--menu-shadow)]" role="menu" data-emoji-menu>
-          {[...map.entries()].map(([name, url]) => (
-            <button
-              key={name}
-              type="button"
-              role="menuitem"
-              title={`:${name}:`}
-              onClick={() => {
-                onPick(`:${name}:`);
-                setOpen(false);
-              }}
-              className="grid h-9 w-9 place-items-center rounded hover:bg-hover"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt={`:${name}:`} className="h-7 w-7" />
-            </button>
-          ))}
+        <div className="absolute left-0 top-10 z-30 w-[264px] rounded-[10px] border border-divider bg-surface p-3 shadow-[var(--menu-shadow)]" role="menu" data-emoji-menu>
+          <div className="mb-3 flex min-h-[76px] items-center gap-3 rounded-lg bg-hover p-3" data-emoji-preview>
+            {selected && (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={selected.url} alt={`:${selected.name}:`} className="h-12 w-12 object-contain" />
+                <span className="min-w-0">
+                  <span className="block text-[11px] font-medium uppercase tracking-wide text-text-2">Emoji preview</span>
+                  <span className="mt-1 block truncate text-[14px] font-medium text-text">:{selected.name}:</span>
+                </span>
+              </>
+            )}
+          </div>
+          <div className="grid max-h-[220px] grid-cols-6 gap-1 overflow-y-auto">
+            {entries.map(([name, url]) => (
+              <button
+                key={name}
+                type="button"
+                role="menuitem"
+                title={`:${name}:`}
+                aria-label={`Preview :${name}:`}
+                onMouseEnter={() => setPreview({ name, url })}
+                onMouseLeave={() => setPreview(null)}
+                onFocus={() => setPreview({ name, url })}
+                onBlur={() => setPreview(null)}
+                onClick={() => {
+                  onPick(`:${name}:`);
+                  setOpen(false);
+                  setPreview(null);
+                }}
+                className="grid h-9 w-9 place-items-center rounded-md hover:bg-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--link)]"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt="" className="h-7 w-7 object-contain" loading="lazy" />
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
