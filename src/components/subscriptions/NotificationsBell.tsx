@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { FeedCard, FeedPage } from "@/lib/feed/types";
 import { badgeLabel, parseSeen, SEEN_KEY } from "@/lib/subscriptions/unread";
 import { parseUtc, timeAgo } from "@/lib/watch/format";
+import { useSession } from "@/lib/store/session";
 
 function readSeen(): number | null {
   if (typeof window === "undefined") return null;
@@ -31,7 +32,7 @@ function writeSeen(value: number) {
 /** One row in the bell menu: a comment, a reply, a bug report update or an upload. */
 type Item = {
   key: string;
-  kind: "comment" | "reply" | "bug" | "share" | "upload" | "other";
+  kind: "comment" | "reply" | "bug" | "share" | "like" | "upload" | "other";
   text: string;
   at: string;
   href: string;
@@ -80,7 +81,7 @@ async function fetchAll(): Promise<Item[]> {
   const items: Item[] = [
     ...db.map<Item>((n) => ({
       key: `n:${n.id}`,
-      kind: n.type === "comment" || n.type === "reply" || n.type === "bug" || n.type === "share" ? n.type : "other",
+      kind: n.type === "comment" || n.type === "reply" || n.type === "bug" || n.type === "share" || n.type === "like" ? n.type : "other",
       text: n.message,
       at: n.created_at,
       href: dbHref(n),
@@ -119,6 +120,7 @@ function isUnread(i: Item, seen: number | null): boolean {
  * opening the menu marks everything read. Clicking a comment jumps to it.
  */
 export function NotificationsBell() {
+  const userId = useSession((s) => s.user?.id ?? null);
   const [items, setItems] = useState<Item[] | null>(null);
   const [seen, setSeen] = useState<number | null>(null);
   const [seenAtOpen, setSeenAtOpen] = useState<number | null>(null);
@@ -132,6 +134,21 @@ export function NotificationsBell() {
     setNow(Date.now());
     return list;
   }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+    const channel = supabase
+      .channel(`notifications-for-${userId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
+        () => { void refresh(); },
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [userId, refresh]);
 
   useEffect(() => {
     // First visit in this browser: older uploads don't count as new.
