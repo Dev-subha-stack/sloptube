@@ -65,7 +65,7 @@ export function TopBarEnd() {
   return (
     <>
       {!config && <DbStatus />}
-      {flags.upload && (
+      {flags.upload && (sessionUser || authChecked) && (
         <Link
           href={sessionUser ? "/upload" : "/login?next=/upload"}
           prefetch={false}
