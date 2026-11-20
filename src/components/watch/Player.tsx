@@ -11,7 +11,6 @@ import {
   FullscreenExitIcon,
   FullscreenIcon,
   PauseIcon,
-  PipIcon,
   PlayIcon,
   ReplayIcon,
   SettingsIcon,
@@ -117,7 +116,6 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
   const [scrubbing, setScrubbing] = useState(false);
   const [volumeDrag, setVolumeDrag] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
-  const [pipOk, setPipOk] = useState(false);
   const [cues, setCues] = useState<SpriteCue[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [resumed, setResumed] = useState(false);
@@ -154,14 +152,6 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
     video.muted = v.muted;
     setVolume(v.volume);
     setMuted(v.muted);
-    setPipOk(typeof document !== "undefined" && document.pictureInPictureEnabled === true);
-
-    const tryAutoplay = () => {
-      video.play().catch(() => {
-        // Autoplay with sound is often blocked: the big play button is there.
-      });
-    };
-
     // A plain video file (the built-in storage) plays as it is; HLS goes through hls.js.
     const direct = !/\.m3u8(\?|$)/i.test(src);
     if (preferNative(video) || direct) {
@@ -184,7 +174,6 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
         "loadedmetadata",
         () => {
           if (start > 0) video.currentTime = start;
-          tryAutoplay();
         },
         { once: true },
       );
@@ -228,7 +217,6 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
           hls.startLevel = level;
           hls.currentLevel = level;
         }
-        tryAutoplay();
       });
       hls.on(HlsClass.Events.LEVEL_SWITCHED, (_e, data) => setPlayingLevel(data.level));
       hls.on(HlsClass.Events.ERROR, (_e, data) => {
@@ -329,13 +317,6 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
     if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
     else if (wrap.requestFullscreen) void wrap.requestFullscreen().catch(() => {});
     else video.webkitEnterFullscreen?.();
-  }, []);
-
-  const togglePip = useCallback(() => {
-    const video = videoRef.current;
-    if (!video || !document.pictureInPictureEnabled) return;
-    if (document.pictureInPictureElement) void document.exitPictureInPicture().catch(() => {});
-    else void video.requestPictureInPicture().catch(() => {});
   }, []);
 
   /** i: the miniplayer on or off. */
@@ -506,9 +487,10 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
         <button
           type="button"
           onClick={() => setMini(false)}
+          aria-label="Return to the watch player"
           className="absolute inset-0 grid place-items-center bg-black text-[14px] text-[#aaaaaa]"
         >
-          Playing in the miniplayer. Click to bring it back.
+          Playing in the miniplayer. Click to return to the watch player.
         </button>
       )}
     <div
@@ -553,8 +535,8 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
           <span className="flex gap-1">
             <button
               type="button"
-              aria-label="Expand (i)"
-              title="Expand (i)"
+              aria-label="Return to watch player"
+              title="Return to watch player"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={() => setMini(false)}
               className="grid h-7 w-7 place-items-center rounded-full hover:bg-white/20"
@@ -845,11 +827,6 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
             {!embed && (
               <CtrlButton label={mini ? "Expand (i)" : "Miniplayer (i)"} onClick={toggleMini} data-miniplayer>
                 <MiniplayerIcon className="h-[22px] w-[22px]" />
-              </CtrlButton>
-            )}
-            {pipOk && (
-              <CtrlButton label="Picture in picture" onClick={togglePip} data-pip>
-                <PipIcon className="h-[22px] w-[22px]" />
               </CtrlButton>
             )}
             <CtrlButton label={fullscreen ? "Exit full screen (f)" : "Full screen (f)"} onClick={toggleFullscreen} data-fullscreen>
