@@ -26,6 +26,7 @@ type SessionState = {
     user: SessionUser | null;
     flags: Record<string, boolean>;
   }) => void;
+  updateUser: (patch: Partial<SessionUser>) => void;
 };
 
 export type SessionInit = { config: SupabaseConfig | null; user: SessionUser | null; flags: Record<string, boolean> };
@@ -37,6 +38,7 @@ function makeStore(init?: SessionInit): StoreApi<SessionState> {
     user: init?.user ?? null,
     flags: init?.flags ?? {},
     setSession: (s) => set({ ...s, loaded: true }),
+    updateUser: (patch) => set((state) => ({ user: state.user ? { ...state.user, ...patch } : null })),
   }));
 }
 
@@ -73,4 +75,11 @@ export const useSession = Object.assign(useSessionImpl, {
 /** Client side flag check. Use flagOn() from lib/flags.ts on the server. */
 export function useFlag(key: string): boolean {
   return useSession((s) => s.flags[key] === true);
+}
+
+/** Update the active browser session profile immediately after a successful profile write. */
+export function updateSessionUser(patch: Partial<SessionUser>): void {
+  if (typeof window === "undefined") return;
+  const store = browserStore ?? globalStore();
+  store.getState().updateUser(patch);
 }
