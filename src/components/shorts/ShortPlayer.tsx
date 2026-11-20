@@ -63,8 +63,12 @@ export function ShortPlayer({
       void import("hls.js").then(({ default: HlsClass }) => {
         if (cancelled) return;
         if (!HlsClass.isSupported()) {
-          video.src = short.src;
-          play();
+          if (video.canPlayType("application/vnd.apple.mpegurl")) {
+            video.src = short.src;
+            play();
+          } else {
+            setFailed(true);
+          }
           return;
         }
         hls = new HlsClass({ xhrSetup: hlsXhrSetup, maxBufferLength: 20, backBufferLength: 30 });
@@ -117,6 +121,7 @@ export function ShortPlayer({
         preload="none"
         onPlay={() => setPaused(false)}
         onPause={() => setPaused(true)}
+        onError={() => setFailed(true)}
         onTimeUpdate={(e) => {
           const v = e.currentTarget;
           if (v.duration > 0) setProgress(v.currentTime / v.duration);
