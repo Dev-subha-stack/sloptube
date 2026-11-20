@@ -607,3 +607,60 @@ html[data-motion="reduced"] *, html[data-motion="reduced"] *::before, html[data-
 }
 .support-card:hover { transform: translateY(-1px); box-shadow: 0 6px 18px -8px var(--support-from); }
 .support-card:active { transform: scale(0.98); }
+
+
+/* Responsive canvas and lightweight interaction feedback. */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+body {
+  min-width: 320px;
+  overscroll-behavior-x: none;
+}
+
+button:not(:disabled) {
+  transition:
+    color 140ms ease,
+    background-color 140ms ease,
+    border-color 140ms ease,
+    opacity 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+button:not(:disabled):active {
+  transform: scale(0.985);
+}
+
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 639px) {
+  #content {
+    min-width: 0;
+    width: 100%;
+  }
+
+  [data-feed-grid] {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  [data-emoji-menu] {
+    max-width: calc(100vw - 24px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button:not(:disabled) {
+    transition-duration: 1ms;
+  }
+
+  button:not(:disabled):active {
+    transform: none;
+  }
+}
