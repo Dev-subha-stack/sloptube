@@ -8,8 +8,8 @@ import { SubscriptionsView } from "@/components/subscriptions/SubscriptionsView"
 const metadata = { title: "Subscriptions | sloptube" };
 
 const loadSubs = createServerFn({ method: "GET" }).handler(async () => {
-  const { subscriptionsFeed } = await import("@/lib/subscriptions/server");
-  return subscriptionsFeed();
+  const { mySubscriptions } = await import("@/lib/subscriptions/server");
+  return mySubscriptions();
 });
 
 function Page() {
