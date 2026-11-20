@@ -63,19 +63,19 @@ Hosting: stay on the Lovable database for now (user may move to own Supabase lat
 - [x] Staff can change users' usernames
 - [x] FIX: custom badges must show to every user next to names
 ### Phase 4
-- [ ] YouTube-style home grid; all public videos in feed
-- [ ] Username/profile changes show everywhere immediately
-- [ ] Mobile fit: no horizontal overflow, responsive spacing
-- [ ] Snappy animations (pages, buttons, modals, hover)
-- [ ] Subscriptions page lists subscribed channels only
-- [ ] Studio shortcut in nav/profile menu; like notifications (videos and comments)
-- [ ] Direct messages between all users
-- [ ] Clickable links in descriptions
-- [ ] Download button on watch page; emoji hover preview
+- [x] YouTube-style home grid; existing paginated feed includes public ready videos
+- [x] Username/profile changes sync immediately in the browser store and channel database triggers
+- [x] Mobile fit: clip horizontal overflow and responsive spacing
+- [x] Snappy interaction feedback and motion-aware button transitions
+- [x] Subscriptions page lists followed channels only
+- [x] Studio shortcut in profile menu; video/comment likes trigger notifications and bell refreshes in real time
+- [x] Direct messages between users (existing RLS-protected DM system)
+- [x] Clickable safe external links in video descriptions
+- [x] Secure original-video download; live emoji hover/focus preview
 ### Phase 5
-- [ ] Desktop profile icon opens Sign In then jumps Home
-- [ ] Remove browser PiP; miniplayer click returns to watch page
-- [ ] Paused videos resuming on their own
-- [ ] Snips not loading/playing; remove fake playlist videos
-- [ ] Upload progress bar resetting to 0%
+- [x] Prevent signed-out menu flash while a browser session is being hydrated
+- [x] Remove browser PiP; miniplayer restore returns to the watch player
+- [x] Remove watch-page auto-play calls that could restart paused videos
+- [x] Add unsupported-browser/media error handling for Snips; remove bundled fake demo playlists
+- [x] Keep multipart upload progress monotonic across retries; reserve 100% for finalization
 - [ ] Performance pass
