@@ -59,6 +59,14 @@ function ActionButton({
   );
 }
 
+function DownloadIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>
+      <path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z" />
+    </svg>
+  );
+}
+
 function VisibilityNote({ visibility }: { visibility: WatchVideo["visibility"] }) {
   if (visibility === "public") return null;
   const Icon = visibility === "private" ? LockIcon : LinkIcon;
@@ -133,6 +141,7 @@ export function VideoInfo({
         <div className="-mx-1.5 flex items-center sm:mx-0">
           <LikeButtons key={video.id} videoId={video.id} engagement={engagement} />
           <ActionButton Icon={ShareIcon} label="Share" onClick={() => setSharing(true)} mirror data-share />
+          <ActionButton Icon={DownloadIcon} label="Download" title="Download original video" onClick={() => window.location.assign(`/api/videos/${video.id}/download`)} data-download />
           <ActionButton Icon={PlaylistAddIcon} label="Save" title="Saving to a playlist arrives in a later feature." />
           {moderation && !video.isOwner ? (
             <Menu
