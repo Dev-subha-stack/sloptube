@@ -61,6 +61,13 @@ export function createCloudUploadStorage(): UploadStorage {
   };
 }
 
+/** A short-lived download link for an authorized original upload. */
+export async function createCloudDownloadUrl(key: string, expiresIn: number, filename: string): Promise<string> {
+  const { data, error } = await (await admin()).createSignedUrl(key, expiresIn, { download: filename });
+  if (error || !data) throw new Error(error?.message ?? "download link could not be created");
+  return browserUrl(data.signedUrl);
+}
+
 export function createCloudMediaStorage(): MediaStorage {
   return {
     async getText(key) {
