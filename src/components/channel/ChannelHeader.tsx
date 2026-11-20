@@ -107,6 +107,9 @@ export function ChannelHeader({
             ) : (
               <>
                 <SubscribeButton channelId={channel.id} channelName={channel.name} count={channel.subscriberCount} />
+                <Link href={`/messages?to=${channel.ownerId}`} className="btn-text press inline-flex items-center" data-message-channel>
+                  Message
+                </Link>
                 <ChannelReport channelId={channel.id} />
               </>
             )}

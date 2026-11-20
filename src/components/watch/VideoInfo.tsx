@@ -5,6 +5,7 @@ import { StarRating } from "@/components/ratings/StarRating";
 import Link from "next/link";
 import { useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { Avatar } from "@/components/Avatar";
+import { LinkedText } from "@/components/LinkedText";
 import { Menu } from "@/components/Menu";
 import { useReport } from "@/components/moderation/ReportMenuItem";
 import { useFlag } from "@/lib/store/session";
@@ -86,7 +87,7 @@ function Description({ text }: { text: string }) {
         ref={ref}
         className={`whitespace-pre-wrap break-words text-[14px] leading-5 text-text ${open ? "" : "line-clamp-3"}`}
       >
-        {text}
+        <LinkedText text={text} />
       </div>
       {(long || open) && (
         <button

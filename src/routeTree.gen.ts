@@ -17,6 +17,7 @@ import { Route as GuidelinesRouteImport } from './routes/guidelines'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as PlaylistRouteImport } from './routes/playlist'
 import { Route as PlaylistsRouteImport } from './routes/playlists'
 import { Route as PressRouteImport } from './routes/press'
@@ -162,6 +163,11 @@ const LibraryRoute = LibraryRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlaylistRoute = PlaylistRouteImport.update({
@@ -706,6 +712,7 @@ export interface FileRoutesByFullPath {
   '/history': typeof HistoryRoute
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
+  '/messages': typeof MessagesRoute
   '/playlist': typeof PlaylistRoute
   '/playlists': typeof PlaylistsRoute
   '/press': typeof PressRoute
@@ -822,6 +829,7 @@ export interface FileRoutesByTo {
   '/history': typeof HistoryRoute
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
+  '/messages': typeof MessagesRoute
   '/playlist': typeof PlaylistRoute
   '/playlists': typeof PlaylistsRoute
   '/press': typeof PressRoute
@@ -938,6 +946,7 @@ export interface FileRoutesById {
   '/history': typeof HistoryRoute
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
+  '/messages': typeof MessagesRoute
   '/playlist': typeof PlaylistRoute
   '/playlists': typeof PlaylistsRoute
   '/press': typeof PressRoute
@@ -1056,6 +1065,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/library'
     | '/login'
+    | '/messages'
     | '/playlist'
     | '/playlists'
     | '/press'
@@ -1172,6 +1182,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/library'
     | '/login'
+    | '/messages'
     | '/playlist'
     | '/playlists'
     | '/press'
@@ -1287,6 +1298,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/library'
     | '/login'
+    | '/messages'
     | '/playlist'
     | '/playlists'
     | '/press'
@@ -1404,6 +1416,7 @@ export interface RootRouteChildren {
   HistoryRoute: typeof HistoryRoute
   LibraryRoute: typeof LibraryRoute
   LoginRoute: typeof LoginRoute
+  MessagesRoute: typeof MessagesRoute
   PlaylistRoute: typeof PlaylistRoute
   PlaylistsRoute: typeof PlaylistsRoute
   PressRoute: typeof PressRoute
@@ -1543,6 +1556,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/playlist': {
@@ -2435,6 +2455,7 @@ const rootRouteChildren: RootRouteChildren = {
   HistoryRoute: HistoryRoute,
   LibraryRoute: LibraryRoute,
   LoginRoute: LoginRoute,
+  MessagesRoute: MessagesRoute,
   PlaylistRoute: PlaylistRoute,
   PlaylistsRoute: PlaylistsRoute,
   PressRoute: PressRoute,

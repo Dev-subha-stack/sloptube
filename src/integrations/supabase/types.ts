@@ -587,6 +587,48 @@ export type Database = {
           },
         ]
       }
+      direct_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "direct_messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "direct_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       encode_jobs: {
         Row: {
           attempts: number
@@ -2188,6 +2230,21 @@ export type Database = {
         }
         Returns: string
       }
+      dm_conversations: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          display_name: string
+          last_at: string
+          last_body: string
+          last_from_me: boolean
+          other_id: string
+          unread: number
+          username: string
+        }[]
+      }
+      dm_mark_read: { Args: { other: string }; Returns: number }
+      dm_unread_count: { Args: never; Returns: number }
       edit_comment: {
         Args: { body: string; comment_id: string }
         Returns: {
@@ -2544,6 +2601,21 @@ export type Database = {
           thumbnail_url: string
           title: string
           views: number
+        }[]
+      }
+      my_subscribed_channels: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          channel_id: string
+          description: string
+          handle: string
+          latest_upload_at: string
+          name: string
+          notify: boolean
+          subscribed_at: string
+          subscriber_count: number
+          video_count: number
         }[]
       }
       my_subscriptions: {

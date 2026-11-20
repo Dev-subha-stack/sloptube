@@ -12,6 +12,8 @@ import { createClient } from "@/lib/supabase/client";
 import { Avatar } from "./Avatar";
 import {
   BugReportIcon,
+  ChatIcon,
+  StudioIcon,
   LightbulbIcon,
   ChannelIcon,
   CheckIcon,
@@ -154,6 +156,24 @@ export function AvatarMenu({ user, email }: { user: SessionUser; email: string |
               Your channel
             </MenuItem>
           )}
+          <MenuItem
+            icon={<StudioIcon className="h-6 w-6" />}
+            onClick={() => {
+              close();
+              router.push("/studio");
+            }}
+          >
+            sloptube Studio
+          </MenuItem>
+          <MenuItem
+            icon={<ChatIcon className="h-6 w-6" />}
+            onClick={() => {
+              close();
+              router.push("/messages");
+            }}
+          >
+            Messages
+          </MenuItem>
           <MenuItem
             icon={<StarIcon className="h-6 w-6" />}
             onClick={() => {

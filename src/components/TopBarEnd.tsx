@@ -5,6 +5,7 @@ import { AvatarMenu } from "./AvatarMenu";
 import { DbStatus } from "./DbStatus";
 import { AccountCircleIcon, UploadIcon } from "./icons";
 import { SignedOutMenu } from "./SignedOutMenu";
+import { MessagesButton } from "./messages/MessagesButton";
 import { NotificationsBell } from "./subscriptions/NotificationsBell";
 
 const iconLink = "hidden h-10 w-10 place-items-center rounded-full text-icon hover:bg-hover sm:grid";
@@ -38,6 +39,7 @@ export function TopBarEnd() {
       )}
       {sessionUser ? (
         <>
+          <MessagesButton userId={sessionUser.id} />
           {(flags.notifications || flags.subscriptions) && <NotificationsBell />}
           <AvatarMenu user={sessionUser} email={email} />
         </>
