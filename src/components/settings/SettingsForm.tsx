@@ -10,6 +10,7 @@ import {
   normalizeUsername,
 } from "@/lib/accounts/validation";
 import { createClient } from "@/lib/supabase/client";
+import { updateSessionUser } from "@/lib/store/session";
 import { Avatar } from "../Avatar";
 import { FormError, TextField } from "../auth/fields";
 import { useUsernameCheck, usernameNote } from "../auth/useUsernameCheck";
@@ -69,6 +70,7 @@ export function SettingsForm({ profile, disabled }: { profile: SettingsProfile; 
       const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", profile.id);
       if (error) throw new Error(error.message);
       setAvatarUrl(url);
+      updateSessionUser({ avatarUrl: url });
       router.refresh();
     } catch (e) {
       setAvatarError(e instanceof Error ? e.message : "Upload failed.");
@@ -87,6 +89,7 @@ export function SettingsForm({ profile, disabled }: { profile: SettingsProfile; 
     setAvatarBusy(false);
     if (error) return setAvatarError(error.message);
     setAvatarUrl(null);
+    updateSessionUser({ avatarUrl: null });
     router.refresh();
   }
 
@@ -114,6 +117,9 @@ export function SettingsForm({ profile, disabled }: { profile: SettingsProfile; 
       // 23505 is a unique violation: someone took the name in the meantime.
       return setError(error.code === "23505" ? accountErrorText("username_taken") : accountErrorText(error.message));
     }
+    const nextUsername = normalizeUsername(username);
+    const nextDisplayName = displayName.trim();
+    updateSessionUser({ username: nextUsername, displayName: nextDisplayName, avatarUrl });
     setSaved(true);
     router.refresh();
   }
