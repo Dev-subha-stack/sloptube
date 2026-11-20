@@ -13,6 +13,8 @@ as $$
    where v.id = video_download_source.video_id
      and v.status = 'ready'
      and v.source_key is not null
+     and v.deleted_at is null
+     and v.removed_at is null
      and (
        v.owner_id = (select auth.uid())
        or v.visibility in ('public', 'unlisted')
