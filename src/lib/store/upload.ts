@@ -235,7 +235,7 @@ export const useUpload = create<UploadState>((set, get) => ({
             // A retried multipart chunk can report fewer acknowledged bytes.
             // Keep the visual meter monotonic; final success still comes only
             // after every part has uploaded and /complete has returned.
-            const visibleSent = Math.max(get().sent, Math.min(sent, upload.size));
+            const visibleSent = Math.max(get().sent, Math.min(sent, Math.max(0, upload.size - 1)));
             const speed = meter.add(visibleSent);
             const now = Date.now();
             // Paint at most five times a second.
