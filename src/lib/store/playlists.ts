@@ -1,7 +1,6 @@
 "use client";
 
 import { create } from "zustand";
-import { CLIENT_VIDEOS, type ClientVideo } from "@/lib/clientData";
 
 const STORAGE_KEY = "sloptube_playlists";
 
@@ -29,28 +28,9 @@ type PlaylistsState = {
   hasVideo: (playlistId: string, videoId: string) => boolean;
 };
 
-const SEED_PLAYLISTS: Playlist[] = [
-  {
-    id: "pl-open-animation",
-    title: "Open Source Animation Masterpieces",
-    description: "Curated collection of groundbreaking open CGI films and animations.",
-    channelId: "c-opencinema-003",
-    visibility: "public",
-    createdAt: new Date(Date.now() - 30 * 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 2 * 86400000).toISOString(),
-    videoIds: ["v-open-001", "v-open-002", "v-cosmos-001"],
-  },
-  {
-    id: "pl-tech-engineering",
-    title: "Full-Stack System Architecture & Web Performance",
-    description: "Deep dive tutorials on frontend performance, modern frameworks, and distributed designs.",
-    channelId: "c-codecraft-004",
-    visibility: "public",
-    createdAt: new Date(Date.now() - 20 * 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 5 * 86400000).toISOString(),
-    videoIds: ["v-code-001", "v-apex-001", "v-apex-002"],
-  },
-];
+// These IDs were bundled demo playlists from the early preview build.
+// Remove only those fixtures; preserve playlists people created themselves.
+const LEGACY_DEMO_PLAYLIST_IDS = new Set(["pl-open-animation", "pl-tech-engineering"]);
 
 function persist(playlists: Playlist[]) {
   if (typeof window === "undefined") return;
@@ -65,16 +45,25 @@ export const usePlaylists = create<PlaylistsState>((set, get) => ({
 
   load: () => {
     if (typeof window === "undefined") return;
+    let parsed: unknown = [];
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored) as Playlist[];
-        set({ playlists: parsed, loaded: true });
-        return;
-      }
-    } catch {}
-    set({ playlists: SEED_PLAYLISTS, loaded: true });
-    persist(SEED_PLAYLISTS);
+      if (stored) parsed = JSON.parse(stored);
+    } catch {
+      parsed = [];
+    }
+    const existing = Array.isArray(parsed) ? parsed : [];
+    const playlists = existing.filter(
+      (item): item is Playlist =>
+        Boolean(item) &&
+        typeof item === "object" &&
+        typeof (item as Playlist).id === "string" &&
+        !LEGACY_DEMO_PLAYLIST_IDS.has((item as Playlist).id),
+    );
+    set({ playlists, loaded: true });
+    // Persist the cleaned list so preview fixtures do not return on next load.
+    if (playlists.length !== existing.length || !Array.isArray(parsed)) persist(playlists);
+    if (existing.length === 0 && !localStorage.getItem(STORAGE_KEY)) persist([]);
   },
 
   createPlaylist: (title, description = "", initialVideoId) => {
