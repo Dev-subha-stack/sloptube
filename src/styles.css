@@ -632,7 +632,7 @@ button:not(:disabled) {
 }
 
 button:not(:disabled):active {
-  transform: scale(0.985);
+  scale: 0.985;
 }
 
 a {
@@ -661,6 +661,6 @@ a {
   }
 
   button:not(:disabled):active {
-    transform: none;
+    scale: 1;
   }
 }
