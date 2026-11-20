@@ -232,12 +232,16 @@ export const useUpload = create<UploadState>((set, get) => ({
           signal: controller.signal,
           partSize: signed.partSize,
           onProgress: (sent) => {
-            const speed = meter.add(sent);
+            // A retried multipart chunk can report fewer acknowledged bytes.
+            // Keep the visual meter monotonic; final success still comes only
+            // after every part has uploaded and /complete has returned.
+            const visibleSent = Math.max(get().sent, Math.min(sent, upload.size));
+            const speed = meter.add(visibleSent);
             const now = Date.now();
             // Paint at most five times a second.
-            if (now - lastPaint > 200 || sent === upload.size) {
+            if (now - lastPaint > 200 || visibleSent === upload.size) {
               lastPaint = now;
-              set({ sent, speed });
+              set({ sent: visibleSent, speed });
             }
           },
         });
