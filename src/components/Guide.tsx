@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, Suspense, useContext, type ComponentType } from "react";
-import { mainGuide, moreGuide, railGuide, youGuide, type GuideKey } from "@/lib/guide";
+import { accountGuide, mainGuide, moreGuide, railGuide, youGuide, type GuideKey } from "@/lib/guide";
 import { useFlag, useSession } from "@/lib/store/session";
 import { useUi } from "@/lib/store/ui";
 import { GuideFooterLinks } from "./launch/SiteFooter";
@@ -24,6 +24,8 @@ import {
   BugReportIcon,
   LightbulbIcon,
   CampaignIcon,
+  ChatIcon,
+  StudioIcon,
   FavoriteIcon,
 } from "./icons";
 import { Logo } from "./Logo";
@@ -46,6 +48,8 @@ const ITEMS: Record<GuideKey, Item> = {
   bugs: { href: "/bugs", label: "Report a bug", Icon: BugReportIcon },
   suggestions: { href: "/suggestions", label: "Suggest a feature", Icon: LightbulbIcon },
   updates: { href: "/updates", label: "What's new", Icon: CampaignIcon },
+  studio: { href: "/studio", label: "sloptube Studio", Icon: StudioIcon },
+  messages: { href: "/messages", label: "Messages", Icon: ChatIcon },
 };
 
 function useShellFlags() {
@@ -125,9 +129,9 @@ function GuideContent({ onNavigate }: { onNavigate?: () => void }) {
           <GuideLink key={key} item={ITEMS[key]} onClick={onNavigate} />
         ))}
       </Section>
-      {you.length > 0 && (
+      {(you.length > 0 || user) && (
         <Section>
-          {you.map((key) => (
+          {[...accountGuide(Boolean(user)), ...you].map((key) => (
             <GuideLink key={key} item={ITEMS[key]} onClick={onNavigate} />
           ))}
         </Section>

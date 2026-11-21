@@ -58,7 +58,7 @@ function NewChat({ onPick }: { onPick: (p: Person) => void }) {
         className="block w-full rounded-full border border-[var(--input-border)] bg-transparent px-4 py-2 text-[14px] text-text outline-none focus:border-[var(--focus)]"
       />
       {people.length > 0 && (
-        <div className="anim-pop absolute inset-x-3 top-[52px] z-20 overflow-hidden rounded-[8px] bg-surface shadow-[var(--menu-shadow)]" role="listbox">
+        <div className="anim-in absolute inset-x-3 top-[52px] z-20 overflow-hidden rounded-[8px] bg-surface shadow-[var(--menu-shadow)]" role="listbox">
           {people.map((p) => (
             <button
               key={p.id}
@@ -280,7 +280,7 @@ export function MessagesView() {
                     {gap && <p className="py-2 text-center text-[11px] text-text-3">{timeAgo(m.created_at, now)}</p>}
                     <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                       <p
-                        className={`anim-pop max-w-[78%] whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-2 text-[14px] leading-5 ${
+                        className={`anim-in max-w-[78%] whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-2 text-[14px] leading-5 ${
                           mine ? "rounded-br-[6px] bg-[var(--link)] text-white [&_a]:text-white [&_a]:underline" : "rounded-bl-[6px] bg-[var(--hover)] text-text"
                         }`}
                         data-dm-message={mine ? "mine" : "theirs"}

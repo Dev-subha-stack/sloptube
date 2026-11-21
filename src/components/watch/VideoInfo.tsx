@@ -10,6 +10,7 @@ import { Menu } from "@/components/Menu";
 import { useReport } from "@/components/moderation/ReportMenuItem";
 import { useFlag } from "@/lib/store/session";
 import {
+  DownloadIcon,
   LinkIcon,
   LockIcon,
   MoreHorizIcon,
@@ -117,6 +118,33 @@ export function VideoInfo({
   const moderation = useFlag("moderation");
   const report = useReport("video", video.id);
   const channelHref = `/@${video.channel.handle}`;
+  const [downloading, setDownloading] = useState(false);
+  const [downloadNote, setDownloadNote] = useState<string | null>(null);
+  const canDownload = Boolean(video.src && video.src.startsWith("/api/media/") && !/\.m3u8(\?|$)/i.test(video.src));
+
+  async function download() {
+    if (!video.src || downloading) return;
+    setDownloading(true);
+    setDownloadNote(null);
+    try {
+      const res = await fetch(`${video.src}?download=1`);
+      const j = res.ok ? ((await res.json()) as { url?: string }) : null;
+      if (!j?.url) throw new Error("no link");
+      const a = document.createElement("a");
+      a.href = j.url;
+      a.rel = "noopener";
+      a.download = "";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setDownloadNote("Download started");
+    } catch {
+      setDownloadNote("The download couldn't start. Try again.");
+    } finally {
+      setDownloading(false);
+      setTimeout(() => setDownloadNote(null), 3000);
+    }
+  }
 
   return (
     <div className="px-3 pt-3 tab:px-0 tab:pt-5">
@@ -133,6 +161,13 @@ export function VideoInfo({
         <div className="-mx-1.5 flex items-center sm:mx-0">
           <LikeButtons key={video.id} videoId={video.id} engagement={engagement} />
           <ActionButton Icon={ShareIcon} label="Share" onClick={() => setSharing(true)} mirror data-share />
+          <ActionButton
+            Icon={DownloadIcon}
+            label={downloading ? "Preparing" : "Download"}
+            title={canDownload ? "Download this video" : "This video can't be downloaded."}
+            onClick={canDownload ? () => void download() : undefined}
+            data-download
+          />
           <ActionButton Icon={PlaylistAddIcon} label="Save" title="Saving to a playlist arrives in a later feature." />
           {moderation && !video.isOwner ? (
             <Menu
@@ -174,6 +209,11 @@ export function VideoInfo({
         <div className="mt-3 tab:ml-16">{children ?? <Description text={video.description} />}</div>
       </div>
 
+      {downloadNote && (
+        <div role="status" className="anim-in fixed bottom-6 left-6 z-[70] rounded-[4px] bg-[#323232] px-4 py-3 text-[14px] text-white shadow-lg">
+          {downloadNote}
+        </div>
+      )}
       {sharing && <ShareDialog videoId={video.id} title={video.title} onClose={() => setSharing(false)} />}
       {report.dialog}
     </div>

@@ -127,3 +127,48 @@ export async function changeSubscription(
   if (!row) return { error: action === "unsubscribe" ? "not_found" : "failed" };
   return { subscribed: row.subscribed === true, notify: row.notify === true, count: Number(row.subscriber_count) || 0 };
 }
+
+export type SubscribedChannel = {
+  id: string;
+  handle: string;
+  name: string;
+  avatarUrl: string | null;
+  description: string;
+  subscriberCount: number;
+  videoCount: number;
+  notify: boolean;
+  latestUploadAt: string | null;
+};
+
+export type SubscribedChannelsState =
+  | { kind: "off" | "no-db" | "signed-out" | "not-set-up" }
+  | { kind: "ready"; channels: SubscribedChannel[]; now: number };
+
+/** /feed/subscriptions: every channel the person follows, A to Z. */
+export async function subscribedChannels(): Promise<SubscribedChannelsState> {
+  const gate = await subscriptionsGate();
+  if (typeof gate === "string") return { kind: gate };
+  const supabase = await createClient();
+  if (!supabase) return { kind: "no-db" };
+  const { data, error } = await supabase.rpc("my_subscribed_channels");
+  if (error) return notSetUp(error.code) ? { kind: "not-set-up" } : { kind: "ready", channels: [], now: Date.now() };
+  type Row = {
+    channel_id: string; handle: string; name: string; avatar_url: string | null; description: string | null;
+    subscriber_count: number | null; video_count: number | null; notify: boolean; latest_upload_at: string | null;
+  };
+  return {
+    kind: "ready",
+    now: Date.now(),
+    channels: ((Array.isArray(data) ? data : []) as Row[]).map((r) => ({
+      id: r.channel_id,
+      handle: r.handle,
+      name: r.name,
+      avatarUrl: r.avatar_url,
+      description: r.description ?? "",
+      subscriberCount: Number(r.subscriber_count) || 0,
+      videoCount: Number(r.video_count) || 0,
+      notify: r.notify === true,
+      latestUploadAt: r.latest_upload_at,
+    })),
+  };
+}

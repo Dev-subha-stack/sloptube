@@ -7,6 +7,7 @@ import { Avatar } from "@/components/Avatar";
 import { BellIcon } from "@/components/icons";
 import { Menu } from "@/components/Menu";
 import { supabase } from "@/integrations/supabase/client";
+import { useSession } from "@/lib/store/session";
 import type { FeedCard, FeedPage } from "@/lib/feed/types";
 import { badgeLabel, parseSeen, SEEN_KEY } from "@/lib/subscriptions/unread";
 import { parseUtc, timeAgo } from "@/lib/watch/format";
@@ -31,7 +32,7 @@ function writeSeen(value: number) {
 /** One row in the bell menu: a comment, a reply, a bug report update or an upload. */
 type Item = {
   key: string;
-  kind: "comment" | "reply" | "bug" | "share" | "upload" | "other";
+  kind: "comment" | "reply" | "like" | "bug" | "share" | "upload" | "other";
   text: string;
   at: string;
   href: string;
@@ -80,7 +81,7 @@ async function fetchAll(): Promise<Item[]> {
   const items: Item[] = [
     ...db.map<Item>((n) => ({
       key: `n:${n.id}`,
-      kind: n.type === "comment" || n.type === "reply" || n.type === "bug" || n.type === "share" ? n.type : "other",
+      kind: n.type === "comment" || n.type === "reply" || n.type === "like" || n.type === "bug" || n.type === "share" ? n.type : "other",
       text: n.message,
       at: n.created_at,
       href: dbHref(n),
@@ -119,6 +120,7 @@ function isUnread(i: Item, seen: number | null): boolean {
  * opening the menu marks everything read. Clicking a comment jumps to it.
  */
 export function NotificationsBell() {
+  const userId = useSession((s) => s.user?.id ?? null);
   const [items, setItems] = useState<Item[] | null>(null);
   const [seen, setSeen] = useState<number | null>(null);
   const [seenAtOpen, setSeenAtOpen] = useState<number | null>(null);
@@ -149,6 +151,23 @@ export function NotificationsBell() {
     }, 60_000);
     return () => clearInterval(t);
   }, [refresh]);
+
+  // New likes, comments and replies arrive live (the database only sends this person's own).
+  useEffect(() => {
+    if (!userId) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const channel = supabase
+      .channel(`bell-${userId}-${Math.random().toString(36).slice(2)}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` }, () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => void refresh(), 300);
+      })
+      .subscribe();
+    return () => {
+      clearTimeout(timer);
+      void supabase.removeChannel(channel);
+    };
+  }, [userId, refresh]);
 
   const unread = items ? items.filter((i) => isUnread(i, seen)).length : 0;
   const badge = badgeLabel(unread);
@@ -214,7 +233,7 @@ export function NotificationsBell() {
                 <BellIcon className="h-[72px] w-[72px] text-text-3" />
                 <p className="mt-4 text-[16px] font-medium text-text">Your notifications live here</p>
                 <p className="mt-2 text-[14px] leading-5 text-text-2">
-                  New comments on your videos, replies to you, and uploads from channels with the bell on show up here.
+                  Likes and comments on your videos, replies to you, and uploads from channels with the bell on show up here.
                 </p>
               </div>
             )}

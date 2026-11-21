@@ -607,3 +607,48 @@ html[data-motion="reduced"] *, html[data-motion="reduced"] *::before, html[data-
 }
 .support-card:hover { transform: translateY(-1px); box-shadow: 0 6px 18px -8px var(--support-from); }
 .support-card:active { transform: scale(0.98); }
+
+/* Round 4: snappy motion for pages, buttons, menus, dialogs and cards. */
+@keyframes anim-in {
+  from { opacity: 0; transform: translateY(4px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+.anim-in { animation: anim-in 180ms cubic-bezier(.2,.8,.2,1) both; }
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.page-in { animation: page-in 220ms cubic-bezier(.2,.8,.2,1) both; }
+
+/* Buttons sink a touch when pressed. */
+.btn-blue, .btn-text, .press, [data-subscribe], [data-like], [data-dislike], [data-share], [data-download], [data-chip] {
+  transition: transform 120ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+.btn-blue:active:not(:disabled), .btn-text:active:not(:disabled), .press:active:not(:disabled),
+[data-subscribe]:active, [data-like]:active, [data-dislike]:active, [data-share]:active, [data-download]:active:not(:disabled), [data-chip]:active {
+  transform: scale(0.95);
+}
+
+/* Menus and dialogs open with a quick fade and grow. */
+[role="menu"], [role="listbox"] { animation: anim-in 140ms cubic-bezier(.2,.8,.2,1) both; transform-origin: top right; }
+[role="dialog"] { animation: anim-in 180ms cubic-bezier(.2,.8,.2,1) both; }
+
+/* Cards lift on hover; video thumbnails zoom a little. */
+.lift { transition: transform 180ms ease, box-shadow 180ms ease; }
+.lift:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.35); }
+.card-thumb img { transition: transform 320ms cubic-bezier(.2,.8,.2,1); }
+[data-feed-card]:hover .card-thumb img, [data-short-card]:hover .card-thumb img { transform: scale(1.04); }
+
+/* Chips row on the home page, like YouTube. */
+.chips { scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+
+/* Phones: never scroll sideways, and scroll smoothly. */
+html, body { overflow-x: clip; max-width: 100%; }
+body { -webkit-overflow-scrolling: touch; }
+img, video { max-width: 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-in, .anim-in, [role="menu"], [role="listbox"], [role="dialog"] { animation: none; }
+}

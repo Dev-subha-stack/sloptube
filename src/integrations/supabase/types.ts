@@ -888,6 +888,80 @@ export type Database = {
           },
         ]
       }
+      playlist_videos: {
+        Row: {
+          added_at: string
+          playlist_id: string
+          position: number
+          video_id: string
+        }
+        Insert: {
+          added_at?: string
+          playlist_id: string
+          position?: number
+          video_id: string
+        }
+        Update: {
+          added_at?: string
+          playlist_id?: string
+          position?: number
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_videos_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playlist_videos_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playlists: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          owner_id: string
+          title: string
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          owner_id: string
+          title: string
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          owner_id?: string
+          title?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlists_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1740,6 +1814,39 @@ export type Database = {
           },
           {
             foreignKeyName: "watch_history_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      watch_later: {
+        Row: {
+          added_at: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          added_at?: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          added_at?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "watch_later_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "watch_later_video_id_fkey"
             columns: ["video_id"]
             isOneToOne: false
             referencedRelation: "videos"
@@ -2636,6 +2743,40 @@ export type Database = {
         Args: { comment_id: string; on?: boolean }
         Returns: boolean
       }
+      playlist_cards: {
+        Args: { pid: string }
+        Returns: {
+          channel_avatar_url: string
+          channel_handle: string
+          channel_id: string
+          channel_name: string
+          duration_s: number
+          hls_key: string
+          id: string
+          is_short: boolean
+          item_position: number
+          preview_sprite_key: string
+          published_at: string
+          thumbnail_url: string
+          title: string
+          views: number
+        }[]
+      }
+      playlist_summaries: {
+        Args: { for_owner?: string; only_public?: boolean }
+        Returns: {
+          description: string
+          first_hls_key: string
+          first_thumbnail_url: string
+          first_video_id: string
+          id: string
+          owner_id: string
+          title: string
+          updated_at: string
+          video_count: number
+          visibility: string
+        }[]
+      }
       post_comment: {
         Args: { body: string; parent_id?: string; video_id: string }
         Returns: {
@@ -3127,9 +3268,32 @@ export type Database = {
         Args: { name: string }
         Returns: boolean
       }
+      video_watchable: {
+        Args: { v: Database["public"]["Tables"]["videos"]["Row"] }
+        Returns: boolean
+      }
       view_threshold_s:
         | { Args: { duration: number }; Returns: number }
         | { Args: { duration: number; is_short: boolean }; Returns: number }
+      watch_later_cards: {
+        Args: never
+        Returns: {
+          added_at: string
+          channel_avatar_url: string
+          channel_handle: string
+          channel_id: string
+          channel_name: string
+          duration_s: number
+          hls_key: string
+          id: string
+          is_short: boolean
+          preview_sprite_key: string
+          published_at: string
+          thumbnail_url: string
+          title: string
+          views: number
+        }[]
+      }
       watch_ping: {
         Args: {
           played_s: number

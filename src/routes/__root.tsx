@@ -180,7 +180,13 @@ function RootComponent() {
               <Guide />
               <div className="flex min-w-0 flex-1 flex-col">
                 <main id="content" tabIndex={-1} className="min-w-0 flex-1 outline-none">
-                  {down ? <Maintenance /> : <Outlet />}
+                  {down ? (
+                    <Maintenance />
+                  ) : (
+                    <div key={pathname} className="page-in">
+                      <Outlet />
+                    </div>
+                  )}
                 </main>
                 <SiteFooter />
               </div>

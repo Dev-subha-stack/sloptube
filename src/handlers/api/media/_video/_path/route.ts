@@ -10,7 +10,9 @@ import { mediaContext } from "@/lib/watch/server";
 // README.md for why it works this way.
 export async function GET(request: Request, ctx: RouteContext<"/api/media/[video]/[...path]">) {
   const { video, path } = await ctx.params;
-  const link = new URL(request.url).searchParams.has("link");
-  const result = await serveMedia(video, path, await mediaContext(), { link });
+  const params = new URL(request.url).searchParams;
+  const download = params.has("download");
+  const link = params.has("link") || download;
+  const result = await serveMedia(video, path, await mediaContext(), { link, download });
   return new Response(result.body, { status: result.status, headers: result.headers });
 }

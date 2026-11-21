@@ -12,7 +12,7 @@ export function ShortCard({ video, className = "" }: { video: ShortCardVideo; cl
   const href = `/shorts/${video.id}`;
   return (
     <article className={`min-w-0 ${className}`} data-short-card={video.id}>
-      <Link href={href} className="relative block aspect-[9/16] overflow-hidden rounded-lg bg-skeleton" tabIndex={-1} aria-hidden>
+      <Link href={href} className="card-thumb relative block aspect-[9/16] overflow-hidden rounded-xl bg-skeleton" tabIndex={-1} aria-hidden>
         <Thumb src={video.thumbnail} alt={video.title} sizes="(min-width: 1280px) 210px, (min-width: 640px) 25vw, 50vw" />
       </Link>
       <h3 className="mt-2 line-clamp-2 pr-2 text-[14px] font-medium leading-5 text-text" title={video.title}>

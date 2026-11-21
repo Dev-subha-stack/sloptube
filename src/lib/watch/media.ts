@@ -14,7 +14,8 @@ export type MediaStorage = {
   /** The object as text, or null when it does not exist. */
   getText(key: string): Promise<string | null>;
   /** A presigned GET link to the object. Made locally, no request to R2. */
-  presign(key: string, expiresIn: number): Promise<string>;
+  /** `download`: ask the browser to save the file under this name instead of playing it. */
+  presign(key: string, expiresIn: number, download?: string): Promise<string>;
 };
 
 export type MediaContext = {
@@ -70,7 +71,7 @@ export function folderOf(hlsKey: string): string | null {
 /** A whole video file played straight from storage: the link has to last a long watch. */
 export const FILE_URL_TTL_S = 6 * 60 * 60;
 
-export async function serveMedia(videoId: string, parts: string[], ctx: MediaContext, opts: { link?: boolean } = {}): Promise<MediaResult> {
+export async function serveMedia(videoId: string, parts: string[], ctx: MediaContext, opts: { link?: boolean; download?: boolean } = {}): Promise<MediaResult> {
   if (!ctx.db) return fail(503, "no_db");
   if (!(await ctx.flagOn())) return fail(403, "watch_off");
   if (!UUID.test(videoId)) return fail(404, "not_found");
@@ -95,7 +96,7 @@ export async function serveMedia(videoId: string, parts: string[], ctx: MediaCon
     }
     if (opts.link) {
       // The player asks with its sign-in attached (owners watching private videos), then plays the link.
-      const url = await ctx.storage.presign(key, FILE_URL_TTL_S);
+      const url = await ctx.storage.presign(key, FILE_URL_TTL_S, opts.download ? `sloptube-${id.slice(0, 8)}.${file.ext}` : undefined);
       return { status: 200, headers: { "content-type": "application/json", "cache-control": "private, no-store" }, body: JSON.stringify({ url }) };
     }
     const url = await ctx.storage.presign(key, MEDIA_URL_TTL_S);

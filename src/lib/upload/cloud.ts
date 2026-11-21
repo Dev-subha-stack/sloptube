@@ -68,8 +68,8 @@ export function createCloudMediaStorage(): MediaStorage {
       if (!data || data.size > MAX_TEXT_BYTES) return null;
       return data.text();
     },
-    async presign(key, expiresIn) {
-      const { data, error } = await (await admin()).createSignedUrl(key, expiresIn);
+    async presign(key, expiresIn, download) {
+      const { data, error } = await (await admin()).createSignedUrl(key, expiresIn, download ? { download } : undefined);
       if (error || !data) throw new Error(error?.message ?? "sign failed");
       return browserUrl(data.signedUrl);
     },

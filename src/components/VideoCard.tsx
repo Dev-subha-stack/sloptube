@@ -3,6 +3,7 @@ import { SpritePreview } from "@/components/feed/SpritePreview";
 import { viewsLabel } from "@/lib/feed/format";
 import type { FeedCard } from "@/lib/feed/types";
 import { formatTime, timeAgo } from "@/lib/watch/format";
+import { StaffBadge } from "@/components/admin/RoleBadge";
 import { Avatar } from "./Avatar";
 import { GRID_SIZES, Thumb } from "./Thumb";
 import { ThumbProgress } from "./ThumbProgress";
@@ -36,7 +37,7 @@ export function VideoCard({
   const channelHref = `/@${video.channel.handle}`;
   return (
     <article className="min-w-0" data-feed-card={video.id}>
-      <Link href={href} className="relative block aspect-video overflow-hidden bg-skeleton" tabIndex={-1} aria-hidden>
+      <Link href={href} className="card-thumb relative block aspect-video overflow-hidden bg-skeleton sm:rounded-xl" tabIndex={-1} aria-hidden>
         <Thumb src={video.thumbnail} alt={video.title} sizes={GRID_SIZES} eager={eager} />
         {video.spriteVtt && <SpritePreview vtt={video.spriteVtt} />}
         {rank !== undefined && (
@@ -45,7 +46,7 @@ export function VideoCard({
           </span>
         )}
         {video.durationS !== null && (
-          <span className="absolute bottom-1 right-1 rounded-sm bg-black/80 px-1 py-[3px] text-[12px] font-medium leading-3 tracking-[0.5px] text-white">
+          <span className="absolute bottom-1.5 right-1.5 rounded-[4px] bg-black/80 px-1 py-[3px] text-[12px] font-medium leading-3 tracking-[0.5px] text-white">
             {formatTime(video.durationS)}
           </span>
         )}
@@ -55,14 +56,15 @@ export function VideoCard({
         <Link href={channelHref} className="shrink-0" aria-label={video.channel.name}>
           <Avatar name={video.channel.name} url={video.channel.avatarUrl} size={36} />
         </Link>
-        <div className="min-w-0 pr-6">
-          <Heading className="line-clamp-2 text-[14px] font-medium leading-5 text-text" title={video.title}>
+        <div className="min-w-0 flex-1 pr-6">
+          <Heading className="line-clamp-2 text-[14px] font-medium leading-5 text-text sm:text-[16px] sm:leading-[22px]" title={video.title}>
             <Link href={href}>{video.title}</Link>
           </Heading>
           <p className="mt-1 text-[13px] leading-[18px] text-text-2 sm:mt-1.5">
             <Link href={channelHref} className="hover:text-text sm:block sm:truncate">
               {video.channel.name}
             </Link>
+            <StaffBadge name={video.channel.handle} />
             <span className="sm:hidden"> · </span>
             {viewsLabel(video.views)} · {timeAgo(video.publishedAt, now)}
           </p>
@@ -76,7 +78,7 @@ export function VideoCard({
 export function VideoCardSkeleton({ className = "" }: { className?: string }) {
   return (
     <div aria-hidden className={`min-w-0 ${className}`} data-card-skeleton>
-      <div className="aspect-video bg-skeleton" />
+      <div className="aspect-video bg-skeleton sm:rounded-xl" />
       <div className="mt-3 flex gap-3 px-3 sm:px-0">
         <div className="h-9 w-9 shrink-0 rounded-full bg-skeleton" />
         <div className="flex-1 pr-6">

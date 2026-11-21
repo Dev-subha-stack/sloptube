@@ -43,6 +43,13 @@ export function EmojiManager() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const input = useRef<HTMLInputElement>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!file) return setPreviewUrl(null);
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
 
   const refresh = useCallback(async (channel: string) => {
     const { data } = await supabase.from("channel_emojis").select("id, name, image_path").eq("channel_id", channel).order("name");
@@ -143,6 +150,18 @@ export function EmojiManager() {
             className="mt-1 block text-[13px] text-text"
           />
         </label>
+        {previewUrl && (
+          <div className="anim-in flex items-center gap-3 rounded-[8px] bg-[var(--hover)] px-3 py-2" data-emoji-upload-preview>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={previewUrl} alt="" className="h-12 w-12 object-contain" />
+            <span className="text-[13px] text-text-2">
+              Preview: <span className="text-text">Nice video </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={previewUrl} alt="" className="inline-block h-6 w-6 align-text-bottom" />
+              <span className="ml-1 text-text">:{cleanEmojiName(name) || "name"}:</span>
+            </span>
+          </div>
+        )}
         <button type="submit" disabled={busy} className="btn-blue">
           {busy ? "Adding..." : "Add emoji"}
         </button>
@@ -159,9 +178,9 @@ export function EmojiManager() {
       <ul className={`${card} mt-2 grid grid-cols-2 gap-px overflow-hidden bg-[var(--divider)] sm:grid-cols-3 lg:grid-cols-4`} data-emoji-list>
         {emojis?.length === 0 && <li className="col-span-full bg-surface px-4 py-8 text-center text-[14px] text-text-2">No emojis yet.</li>}
         {emojis?.map((e) => (
-          <li key={e.id} className="flex items-center gap-3 bg-surface px-4 py-3" data-emoji-row={e.name}>
+          <li key={e.id} className="group flex items-center gap-3 bg-surface px-4 py-3" data-emoji-row={e.name}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={emojiUrl(e.image_path)} alt="" className="h-8 w-8" />
+            <img src={emojiUrl(e.image_path)} alt="" className="h-8 w-8 transition-transform duration-150 group-hover:scale-150" />
             <span className="min-w-0 flex-1 truncate text-[14px] text-text">:{e.name}:</span>
             <button type="button" onClick={() => void remove(e)} disabled={busy} className="text-[12px] font-medium text-[var(--link)]">
               Remove

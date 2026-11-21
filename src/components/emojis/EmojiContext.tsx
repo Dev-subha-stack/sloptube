@@ -37,8 +37,19 @@ export function EmojiText({ text }: { text: string }) {
         typeof p === "string" ? (
           <span key={i}>{p}</span>
         ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img key={i} src={p.url} alt={`:${p.name}:`} title={`:${p.name}:`} className="inline-block h-6 w-6 align-text-bottom" loading="lazy" data-emoji={p.name} />
+          <span key={i} className="group/emoji relative inline-block align-text-bottom">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={p.url} alt={`:${p.name}:`} className="inline-block h-6 w-6 transition-transform duration-150 group-hover/emoji:scale-125" loading="lazy" data-emoji={p.name} />
+            <span
+              role="tooltip"
+              className="pointer-events-none absolute bottom-full left-1/2 z-40 mb-1 hidden -translate-x-1/2 flex-col items-center rounded-[8px] bg-surface p-2 shadow-[var(--menu-shadow)] group-hover/emoji:flex"
+              data-emoji-preview={p.name}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={p.url} alt="" className="h-14 w-14 object-contain" />
+              <span className="mt-1 whitespace-nowrap text-[12px] text-text-2">:{p.name}:</span>
+            </span>
+          </span>
         ),
       )}
     </>
@@ -49,7 +60,10 @@ export function EmojiText({ text }: { text: string }) {
 export function EmojiPicker({ onPick }: { onPick: (code: string) => void }) {
   const map = useEmojis();
   const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState<string | null>(null);
   if (map.size === 0) return null;
+  const entries = [...map.entries()];
+  const shown = hovered && map.has(hovered) ? hovered : entries[0]?.[0] ?? null;
   return (
     <div className="relative">
       <button
@@ -65,23 +79,34 @@ export function EmojiPicker({ onPick }: { onPick: (code: string) => void }) {
         </svg>
       </button>
       {open && (
-        <div className="absolute left-0 top-10 z-30 grid w-[248px] grid-cols-6 gap-1 rounded-[8px] bg-surface p-2 shadow-[var(--menu-shadow)]" role="menu" data-emoji-menu>
-          {[...map.entries()].map(([name, url]) => (
+        <div className="anim-in absolute left-0 top-10 z-30 w-[248px] rounded-[8px] bg-surface p-2 shadow-[var(--menu-shadow)]" role="menu" data-emoji-menu>
+          <div className="grid grid-cols-6 gap-1">
+          {entries.map(([name, url]) => (
             <button
               key={name}
               type="button"
               role="menuitem"
               title={`:${name}:`}
+              onMouseEnter={() => setHovered(name)}
+              onFocus={() => setHovered(name)}
               onClick={() => {
                 onPick(`:${name}:`);
                 setOpen(false);
               }}
-              className="grid h-9 w-9 place-items-center rounded hover:bg-hover"
+              className="grid h-9 w-9 place-items-center rounded transition-transform hover:scale-110 hover:bg-hover"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={url} alt={`:${name}:`} className="h-7 w-7" />
             </button>
           ))}
+          </div>
+          {shown && (
+            <div className="mt-2 flex items-center gap-3 border-t border-divider pt-2" data-emoji-live-preview={shown}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={map.get(shown)} alt="" className="h-12 w-12 object-contain" />
+              <span className="min-w-0 truncate text-[13px] text-text">:{shown}:</span>
+            </div>
+          )}
         </div>
       )}
     </div>

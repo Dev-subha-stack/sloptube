@@ -3,7 +3,7 @@
 // one feature at a time (Trending appears when feed goes on, and so on).
 // No imports on purpose, so `node --test` can load it directly.
 
-export type GuideKey = "home" | "shorts" | "trending" | "subscriptions" | "library" | "history" | "watchLater" | "playlists" | "topRated" | "ratings" | "bugs" | "suggestions" | "updates";
+export type GuideKey = "home" | "shorts" | "trending" | "subscriptions" | "library" | "history" | "watchLater" | "playlists" | "topRated" | "ratings" | "bugs" | "suggestions" | "updates" | "studio" | "messages";
 
 export type ShellFlags = {
   feed?: boolean;
@@ -36,6 +36,11 @@ export function railGuide(f: ShellFlags): GuideKey[] {
 /** The search box only shows with the search flag (8). */
 export function searchShown(f: ShellFlags): boolean {
   return f.search === true;
+}
+
+/** Signed-in shortcuts: sloptube Studio and Messages. */
+export function accountGuide(signedIn: boolean): GuideKey[] {
+  return signedIn ? ["studio", "messages"] : [];
 }
 
 /** Extra links: Top rated and your ratings (with engagement), then What's new, Report a bug and Suggest a feature, which are always there. */
