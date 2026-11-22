@@ -6,7 +6,7 @@ import { readSupabaseConfig } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import { previewLog, previewQueue, previewSuspended, previewWords } from "./preview";
 import { groupReports, rowToReport, type QueueGroup } from "./queue";
-import { moderationErrorCode, type ModAction, type ReportKind, type ReportReason, type TargetKind } from "./rules";
+import { moderationErrorCode, type ModAction, type ModTargetKind, type ReportKind, type ReportReason, type TargetKind } from "./rules";
 import { rowToLog, rowToSuspended, rowToWord, type LogEntry, type SuspendedChannel, type Word } from "./types";
 
 type Fail = { error: string };
@@ -49,6 +49,16 @@ export async function reportTarget(kind: TargetKind, id: string, reason: ReportR
   const w = await writer();
   if ("error" in w) return w;
   const { data, error } = await w.supabase.rpc("report_target", { target_kind: kind, target_id: id, reason, details });
+  return error ? { error: codeOf(error) } : { id: String(data) };
+}
+/** Report a received DM. The database RPC validates participation and captures the message plus its ten immediately preceding messages. */
+export async function reportDirectMessage(id: string, reason: ReportReason, details: string): Promise<{ id: string } | Fail> {
+  const w = await writer();
+  if ("error" in w) return w;
+  const db = w.supabase as unknown as {
+    rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { code?: string; message?: string } | null }>;
+  };
+  const { data, error } = await db.rpc("report_direct_message", { message_id: id, reason, details });
   return error ? { error: codeOf(error) } : { id: String(data) };
 }
 
@@ -155,7 +165,7 @@ async function adminWriter(): Promise<{ supabase: Db } | Fail> {
 
 export type ActionResult = { closed: number; suspended: boolean };
 
-export async function modAction(action: ModAction, targetKind: TargetKind, targetId: string, reason: string, kind: ReportKind): Promise<ActionResult | Fail> {
+export async function modAction(action: ModAction, targetKind: ModTargetKind, targetId: string, reason: string, kind: ReportKind): Promise<ActionResult | Fail> {
   const w = await adminWriter();
   if ("error" in w) return w;
   const { data, error } = await w.supabase.rpc("mod_action", { action, target_kind: targetKind, target_id: targetId, reason, kind });
