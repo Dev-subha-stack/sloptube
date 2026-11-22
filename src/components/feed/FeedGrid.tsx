@@ -48,6 +48,50 @@ export function FeedGrid({
   // browser buckets again with its own time zone once it has mounted.
   const tzOffset = useTimezoneOffset();
 
+  // Refresh the newest page quietly every ten minutes. Never refresh while
+  // hidden or while the viewer is loading another page; newly found videos
+  // are prepended without replacing the cards already on screen.
+  const lastRefreshAt = useRef(Date.now());
+  const refreshing = useRef(false);
+  const refreshLatest = useCallback(async () => {
+    if (document.visibilityState !== "visible" || busy.current || refreshing.current) return;
+    refreshing.current = true;
+    const params = new URLSearchParams();
+    if (kind !== "subscriptions") params.set("kind", kind);
+    if (channelId) params.set("channel", channelId);
+    const endpoint = kind === "subscriptions" ? "/api/subscriptions/feed" : "/api/feed";
+    try {
+      const res = await fetch(`${endpoint}?${params.toString()}`, { cache: "no-store" });
+      if (!res.ok) return;
+      const page = (await res.json()) as FeedPage;
+      lastRefreshAt.current = Date.now();
+      if (!page.cards?.length) return;
+      setCards((old) => {
+        const seen = new Set(old.map((card) => card.id));
+        const fresh = page.cards.filter((card) => !seen.has(card.id));
+        return fresh.length ? [...fresh, ...old] : old;
+      });
+    } catch {
+      // Keep the current feed intact; a later interval can retry.
+    } finally {
+      refreshing.current = false;
+    }
+  }, [kind, channelId]);
+
+  useEffect(() => {
+    const maybeRefresh = () => {
+      if (document.visibilityState === "visible" && Date.now() - lastRefreshAt.current >= 10 * 60 * 1000) {
+        void refreshLatest();
+      }
+    };
+    const id = window.setInterval(maybeRefresh, 10 * 60 * 1000);
+    document.addEventListener("visibilitychange", maybeRefresh);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener("visibilitychange", maybeRefresh);
+    };
+  }, [refreshLatest]);
+
   // The next page is read ahead once the browser is idle (feature 15), so
   // the cards are there the moment the end of the grid comes near.
   const ahead = useRef<{ cursor: string; page: Promise<FeedPage> } | null>(null);
