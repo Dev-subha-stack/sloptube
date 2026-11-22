@@ -1,6 +1,7 @@
 "use client";
 
 import type Hls from "hls.js";
+import { useRouter } from "next/navigation";
 import { hlsXhrSetup } from "@/lib/auth-fetch";
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import {
@@ -78,6 +79,7 @@ function preferNative(video: HTMLVideoElement): boolean {
  * HLS natively (and then picks the quality itself).
  */
 export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, engagement = null, nextVideoId = null, embed = false }: Props) {
+  const router = useRouter();
   const wrapRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
@@ -622,7 +624,7 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
           saveResume(videoId, e.currentTarget.duration, e.currentTarget.duration);
           if (autoplayRef.current && nextVideoId) {
             window.setTimeout(() => {
-              window.location.assign(`/watch?v=${encodeURIComponent(nextVideoId)}`);
+              router.push(`/watch?v=${encodeURIComponent(nextVideoId)}`);
             }, 350);
           }
         }}
