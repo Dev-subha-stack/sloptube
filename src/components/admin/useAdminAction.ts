@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { moderationErrorMessage, type ModAction, type ReportKind, type TargetKind } from "@/lib/moderation/rules";
+import { moderationErrorMessage, type ModAction, type ModTargetKind, type ReportKind } from "@/lib/moderation/rules";
 
-export type ActionInput = { action: ModAction; targetKind: TargetKind; targetId: string; reason: string; kind?: ReportKind };
+export type ActionInput = { action: ModAction; targetKind: ModTargetKind; targetId: string; reason: string; kind?: ReportKind };
 export type ActionOutcome = { ok: true; closed: number; suspended: boolean } | { ok: false; message: string };
 
 /** POST /api/admin/action, then the server data is read again. */
