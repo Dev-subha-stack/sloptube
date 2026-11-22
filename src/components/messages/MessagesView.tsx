@@ -295,7 +295,7 @@ function MessagesContent() {
             </div>
             <form onSubmit={send} className="flex shrink-0 items-end gap-2 border-t border-divider p-2 sm:p-3">
               <EmojiPicker
-                onPick={(code) => setDraft((current) => (current && !/\\s$/.test(current) ? current + " " + code : current + code))}
+                onPick={(code) => setDraft((current) => (current && !/\s$/.test(current) ? current + " " + code : current + code))}
               />
               <textarea
                 value={draft}
