@@ -3,17 +3,19 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { groupActions, type QueueGroup } from "@/lib/moderation/queue";
+import type { ModTargetKind } from "@/lib/moderation/rules";
 import { actionNeedsReason, DETAILS_MAX, REASON_LABELS, type ModAction } from "@/lib/moderation/rules";
 import { strikesLabel } from "@/lib/moderation/strikes";
 import { timeAgo } from "@/lib/watch/format";
 import { card } from "./AdminShell";
 import { ACTION_DONE, ACTION_LABELS, useAdminAction } from "./useAdminAction";
 
-const KIND_LABEL = { video: "Video", comment: "Comment", channel: "Channel" } as const;
+const KIND_LABEL: Record<ModTargetKind, string> = { video: "Video", comment: "Comment", channel: "Channel", direct_message: "Direct message" };
 
 const DANGER = new Set<ModAction>(["remove", "strike", "suspend", "ban"]);
 
 function targetHref(g: QueueGroup): string | null {
+  if (g.targetKind === "direct_message") return null;
   if (g.targetKind === "channel") return g.channel ? `/@${g.channel.handle}` : null;
   if (g.videoId) return `/watch?v=${g.videoId}`;
   return null;
@@ -77,6 +79,32 @@ function Group({ g, now, preview, onDone }: { g: QueueGroup; now: number; previe
         </span>
       </div>
 
+      {g.targetKind === "direct_message" && g.latest.reportedMessage && (
+        <div className="mt-3 rounded-[4px] border border-divider bg-hover/40 p-3" data-queue-dm-snapshot>
+          <p className="text-[12px] font-medium text-text-2">
+            Reported message from {g.latest.reportedMessage.senderName}
+            {g.latest.reportedMessage.createdAt ? " · " + timeAgo(g.latest.reportedMessage.createdAt, now) : ""}
+          </p>
+          <p className="mt-1 whitespace-pre-wrap break-words text-[14px] leading-5 text-text" data-queue-dm-message>
+            {g.latest.reportedMessage.body}
+          </p>
+          {(g.latest.messageContext?.length ?? 0) > 0 && (
+            <details className="mt-2 border-t border-divider pt-2">
+              <summary className="cursor-pointer text-[12px] font-medium text-text-2">
+                Previous {g.latest.messageContext?.length} messages
+              </summary>
+              <ol className="mt-2 space-y-2">
+                {g.latest.messageContext?.map((m, index) => (
+                  <li key={g.latest.id + "-context-" + index} className="border-l-2 border-divider pl-2">
+                    <p className="text-[11px] text-text-2">{m.senderName}{m.createdAt ? " · " + timeAgo(m.createdAt, now) : ""}</p>
+                    <p className="whitespace-pre-wrap break-words text-[13px] text-text">{m.body}</p>
+                  </li>
+                ))}
+              </ol>
+            </details>
+          )}
+        </div>
+      )}
       <div className="mt-3 border-l-2 border-divider pl-3 text-[13px] leading-[18px]">
         <p className="text-text">
           <span className="font-medium" data-queue-latest-reason>
