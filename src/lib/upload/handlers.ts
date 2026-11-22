@@ -11,6 +11,7 @@ import {
   isUuid,
   keyBelongsTo,
   planParts,
+  uploadDurationProblem,
   uploadErrorText,
   type Details,
   type Visibility,
@@ -26,6 +27,8 @@ export type UploadStorage = {
   abortMultipart(key: string, uploadId: string): Promise<void>;
   /** The object's size in bytes, or null when it does not exist. */
   objectSize(key: string): Promise<number | null>;
+  /** Optional server-side duration probe for storage backends that publish without the encoder worker. */
+  inspectDuration?(key: string): Promise<number | null>;
   /** The whole file goes up in one PUT (the built-in storage). */
   singlePart?: boolean;
 };
@@ -88,6 +91,9 @@ export function statusForCode(code: string): number {
       return 409;
     case "file_too_big":
       return 413;
+    case "invalid_duration":
+    case "video_too_long":
+      return 422;
     case "bad_type":
       return 415;
     case "daily_limit":
@@ -205,6 +211,17 @@ async function ownUpload(
   return { video: { ...video, sourceKey: video.sourceKey }, uploadId };
 }
 
+async function rejectDurationUpload(
+  g: Extract<Gate, { ok: true }>,
+  video: VideoRow & { sourceKey: string },
+  uploadId: string,
+  code: "invalid_duration" | "video_too_long",
+): Promise<HandlerResult> {
+  await g.storage.abortMultipart(video.sourceKey, uploadId).catch(() => undefined);
+  await g.db.abandonUpload(video.id, "duration validation failed").catch(() => undefined);
+  return fail(422, code);
+}
+
 /**
  * POST /api/upload/complete  { videoId, uploadId, parts: [{ partNumber, etag }], title, description, visibility }
  * Joins the parts in R2, checks the object is there with the right size,
@@ -235,6 +252,9 @@ export async function completeUpload(rawBody: unknown, ctx: UploadContext): Prom
   if (video.status === "uploaded") return done(video.id);
   if (video.status !== "uploading") return fail(409, "not_uploading");
 
+  const durationProblem = uploadDurationProblem(body.durationS);
+  if (durationProblem) return rejectDurationUpload(g, video, uploadId, durationProblem);
+
   const partSize = g.storage.singlePart ? Math.max(1, video.sourceBytes ?? 1) : PART_SIZE;
   const parts = readParts(body.parts, planParts(video.sourceBytes ?? 0, partSize).length);
   if (!parts) return fail(400, "bad_parts");
@@ -251,6 +271,21 @@ export async function completeUpload(rawBody: unknown, ctx: UploadContext): Prom
     return fail(422, "size_mismatch");
   }
 
+  // Built-in Cloud storage has no separate encoder worker, so independently
+  // inspect the uploaded bytes instead of trusting durationS from the browser.
+  let afterUploadBody = body;
+  if (g.storage.inspectDuration) {
+    let actualDuration: number | null = null;
+    try {
+      actualDuration = await g.storage.inspectDuration(video.sourceKey);
+    } catch {
+      return rejectDurationUpload(g, video, uploadId, "invalid_duration");
+    }
+    const actualDurationProblem = uploadDurationProblem(actualDuration);
+    if (actualDurationProblem) return rejectDurationUpload(g, video, uploadId, actualDurationProblem);
+    afterUploadBody = { ...body, durationS: actualDuration };
+  }
+
   if (details) {
     const err = await g.db.saveDetails(video.id, details);
     if (err) return fail(statusForCode(err), err);
@@ -258,7 +293,7 @@ export async function completeUpload(rawBody: unknown, ctx: UploadContext): Prom
   const err = await g.db.finishUpload(video.id);
   if (err) return fail(statusForCode(err), err);
   if (ctx.afterUpload) {
-    const after = await ctx.afterUpload({ id: video.id, sourceKey: video.sourceKey }, body);
+    const after = await ctx.afterUpload({ id: video.id, sourceKey: video.sourceKey }, afterUploadBody);
     if (after) return fail(statusForCode(after), after);
     return { status: 200, body: { ...done(video.id).body, status: "ready" } };
   }

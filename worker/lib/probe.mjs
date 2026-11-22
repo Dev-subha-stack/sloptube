@@ -1,4 +1,5 @@
 // ffprobe: the arguments and what we read from its JSON. Pure functions.
+import { MAX_VIDEO_DURATION_S } from "./limits.mjs";
 
 export function buildProbeArgs(input) {
   return ["-v", "error", "-print_format", "json", "-show_format", "-show_streams", input];
@@ -26,8 +27,18 @@ export function parseProbe(json) {
   const tagRotation = Number(video.tags?.rotate);
   const rotation = typeof sideRotation === "number" ? sideRotation : Number.isFinite(tagRotation) ? tagRotation : 0;
 
-  const durationS = Number(data?.format?.duration ?? video.duration);
-  if (!Number.isFinite(durationS) || durationS <= 0) throw new Error("no duration");
+  // Use the longest reported media stream/container duration. A short or
+  // falsified container duration must not hide a much longer video stream.
+  const durationValues = [data?.format?.duration, ...streams
+    .filter((s) => (s.codec_type === "video" && !s.disposition?.attached_pic) || s.codec_type === "audio")
+    .map((s) => s.duration)]
+    .map(Number)
+    .filter((value) => Number.isFinite(value) && value > 0);
+  if (durationValues.length === 0) throw new Error("no duration");
+  const durationS = Math.max(...durationValues);
+  if (durationS > MAX_VIDEO_DURATION_S) {
+    throw new Error(`video is longer than the ${MAX_VIDEO_DURATION_S / 60}-minute upload limit`);
+  }
 
   return {
     durationS,

@@ -3,7 +3,7 @@ import { bugStatusLabel } from "@/components/bugs/bugStatus";
 import { MAX_ACCOUNTS, upsertAccount, type SavedAccount } from "@/lib/accounts/switcher";
 import { initialReaction, reduceReaction, viewReaction } from "@/lib/engagement/reaction";
 import { PLATFORM_LIMIT_BYTES, maxDurationS, planCompression } from "@/lib/upload/compressPlan";
-import { fileProblemCode, MAX_UPLOAD_BYTES } from "@/lib/upload/rules";
+import { fileProblemCode, MAX_UPLOAD_BYTES, MAX_VIDEO_DURATION_S, uploadDurationProblem } from "@/lib/upload/rules";
 import { timeAgo } from "@/lib/watch/format";
 
 describe("50 MB upload limit", () => {
@@ -32,6 +32,20 @@ describe("built-in compressor plan", () => {
   });
   it("says a video too long for 50 MB does not fit", () => {
     expect(planCompression({ width: 1920, height: 1080, fps: 30, durationS: maxDurationS() * 3 }).fits).toBe(false);
+  });
+  it("rejects unknown, invalid and 1,000-hour durations instead of treating them as one second", () => {
+    const video = { width: 1920, height: 1080, fps: 30 };
+    for (const durationS of [0, -1, Number.NaN, Number.POSITIVE_INFINITY, 1000 * 60 * 60]) {
+      expect(planCompression({ ...video, durationS }).fits).toBe(false);
+    }
+  });
+  it("applies a hard 60-minute duration ceiling", () => {
+    expect(MAX_VIDEO_DURATION_S).toBe(3600);
+    expect(maxDurationS()).toBe(3600);
+    expect(uploadDurationProblem(3600)).toBeNull();
+    expect(uploadDurationProblem(3600.1)).toBe("video_too_long");
+    expect(uploadDurationProblem(0)).toBe("invalid_duration");
+    expect(uploadDurationProblem(Number.NaN)).toBe("invalid_duration");
   });
 });
 

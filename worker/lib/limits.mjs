@@ -4,6 +4,9 @@
 /** A job is tried this many times before the video is marked failed (encode_max_attempts()). */
 export const MAX_ATTEMPTS = 3;
 
+/** Hard ceiling shared with the uploader; reject long media before ffmpeg starts. */
+export const MAX_VIDEO_DURATION_S = 60 * 60;
+
 /** A worker stops a job after 2 hours. The database takes a job back after 2 h 15 min. */
 export const JOB_TIMEOUT_MS = 2 * 60 * 60 * 1000;
 

@@ -1,3 +1,5 @@
+import { MAX_VIDEO_DURATION_S } from "./rules";
+
 // The built-in compressor's settings: what size, frame rate and bitrates a
 // picked video is squeezed to before it is uploaded. Always on. The result
 // must fit the platform limit, so long videos get a smaller picture and a
@@ -44,7 +46,7 @@ function audioFor(totalBudget: number): number {
 
 /** The longest video (seconds) that can still fit the limit at the smallest settings. */
 export function maxDurationS(limitBytes = PLATFORM_LIMIT_BYTES): number {
-  return Math.floor((limitBytes * 8 * SAFETY) / (MIN_VIDEO_BITRATE + 32_000));
+  return Math.min(MAX_VIDEO_DURATION_S, Math.floor((limitBytes * 8 * SAFETY) / (MIN_VIDEO_BITRATE + 32_000)));
 }
 
 /**
@@ -60,7 +62,9 @@ export function planCompression(
   const w0 = Math.max(2, Math.round(src.width));
   const h0 = Math.max(2, Math.round(src.height));
   const srcShort = Math.min(w0, h0);
-  const duration = Math.max(1, src.durationS || 1);
+  const durationIsValid = Number.isFinite(src.durationS) && src.durationS > 0;
+  // Keep calculations finite, but never mark an unknown duration as uploadable.
+  const duration = durationIsValid ? src.durationS : 1;
   const srcFps = src.fps && Number.isFinite(src.fps) && src.fps > 0 ? Math.round(src.fps) : MAX_FPS;
 
   const totalBudget = Math.floor((limitBytes * 8 * SAFETY) / duration);
@@ -85,7 +89,7 @@ export function planCompression(
   }
 
   const wanted = Math.round(chosen.width * chosen.height * frameRate * GOOD_BPP);
-  const fits = videoBudget >= MIN_VIDEO_BITRATE;
+  const fits = durationIsValid && duration <= maxDurationS(limitBytes) && videoBudget >= MIN_VIDEO_BITRATE;
   const videoBitrate = Math.max(MIN_VIDEO_BITRATE, Math.min(wanted, videoBudget, MAX_VIDEO_BITRATE));
   const estimatedBytes = Math.round(((videoBitrate + audioBitrate) * duration) / 8);
   return { ...chosen, frameRate, videoBitrate, audioBitrate, estimatedBytes, fits };

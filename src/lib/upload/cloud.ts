@@ -58,6 +58,20 @@ export function createCloudUploadStorage(): UploadStorage {
       const size = (hit?.metadata as { size?: number } | undefined)?.size;
       return typeof size === "number" ? size : null;
     },
+    async inspectDuration(key) {
+      const { data, error } = await (await admin()).download(key);
+      if (error || !data) throw new Error(error?.message ?? "video could not be read");
+      const mb = await import("mediabunny");
+      const input = new mb.Input({ source: new mb.BlobSource(data), formats: mb.ALL_FORMATS });
+      try {
+        const videoTrack = await input.getPrimaryVideoTrack();
+        if (!videoTrack) return null;
+        const duration = await input.computeDuration();
+        return Number.isFinite(duration) && duration > 0 ? duration : null;
+      } finally {
+        input.dispose?.();
+      }
+    },
   };
 }
 

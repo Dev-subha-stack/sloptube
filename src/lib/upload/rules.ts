@@ -3,6 +3,16 @@
 // No imports on purpose, so Node can load this file directly.
 
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024; // 50 MB, after the built-in compressor
+/** Hard duration ceiling; file size alone must not let extremely long videos through. */
+export const MAX_VIDEO_DURATION_S = 60 * 60;
+
+export type UploadDurationProblemCode = "invalid_duration" | "video_too_long";
+
+/** Reject missing, non-finite and over-limit durations instead of guessing a short clip. */
+export function uploadDurationProblem(value: unknown): UploadDurationProblemCode | null {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) return "invalid_duration";
+  return value > MAX_VIDEO_DURATION_S ? "video_too_long" : null;
+}
 export const UPLOADS_PER_DAY = 10;
 /** Every part is 16 MB except the last one. R2 wants at least 5 MB per part. */
 export const PART_SIZE = 16 * 1024 * 1024;
@@ -169,6 +179,10 @@ export function uploadErrorText(code: string | null | undefined): string {
       return "This file is empty.";
     case "file_too_big":
       return "Even compressed, this video is bigger than 50 MB, the most one upload can be. Try a shorter clip.";
+    case "video_too_long":
+      return "Videos must be 60 minutes or shorter, even after compression.";
+    case "invalid_duration":
+      return "SlopTube could not verify this video’s duration. Re-export it as a standard MP4 and try again.";
     case "bad_type":
       return "Only MP4, MOV, WebM and MKV videos can be uploaded.";
     case "daily_limit":
