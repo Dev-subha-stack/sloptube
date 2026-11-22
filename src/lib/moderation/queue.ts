@@ -1,12 +1,14 @@
 // The admin queue: open reports grouped by what they point at. No imports
 // beyond types, so Node loads it directly.
-import type { ReportKind, ReportReason, TargetKind } from "./rules.ts";
+import type { ModTargetKind, ReportKind, ReportReason } from "./rules.ts";
+
+export type DmSnapshotMessage = { senderName: string; body: string; createdAt: string };
 
 /** One open report as admin_reports() answers it. */
 export type QueueReport = {
   id: string;
   kind: ReportKind;
-  targetKind: TargetKind;
+  targetKind: ModTargetKind;
   targetId: string;
   reason: ReportReason | "appeal";
   details: string;
@@ -19,13 +21,15 @@ export type QueueReport = {
   ownerAdmin: boolean;
   removed: boolean;
   gone: boolean;
+  reportedMessage?: DmSnapshotMessage | null;
+  messageContext?: DmSnapshotMessage[];
 };
 
 /** One row of the queue: every open report on one target (appeals apart). */
 export type QueueGroup = {
   key: string;
   kind: ReportKind;
-  targetKind: TargetKind;
+  targetKind: ModTargetKind;
   targetId: string;
   count: number;
   /** How many reports gave each reason, most first. */
@@ -97,6 +101,7 @@ export function groupReports(reports: readonly QueueReport[]): QueueGroup[] {
 
 /** Which actions the queue offers for a group. */
 export function groupActions(g: Pick<QueueGroup, "kind" | "targetKind" | "removed" | "gone" | "ownerAdmin" | "ownerBanned" | "channel">): string[] {
+  if (g.targetKind === "direct_message") return ["dismiss"];
   if (g.gone) return ["dismiss"];
   if (g.kind === "appeal") return g.removed ? ["restore", "dismiss"] : ["dismiss"];
   const out = ["dismiss"];
@@ -109,20 +114,53 @@ export function groupActions(g: Pick<QueueGroup, "kind" | "targetKind" | "remove
   return out;
 }
 
+function objectValue(value: unknown): Record<string, unknown> | null {
+  return value !== null && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
+}
+
+function snapshotMessage(value: unknown): DmSnapshotMessage | null {
+  const v = objectValue(value);
+  if (!v || typeof v.body !== "string") return null;
+  return {
+    senderName: String(v.sender_name ?? v.senderName ?? "A participant"),
+    body: v.body,
+    createdAt: String(v.created_at ?? v.createdAt ?? ""),
+  };
+}
+
+function unpackDmDetails(raw: string): { details: string; reportedMessage: DmSnapshotMessage | null; messageContext: DmSnapshotMessage[] } {
+  try {
+    const data = objectValue(JSON.parse(raw) as unknown);
+    if (!data) return { details: raw, reportedMessage: null, messageContext: [] };
+    const list = Array.isArray(data.context) ? data.context : Array.isArray(data.previous_messages) ? data.previous_messages : [];
+    return {
+      details: String(data.details ?? data.user_details ?? ""),
+      reportedMessage: snapshotMessage(data.reported_message ?? data.reportedMessage ?? data.message),
+      messageContext: list.map(snapshotMessage).filter((m): m is DmSnapshotMessage => m !== null),
+    };
+  } catch {
+    return { details: raw, reportedMessage: null, messageContext: [] };
+  }
+}
+
 /** The admin_reports row reader. */
 export function rowToReport(r: Record<string, unknown>): QueueReport {
   const kind = r.kind === "appeal" ? "appeal" : "report";
-  const tk = r.target_kind === "comment" || r.target_kind === "channel" ? r.target_kind : "video";
+  const tk: ModTargetKind = r.target_kind === "direct_message"
+    ? "direct_message"
+    : r.target_kind === "comment" || r.target_kind === "channel" ? r.target_kind : "video";
+  const rawDetails = String(r.details ?? "");
+  const dm = tk === "direct_message" ? unpackDmDetails(rawDetails) : null;
   return {
     id: String(r.id),
     kind,
     targetKind: tk,
     targetId: String(r.target_id),
     reason: String(r.reason ?? "other") as QueueReport["reason"],
-    details: String(r.details ?? ""),
+    details: dm?.details ?? rawDetails,
     createdAt: String(r.created_at ?? new Date(0).toISOString()),
     reporterName: String(r.reporter_name ?? "someone"),
-    targetLabel: (r.target_label as string | null) ?? null,
+    targetLabel: tk === "direct_message" ? "Reported direct message" : (r.target_label as string | null) ?? null,
     videoId: (r.video_id as string | null) ?? null,
     channel: r.channel_id
       ? {
@@ -135,7 +173,9 @@ export function rowToReport(r: Record<string, unknown>): QueueReport {
       : null,
     ownerBanned: r.owner_banned === true,
     ownerAdmin: r.owner_admin === true,
-    removed: r.target_removed === true,
-    gone: r.target_gone === true,
+    removed: tk === "direct_message" ? false : r.target_removed === true,
+    gone: tk === "direct_message" ? false : r.target_gone === true,
+    reportedMessage: dm?.reportedMessage ?? null,
+    messageContext: dm?.messageContext ?? [],
   };
 }
