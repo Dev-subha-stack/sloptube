@@ -20,15 +20,22 @@ export function HoverVideoPreview({ src }: { src: string }) {
     let hls: Hls | null = null;
     let delay: ReturnType<typeof setTimeout> | undefined;
     let active = false;
+    let previewListeners: { playing: () => void; timeUpdate: () => void; ended: () => void } | null = null;
 
     const stop = () => {
       active = false;
       if (delay) clearTimeout(delay);
+      if (previewListeners) {
+        video.removeEventListener("playing", previewListeners.playing);
+        video.removeEventListener("timeupdate", previewListeners.timeUpdate);
+        video.removeEventListener("ended", previewListeners.ended);
+        previewListeners = null;
+      }
+      hls?.destroy();
+      hls = null;
       video.pause();
       video.removeAttribute("src");
       video.load();
-      hls?.destroy();
-      hls = null;
       setVisible(false);
     };
 
@@ -38,8 +45,6 @@ export function HoverVideoPreview({ src }: { src: string }) {
         active = true;
         video.muted = true;
         video.volume = 0;
-        video.currentTime = 0;
-
         const onPlaying = () => active && setVisible(true);
         const onTimeUpdate = () => {
           if (active && Number.isFinite(video.duration) && video.duration > PREVIEW_SECONDS && video.currentTime >= PREVIEW_SECONDS) {
@@ -52,6 +57,7 @@ export function HoverVideoPreview({ src }: { src: string }) {
             void video.play().catch(() => {});
           }
         };
+        previewListeners = { playing: onPlaying, timeUpdate: onTimeUpdate, ended: onEnded };
         video.addEventListener("playing", onPlaying);
         video.addEventListener("timeupdate", onTimeUpdate);
         video.addEventListener("ended", onEnded);
