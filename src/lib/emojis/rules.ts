@@ -27,7 +27,7 @@ export type EmojiPiece = string | { name: string; url: string };
 export function splitEmojis(text: string, emojis: ReadonlyMap<string, string>): EmojiPiece[] {
   if (emojis.size === 0 || !text.includes(":")) return [text];
   const out: EmojiPiece[] = [];
-  const re = /:([a-z0-9_]{2,32}):/gi;
+  const re = /:([a-z0-9_]{2,64}):/gi;
   let last = 0;
   for (let m = re.exec(text); m; m = re.exec(text)) {
     const url = emojis.get(m[1]!.toLowerCase());
