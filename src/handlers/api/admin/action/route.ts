@@ -1,5 +1,5 @@
 import { answer, badRequest, isUuid, readJson } from "@/lib/moderation/http";
-import { actionNeedsReason, DETAILS_MAX, isAction, isTargetKind } from "@/lib/moderation/rules";
+import { actionNeedsReason, DETAILS_MAX, isAction, isModTargetKind } from "@/lib/moderation/rules";
 import { modAction } from "@/lib/moderation/server";
 
 // POST /api/admin/action { action, targetKind, targetId, reason, kind: report | appeal }
@@ -7,7 +7,7 @@ import { modAction } from "@/lib/moderation/server";
 // See mod_action in 016_moderation.sql.
 export async function POST(request: Request) {
   const body = await readJson(request);
-  if (!body || !isAction(body.action) || !isTargetKind(body.targetKind) || !isUuid(body.targetId)) return badRequest();
+  if (!body || !isAction(body.action) || !isModTargetKind(body.targetKind) || !isUuid(body.targetId)) return badRequest();
   const kind = body.kind === "appeal" ? "appeal" : "report";
   const reason = typeof body.reason === "string" ? body.reason.trim() : "";
   if (reason.length > DETAILS_MAX) return answer({ error: "reason_too_long" });
