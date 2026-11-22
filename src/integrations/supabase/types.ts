@@ -591,7 +591,10 @@ export type Database = {
         Row: {
           body: string
           created_at: string
+          deleted_at: string | null
+          edited_at: string | null
           id: string
+          reactions: Json
           read_at: string | null
           recipient_id: string
           sender_id: string
@@ -599,7 +602,10 @@ export type Database = {
         Insert: {
           body: string
           created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
           id?: string
+          reactions?: Json
           read_at?: string | null
           recipient_id: string
           sender_id: string
@@ -607,7 +613,10 @@ export type Database = {
         Update: {
           body?: string
           created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
           id?: string
+          reactions?: Json
           read_at?: string | null
           recipient_id?: string
           sender_id?: string
@@ -2351,7 +2360,67 @@ export type Database = {
           username: string
         }[]
       }
+      dm_delete: {
+        Args: { _id: string }
+        Returns: {
+          body: string
+          created_at: string
+          deleted_at: string | null
+          edited_at: string | null
+          id: string
+          reactions: Json
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "direct_messages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      dm_edit: {
+        Args: { _body: string; _id: string }
+        Returns: {
+          body: string
+          created_at: string
+          deleted_at: string | null
+          edited_at: string | null
+          id: string
+          reactions: Json
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "direct_messages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       dm_mark_read: { Args: { other: string }; Returns: number }
+      dm_react: {
+        Args: { _emoji: string; _id: string }
+        Returns: {
+          body: string
+          created_at: string
+          deleted_at: string | null
+          edited_at: string | null
+          id: string
+          reactions: Json
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "direct_messages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       dm_unread_count: { Args: never; Returns: number }
       edit_comment: {
         Args: { body: string; comment_id: string }

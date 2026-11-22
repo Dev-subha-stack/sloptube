@@ -246,6 +246,13 @@
       "when": 1795325084835,
       "tag": "0034_dm_recipient_check_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1795329440999,
+      "tag": "0035_dm_edit_delete_reactions",
+      "breakpoints": true
     }
   ]
 }
