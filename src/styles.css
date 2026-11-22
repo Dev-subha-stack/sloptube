@@ -660,3 +660,16 @@ img, video { max-width: 100%; }
 @media (prefers-reduced-motion: reduce) {
   .page-in, .anim-in, [role="menu"], [role="listbox"], [role="dialog"] { animation: none; }
 }
+
+
+/* Hide native scrollbars across the app without disabling scrolling.
+   Touch, wheel, trackpad, keyboard and the Snips arrow controls still work. */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
