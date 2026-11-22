@@ -61,7 +61,11 @@ export function AvatarMenu({ user, email }: { user: SessionUser; email: string |
   }
 
   return (
-    <Menu label="Account menu" button={<Avatar name={user.displayName} url={user.avatarUrl} size={32} />}>
+    <Menu
+      label="Account menu"
+      buttonClassName="grid h-8 w-8 place-items-center rounded-full text-icon hover:bg-hover sm:h-10 sm:w-10"
+      button={<Avatar name={user.displayName} url={user.avatarUrl} size={32} />}
+    >
       {(close) => (
         <>
           <div className="flex gap-4 px-4 pb-4 pt-2">

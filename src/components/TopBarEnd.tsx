@@ -8,7 +8,7 @@ import { SignedOutMenu } from "./SignedOutMenu";
 import { MessagesButton } from "./messages/MessagesButton";
 import { NotificationsBell } from "./subscriptions/NotificationsBell";
 
-const iconLink = "hidden h-10 w-10 place-items-center rounded-full text-icon hover:bg-hover sm:grid";
+const iconLink = "grid h-8 w-8 place-items-center rounded-full text-icon hover:bg-hover sm:h-10 sm:w-10";
 
 /**
  * Right side of the top bar. It reads the request (session cookie, flags),
@@ -30,8 +30,9 @@ export function TopBarEnd() {
         <Link
           href={sessionUser ? "/upload" : "/login?next=/upload"}
           prefetch={false}
-          aria-label="Upload"
-          title="Upload"
+          aria-label="Upload video"
+          title="Upload video"
+          data-upload-shortcut
           className={iconLink}
         >
           <UploadIcon className="h-6 w-6" />

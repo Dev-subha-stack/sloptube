@@ -299,7 +299,7 @@ export function SearchBox({ initialQuery = "" }: { initialQuery?: string }) {
           aria-label="Search"
           data-search-open
           onClick={() => setOpen(true)}
-          className="grid h-10 w-10 place-items-center rounded-full text-icon hover:bg-hover"
+          className="grid h-8 w-8 place-items-center rounded-full text-icon hover:bg-hover sm:h-10 sm:w-10"
         >
           <SearchIcon className="h-6 w-6" />
         </button>
