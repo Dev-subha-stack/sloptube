@@ -281,7 +281,7 @@ function GuideLayout() {
 
       <nav
         aria-label="Guide"
-        className={`sticky top-14 hidden h-[calc(100dvh-56px)] w-60 shrink-0 overflow-y-auto bg-surface ${
+        className={`sticky top-14 hidden h-[calc(100dvh-56px)] w-60 shrink-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-surface ${
           guideMini || !docked ? "" : "wide:block"
         }`}
       >
@@ -293,7 +293,7 @@ function GuideLayout() {
           <div onClick={close} aria-hidden className="absolute inset-0 bg-black/50" />
           <nav
             aria-label="Guide"
-            className="absolute inset-y-0 left-0 w-60 overflow-y-auto bg-surface"
+            className="absolute inset-y-0 left-0 w-60 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-surface"
           >
             <div className="flex h-14 items-center pl-4">
               <GuideButton />
