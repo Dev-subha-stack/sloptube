@@ -4,6 +4,7 @@ import {
   createRootRouteWithContext,
   useRouter,
   useLocation,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -148,6 +149,9 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const { session } = Route.useLoaderData();
   const pathname = useLocation({ select: (l) => l.pathname });
+  // The page-change animation follows the page actually shown, not the one still loading:
+  // keying on the pending address would remount the old page mid-navigation.
+  const shownPath = useRouterState({ select: (s) => s.resolvedLocation?.pathname ?? s.location.pathname });
   const [store] = useState(() => sessionStoreFor({ config: session.config, user: session.user, flags: session.flags }));
   useEffect(() => {
     store.getState().setSession({ config: session.config, user: session.user, flags: session.flags });
@@ -183,7 +187,7 @@ function RootComponent() {
                   {down ? (
                     <Maintenance />
                   ) : (
-                    <div key={pathname} className="page-in">
+                    <div key={shownPath} className="page-in">
                       <Outlet />
                     </div>
                   )}
