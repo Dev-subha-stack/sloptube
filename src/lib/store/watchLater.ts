@@ -1,88 +1,54 @@
 "use client";
 
 import { create } from "zustand";
-import { CLIENT_VIDEOS, type ClientVideo } from "@/lib/clientData";
+import { supabase } from "@/integrations/supabase/client";
+import { rowToCard, type FeedCard, type FeedRow } from "@/lib/feed/types";
 
-const STORAGE_KEY = "sloptube_watch_later";
-
-type WatchLaterItem = {
-  video: ClientVideo;
-  addedAt: string;
+type State = {
+  cards: FeedCard[] | null;
+  ids: Set<string>;
+  load: () => Promise<void>;
+  /** Adds or removes; answers whether the video is now saved, or null when it failed. */
+  toggle: (videoId: string) => Promise<boolean | null>;
+  remove: (videoId: string) => Promise<void>;
+  clear: () => Promise<void>;
 };
 
-type WatchLaterState = {
-  items: WatchLaterItem[];
-  loaded: boolean;
-  add: (video: ClientVideo) => void;
-  remove: (videoId: string) => void;
-  toggle: (video: ClientVideo) => boolean;
-  has: (videoId: string) => boolean;
-  clear: () => void;
-  load: () => void;
-};
+async function myId(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.user.id ?? null;
+}
 
-export const useWatchLater = create<WatchLaterState>((set, get) => ({
-  items: [],
-  loaded: false,
-
-  load: () => {
-    if (typeof window === "undefined") return;
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored) as WatchLaterItem[];
-        set({ items: parsed, loaded: true });
-        return;
-      }
-    } catch {}
-    const initial: WatchLaterItem[] = [
-      { video: CLIENT_VIDEOS[0], addedAt: new Date(Date.now() - 3600000).toISOString() },
-      { video: CLIENT_VIDEOS[2], addedAt: new Date(Date.now() - 7200000).toISOString() },
-    ];
-    set({ items: initial, loaded: true });
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
-    } catch {}
+/** Watch later, saved in the signed-in person's account. */
+export const useWatchLater = create<State>((set, get) => ({
+  cards: null,
+  ids: new Set(),
+  load: async () => {
+    const { data } = await supabase.rpc("watch_later_cards");
+    const cards = ((data ?? []) as FeedRow[]).map((r) => rowToCard(r, null));
+    set({ cards, ids: new Set(cards.map((c) => c.id)) });
   },
-
-  add: (video) => {
-    const { items } = get();
-    if (items.some((i) => i.video.id === video.id)) return;
-    const next = [{ video, addedAt: new Date().toISOString() }, ...items];
-    set({ items: next });
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    } catch {}
+  toggle: async (videoId) => {
+    const me = await myId();
+    if (!me) return null;
+    const saved = get().ids.has(videoId);
+    const { error } = saved
+      ? await supabase.from("watch_later").delete().eq("user_id", me).eq("video_id", videoId)
+      : await supabase.from("watch_later").insert({ user_id: me, video_id: videoId });
+    if (error && error.code !== "23505") return null;
+    await get().load();
+    return !saved;
   },
-
-  remove: (videoId) => {
-    const { items } = get();
-    const next = items.filter((i) => i.video.id !== videoId);
-    set({ items: next });
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    } catch {}
+  remove: async (videoId) => {
+    const me = await myId();
+    if (!me) return;
+    await supabase.from("watch_later").delete().eq("user_id", me).eq("video_id", videoId);
+    await get().load();
   },
-
-  toggle: (video) => {
-    const { has, add, remove } = get();
-    if (has(video.id)) {
-      remove(video.id);
-      return false;
-    } else {
-      add(video);
-      return true;
-    }
-  },
-
-  has: (videoId) => {
-    return get().items.some((i) => i.video.id === videoId);
-  },
-
-  clear: () => {
-    set({ items: [] });
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {}
+  clear: async () => {
+    const me = await myId();
+    if (!me) return;
+    await supabase.from("watch_later").delete().eq("user_id", me);
+    set({ cards: [], ids: new Set() });
   },
 }));

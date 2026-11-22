@@ -6,66 +6,59 @@ import { metadataToHead } from "@/lib/seo/head";
 import Link from "next/link";
 import { useEffect } from "react";
 import { PlaylistAddIcon } from "@/components/icons";
-import { Thumb } from "@/components/Thumb";
-import { getClientVideo } from "@/lib/clientData";
+import { PlaylistCard } from "@/components/playlist/PlaylistCard";
 import { usePlaylists } from "@/lib/store/playlists";
+import { useSession } from "@/lib/store/session";
 
 function PlaylistsIndexPage() {
-  const { playlists, loaded, load } = usePlaylists();
+  const user = useSession((s) => s.user);
+  const loaded = useSession((s) => s.loaded);
+  const { mine, loadMine } = usePlaylists();
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (user) void loadMine();
+  }, [user, loadMine]);
 
-  if (!loaded) {
-    return <div className="p-8">Loading playlists...</div>;
+  if (loaded && !user) {
+    return (
+      <div className="flex flex-col items-center px-6 py-20 text-center">
+        <PlaylistAddIcon className="h-16 w-16 text-text-3" />
+        <p className="mt-4 text-[18px] text-text">Sign in to see your playlists</p>
+        <Link href="/login?next=%2Fplaylists" className="btn-blue mt-6">
+          Sign in
+        </Link>
+      </div>
+    );
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 py-8 sm:px-6">
-      <div className="flex items-center gap-3 border-b border-divider pb-4 mb-6">
+    <div className="mx-auto max-w-[1400px] px-3 py-6 sm:px-6" data-playlists={mine ? mine.length : "loading"}>
+      <div className="mb-6 flex items-center gap-3 border-b border-divider pb-4">
         <PlaylistAddIcon className="h-7 w-7 text-[var(--mark)]" />
-        <h1 className="text-[24px] font-normal leading-8 text-text">Playlists</h1>
-        <span className="text-[14px] text-text-2">({playlists.length})</span>
+        <h1 className="text-[22px] leading-8 text-text">Your playlists</h1>
+        {mine && <span className="text-[14px] text-text-2">({mine.length})</span>}
       </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {playlists.map((pl) => {
-          const firstVideo = pl.videoIds[0] ? getClientVideo(pl.videoIds[0]) : null;
-          return (
-            <Link
-              key={pl.id}
-              href={`/playlist?list=${pl.id}`}
-              className="group block rounded-xs overflow-hidden bg-surface border border-divider hover:shadow-md transition-shadow"
-            >
-              <div className="relative aspect-video w-full bg-skeleton">
-                {firstVideo ? (
-                  <Thumb src={firstVideo.thumbnail} alt={pl.title} />
-                ) : (
-                  <div className="grid h-full place-items-center text-text-3">No videos</div>
-                )}
-                <div className="absolute inset-y-0 right-0 w-[40%] bg-black/70 flex flex-col items-center justify-center text-white backdrop-blur-xs">
-                  <span className="text-[18px] font-semibold">{pl.videoIds.length}</span>
-                  <PlaylistAddIcon className="h-5 w-5 mt-1" />
-                </div>
-              </div>
-              <div className="p-3">
-                <h3 className="text-[14px] font-medium text-text line-clamp-1 group-hover:underline">
-                  {pl.title}
-                </h3>
-                <p className="mt-1 text-[12px] text-text-2 line-clamp-2">
-                  {pl.description || "View full playlist"}
-                </p>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+      {mine === null ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="aspect-video rounded-[12px] bg-skeleton" />
+          ))}
+        </div>
+      ) : mine.length === 0 ? (
+        <div className="py-16 text-center">
+          <p className="text-[16px] text-text">No playlists yet</p>
+          <p className="mt-1 text-[14px] text-text-2">Press Save under any video and choose Create new playlist.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {mine.map((pl) => (
+            <PlaylistCard key={pl.id} playlist={pl} showVisibility />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
-
-
 
 export const Route = createFileRoute("/playlists")({
 

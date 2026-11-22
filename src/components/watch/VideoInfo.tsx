@@ -8,7 +8,9 @@ import { Avatar } from "@/components/Avatar";
 import { LinkedText } from "@/components/LinkedText";
 import { Menu } from "@/components/Menu";
 import { useReport } from "@/components/moderation/ReportMenuItem";
-import { useFlag } from "@/lib/store/session";
+import { useFlag, useSession } from "@/lib/store/session";
+import { AddToPlaylistModal } from "@/components/playlist/AddToPlaylistModal";
+import { useRouter } from "next/navigation";
 import {
   DownloadIcon,
   LinkIcon,
@@ -115,6 +117,9 @@ export function VideoInfo({
   children?: ReactNode;
 }) {
   const [sharing, setSharing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const signedIn = useSession((s) => s.user !== null);
+  const router = useRouter();
   const moderation = useFlag("moderation");
   const report = useReport("video", video.id);
   const channelHref = `/@${video.channel.handle}`;
@@ -168,7 +173,7 @@ export function VideoInfo({
             onClick={canDownload ? () => void download() : undefined}
             data-download
           />
-          <ActionButton Icon={PlaylistAddIcon} label="Save" title="Saving to a playlist arrives in a later feature." />
+          <ActionButton Icon={PlaylistAddIcon} label="Save" title="Save to Watch later or a playlist" onClick={() => (signedIn ? setSaving(true) : router.push(`/login?next=${encodeURIComponent(`/watch?v=${video.id}`)}`))} data-save />
           {moderation && !video.isOwner ? (
             <Menu
               label="More actions"
@@ -214,6 +219,7 @@ export function VideoInfo({
           {downloadNote}
         </div>
       )}
+      <AddToPlaylistModal isOpen={saving} videoId={video.id} onClose={() => setSaving(false)} />
       {sharing && <ShareDialog videoId={video.id} title={video.title} onClose={() => setSharing(false)} />}
       {report.dialog}
     </div>
