@@ -11,6 +11,8 @@ export const LINK_LIMIT = 5;
 export const REPORT_REASONS = ["spam", "sexual", "violent", "harassment", "copyright", "other"] as const;
 export type ReportReason = (typeof REPORT_REASONS)[number];
 export type TargetKind = "video" | "comment" | "channel";
+/** Targets supported by moderation actions; DM reports are dismiss-only. */
+export type ModTargetKind = TargetKind | "direct_message";
 export type ReportKind = "report" | "appeal";
 
 /** The 2019 report dialog's wording. */
@@ -30,6 +32,10 @@ export function isReason(v: unknown): v is ReportReason {
 
 export function isTargetKind(v: unknown): v is TargetKind {
   return v === "video" || v === "comment" || v === "channel";
+}
+
+export function isModTargetKind(v: unknown): v is ModTargetKind {
+  return isTargetKind(v) || v === "direct_message";
 }
 
 /** What is wrong with a report before it goes out, or null. */
@@ -74,6 +80,7 @@ export const LOG_LABELS: Record<string, string> = {
 
 const MESSAGES: Record<string, string> = {
   moderation_off: "Reporting isn't on yet.",
+  not_set_up: "Message reporting is not enabled on the server yet.",
   not_signed_in: "Sign in to report.",
   not_admin: "That page isn't available.",
   not_found: "That's gone already.",
