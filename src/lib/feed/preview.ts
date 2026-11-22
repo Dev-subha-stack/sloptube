@@ -3,9 +3,9 @@
 // No imports, so Node can load this file directly.
 
 /** Hover this long before the preview starts. */
-export const PREVIEW_DELAY_MS = 1000;
+export const PREVIEW_DELAY_MS = 650;
 /** Each frame shows this long. */
-export const PREVIEW_STEP_MS = 500;
+export const PREVIEW_STEP_MS = 300;
 /** At most this many frames, spread over the whole video. */
 export const PREVIEW_FRAMES = 10;
 
