@@ -7,6 +7,7 @@ import { StaffBadge } from "@/components/admin/RoleBadge";
 import { Avatar } from "@/components/Avatar";
 import { ChatIcon, SendIcon } from "@/components/icons";
 import { EmojiPicker, EmojiProvider, EmojiText } from "@/components/emojis/EmojiContext";
+import { ReportMessageDialog } from "@/components/messages/ReportMessageDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { DM_MAX, dmErrorText, dmProblem } from "@/lib/messages/rules";
 import { useDmUnread } from "@/lib/store/dms";
@@ -102,6 +103,7 @@ function MessagesContent() {
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const [reportingMessage, setReportingMessage] = useState<Message | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const bottom = useRef<HTMLDivElement>(null);
   const otherRef = useRef<string | null>(null);
@@ -279,14 +281,27 @@ function MessagesContent() {
                   <div key={m.id}>
                     {gap && <p className="py-2 text-center text-[11px] text-text-3">{timeAgo(m.created_at, now)}</p>}
                     <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                      <p
-                        className={`anim-in max-w-[78%] whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-2 text-[14px] leading-5 ${
-                          mine ? "rounded-br-[6px] bg-[var(--link)] text-white [&_a]:text-white [&_a]:underline" : "rounded-bl-[6px] bg-[var(--hover)] text-text"
-                        }`}
-                        data-dm-message={mine ? "mine" : "theirs"}
-                      >
-                        <EmojiText text={m.body} />
-                      </p>
+                      <div className={`flex max-w-[78%] flex-col ${mine ? "items-end" : "items-start"}`}>
+                        <p
+                          className={`anim-in w-fit max-w-full whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-2 text-[14px] leading-5 ${
+                            mine ? "rounded-br-[6px] bg-[var(--link)] text-white [&_a]:text-white [&_a]:underline" : "rounded-bl-[6px] bg-[var(--hover)] text-text"
+                          }`}
+                          data-dm-message={mine ? "mine" : "theirs"}
+                        >
+                          <EmojiText text={m.body} />
+                        </p>
+                        {!mine && (
+                          <button
+                            type="button"
+                            onClick={() => setReportingMessage(m)}
+                            className="mt-1 rounded-full px-2 py-1 text-[11px] font-medium text-text-2 hover:bg-hover hover:text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)]"
+                            aria-label="Report this message"
+                            data-dm-report-message={m.id}
+                          >
+                            Report
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -317,6 +332,7 @@ function MessagesContent() {
               </button>
             </form>
             {error && <p role="alert" className="px-4 pb-2 text-[13px] text-[var(--error)]">{error}</p>}
+            {reportingMessage && <ReportMessageDialog message={reportingMessage} onClose={() => setReportingMessage(null)} />}
           </>
         )}
       </section>
