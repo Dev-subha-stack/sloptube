@@ -1,199 +1,191 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState, type DragEvent } from "react";
-import { DeleteIcon, DragHandleIcon, PlayIcon, PlaylistAddIcon } from "@/components/icons";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState, type DragEvent } from "react";
+import { DeleteIcon, DragHandleIcon, PlayIcon } from "@/components/icons";
 import { Thumb } from "@/components/Thumb";
-import { getClientVideo, type ClientVideo } from "@/lib/clientData";
-import { usePlaylists, type Playlist } from "@/lib/store/playlists";
+import { VideoRow } from "@/components/playlist/VideoRow";
+import { supabase } from "@/integrations/supabase/client";
+import type { FeedCard } from "@/lib/feed/types";
+import { playlistCards, usePlaylists, type PlaylistVisibility } from "@/lib/store/playlists";
+import { useSession } from "@/lib/store/session";
 import { useSubscriptions } from "@/lib/store/subscriptions";
 import { formatTime } from "@/lib/watch/format";
 
-export function PlaylistDetailView() {
-  const searchParams = useSearchParams();
-  const playlistId = searchParams.get("list");
-  const { playlists, loaded, load, reorderVideos, removeVideo } = usePlaylists();
-  const showToast = useSubscriptions((s) => s.showToast);
+type Info = { id: string; owner_id: string; title: string; description: string; visibility: PlaylistVisibility };
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
-  const [overIdx, setOverIdx] = useState<number | null>(null);
+/** /playlist?list=<id>: one playlist. The owner can reorder, remove, rename and delete. */
+export function PlaylistDetailView() {
+  const id = useSearchParams().get("list") ?? "";
+  const router = useRouter();
+  const me = useSession((s) => s.user?.id ?? null);
+  const showToast = useSubscriptions((s) => s.showToast);
+  const { reorder, removeVideo, update, remove } = usePlaylists();
+  const [info, setInfo] = useState<Info | null | undefined>(undefined);
+  const [videos, setVideos] = useState<FeedCard[]>([]);
+  const [dragged, setDragged] = useState<number | null>(null);
+  const [over, setOver] = useState<number | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({ title: "", description: "", visibility: "private" as PlaylistVisibility });
+
+  const reload = useCallback(async () => {
+    if (!UUID.test(id)) return setInfo(null);
+    const { data } = await supabase.from("playlists").select("id,owner_id,title,description,visibility").eq("id", id).maybeSingle();
+    setInfo((data as Info | null) ?? null);
+    if (data) setVideos(await playlistCards(id));
+  }, [id]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    void reload();
+  }, [reload, me]);
 
-  if (!loaded) {
+  if (info === undefined) {
     return (
       <div className="mx-auto max-w-[1400px] px-4 py-8 sm:px-6">
-        <div className="h-8 w-48 bg-skeleton rounded-xs animate-pulse mb-6" />
+        <div className="mb-6 h-8 w-48 rounded-[4px] bg-skeleton" />
       </div>
     );
   }
-
-  const playlist: Playlist | undefined = playlists.find((p) => p.id === playlistId) || playlists[0];
-
-  if (!playlist) {
+  if (info === null) {
     return (
       <div className="mx-auto max-w-[1400px] px-4 py-16 text-center">
-        <p className="text-[18px] text-text font-medium">Playlist not found</p>
+        <p className="text-[18px] text-text">This playlist doesn't exist or is private</p>
         <Link href="/playlists" className="btn-blue mt-4">
-          All Playlists
+          Your playlists
         </Link>
       </div>
     );
   }
 
-  const videos: ClientVideo[] = playlist.videoIds
-    .map((id) => getClientVideo(id))
-    .filter((v): v is ClientVideo => Boolean(v));
+  const owner = me === info.owner_id;
+  const total = videos.reduce((acc, v) => acc + (v.durationS ?? 0), 0);
+  const first = videos[0];
 
-  const totalDuration = videos.reduce((acc, v) => acc + v.durationS, 0);
-
-  const handleDragStart = (e: DragEvent, index: number) => {
-    setDraggedIdx(index);
-    e.dataTransfer.effectAllowed = "move";
-  };
-
-  const handleDragOver = (e: DragEvent, index: number) => {
+  function drop(e: DragEvent, to: number) {
     e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    if (overIdx !== index) {
-      setOverIdx(index);
-    }
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIdx(null);
-    setOverIdx(null);
-  };
-
-  const handleDrop = (e: DragEvent, dropIndex: number) => {
-    e.preventDefault();
-    if (draggedIdx === null || draggedIdx === dropIndex) {
-      setDraggedIdx(null);
-      setOverIdx(null);
-      return;
-    }
-    reorderVideos(playlist.id, draggedIdx, dropIndex);
-    showToast("Playlist order updated");
-    setDraggedIdx(null);
-    setOverIdx(null);
-  };
-
-  const handleRemove = (videoId: string, title: string) => {
-    removeVideo(playlist.id, videoId);
-    showToast(`Removed "${title}" from playlist`);
-  };
+    const from = dragged;
+    setDragged(null);
+    setOver(null);
+    if (from === null || from === to) return;
+    const next = [...videos];
+    const [moved] = next.splice(from, 1);
+    if (!moved) return;
+    next.splice(to, 0, moved);
+    setVideos(next);
+    void reorder(info!.id, next.map((v) => v.id)).then((ok) => showToast(ok ? "Playlist order updated" : "The new order wasn't saved"));
+  }
 
   return (
-    <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6">
-      <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-8">
-        <div className="rounded-sm bg-surface border border-divider p-6 h-fit sticky top-20 shadow-xs">
-          <div className="relative aspect-video w-full rounded-xs overflow-hidden bg-black mb-4">
-            {videos[0] ? (
-              <Thumb src={videos[0].thumbnail} alt={playlist.title} />
-            ) : (
-              <div className="grid h-full place-items-center text-text-3">Empty playlist</div>
-            )}
-            <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-              {videos[0] && (
-                <Link
-                  href={`/watch?v=${videos[0].id}&list=${playlist.id}`}
-                  className="flex items-center gap-2 rounded-full bg-[var(--mark)] px-4 py-2 font-medium text-white shadow-lg"
-                >
-                  <PlayIcon className="h-5 w-5" /> Play All
-                </Link>
-              )}
-            </div>
+    <div className="mx-auto max-w-[1500px] px-3 py-6 sm:px-6" data-playlist-view={info.id}>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+        <div className="h-fit rounded-[16px] bg-surface-2 p-5 lg:sticky lg:top-20">
+          <div className="relative mb-4 aspect-video w-full overflow-hidden rounded-[12px] bg-black">
+            {first ? <Thumb src={first.thumbnail} alt={info.title} /> : <div className="grid h-full place-items-center text-text-3">Empty playlist</div>}
           </div>
-
-          <h1 className="text-[22px] font-bold text-text leading-7">{playlist.title}</h1>
-          <p className="mt-2 text-[13px] text-text-2 leading-relaxed">{playlist.description || "No description provided."}</p>
-
-          <div className="mt-4 border-t border-divider pt-3 text-[12px] text-text-3 space-y-1">
-            <p>{videos.length} videos · {formatTime(totalDuration)} total watch time</p>
-            <p className="capitalize">Visibility: {playlist.visibility}</p>
-          </div>
-
-          {videos.length > 0 && (
-            <Link
-              href={`/watch?v=${videos[0].id}&list=${playlist.id}`}
-              className="btn-blue w-full mt-6 flex items-center justify-center gap-2"
+          {editing ? (
+            <form
+              className="space-y-3"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!draft.title.trim()) return;
+                const ok = await update(info.id, { title: draft.title.trim().slice(0, 150), description: draft.description.slice(0, 5000), visibility: draft.visibility });
+                showToast(ok ? "Playlist saved" : "The changes weren't saved");
+                setEditing(false);
+                void reload();
+              }}
             >
-              <PlayIcon className="h-5 w-5" /> Play All
+              <input aria-label="Playlist name" value={draft.title} maxLength={150} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className="w-full rounded-[4px] border border-[var(--input-border)] bg-transparent px-2.5 py-2 text-[15px] text-text" />
+              <textarea aria-label="Description" value={draft.description} maxLength={5000} rows={3} onChange={(e) => setDraft({ ...draft, description: e.target.value })} className="w-full rounded-[4px] border border-[var(--input-border)] bg-transparent px-2.5 py-2 text-[13px] text-text" />
+              <select aria-label="Who can see it" value={draft.visibility} onChange={(e) => setDraft({ ...draft, visibility: e.target.value as PlaylistVisibility })} className="w-full rounded-[4px] border border-[var(--input-border)] bg-surface px-2 py-2 text-[13px] text-text">
+                <option value="private">Private</option>
+                <option value="unlisted">Unlisted</option>
+                <option value="public">Public</option>
+              </select>
+              <div className="flex justify-end gap-2">
+                <button type="button" className="btn-text" onClick={() => setEditing(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-blue">
+                  Save
+                </button>
+              </div>
+            </form>
+          ) : (
+            <>
+              <h1 className="text-[22px] font-bold leading-7 text-text">{info.title}</h1>
+              {info.description && <p className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed text-text-2">{info.description}</p>}
+              <p className="mt-3 text-[12px] text-text-3">
+                {videos.length} videos · {formatTime(total)} · <span className="capitalize">{info.visibility}</span>
+              </p>
+            </>
+          )}
+          {first && (
+            <Link href={`/watch?v=${first.id}`} className="btn-blue mt-5 flex w-full items-center justify-center gap-2">
+              <PlayIcon className="h-5 w-5" /> Play all
             </Link>
+          )}
+          {owner && !editing && (
+            <div className="mt-3 flex gap-2">
+              <button type="button" className="btn-text flex-1" onClick={() => (setDraft({ title: info.title, description: info.description, visibility: info.visibility }), setEditing(true))}>
+                Edit
+              </button>
+              <button
+                type="button"
+                className="btn-text flex-1 text-[var(--error)]"
+                onClick={async () => {
+                  if (!window.confirm(`Delete the playlist "${info.title}"? The videos stay; only the list is removed.`)) return;
+                  if (await remove(info.id)) {
+                    showToast("Playlist deleted");
+                    router.push("/playlists");
+                  }
+                }}
+              >
+                Delete
+              </button>
+            </div>
           )}
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between pb-3 border-b border-divider">
-            <span className="text-[14px] font-medium text-text">Drag videos by the handle to reorder</span>
-            <span className="text-[12px] text-text-3">{videos.length} items</span>
-          </div>
-
+        <div className="min-w-0">
+          {owner && videos.length > 1 && <p className="border-b border-divider pb-3 text-[13px] text-text-2">Drag a video by its handle to reorder</p>}
           {videos.length === 0 ? (
-            <div className="py-16 text-center text-text-2">
-              <p>No videos in this playlist yet.</p>
-            </div>
+            <div className="py-16 text-center text-text-2">No videos in this playlist yet.</div>
           ) : (
-            <div className="divide-y divide-divider/40">
-              {videos.map((video, idx) => {
-                const isDragging = draggedIdx === idx;
-                const isOver = overIdx === idx;
-                return (
-                  <div
-                    key={video.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, idx)}
-                    onDragOver={(e) => handleDragOver(e, idx)}
-                    onDragEnd={handleDragEnd}
-                    onDrop={(e) => handleDrop(e, idx)}
-                    className={`group flex items-center gap-3 py-2.5 px-3 rounded-xs transition-all ${
-                      isDragging ? "opacity-30 bg-hover" : ""
-                    } ${isOver ? "border-t-2 border-[var(--link)] bg-hover/80" : "hover:bg-hover/60"}`}
-                  >
-                    <div
-                      className="cursor-grab active:cursor-grabbing text-icon/60 hover:text-text p-1 shrink-0"
-                      title="Drag to reorder"
-                    >
-                      <DragHandleIcon className="h-5 w-5" />
-                    </div>
-
-                    <span className="text-[12px] text-text-3 w-4 text-center shrink-0">{idx + 1}</span>
-
-                    <Link
-                      href={`/watch?v=${video.id}&list=${playlist.id}`}
-                      className="relative aspect-video w-[130px] shrink-0 overflow-hidden rounded-xs bg-skeleton"
-                    >
-                      <Thumb src={video.thumbnail} alt={video.title} />
-                      <span className="absolute bottom-1 right-1 rounded-xs bg-black/80 px-1 text-[10px] font-medium text-white">
-                        {formatTime(video.durationS)}
-                      </span>
-                    </Link>
-
-                    <div className="min-w-0 flex-1">
-                      <Link
-                        href={`/watch?v=${video.id}&list=${playlist.id}`}
-                        className="text-[14px] font-medium text-text line-clamp-1 hover:underline"
+            videos.map((v, i) => (
+              <div
+                key={v.id}
+                draggable={owner}
+                onDragStart={(e) => (setDragged(i), (e.dataTransfer.effectAllowed = "move"))}
+                onDragOver={(e) => (e.preventDefault(), over !== i && setOver(i))}
+                onDragEnd={() => (setDragged(null), setOver(null))}
+                onDrop={(e) => drop(e, i)}
+                className={`${dragged === i ? "opacity-30" : ""} ${over === i && dragged !== null ? "border-t-2 border-[var(--link)]" : ""}`}
+              >
+                <VideoRow
+                  video={v}
+                  index={i}
+                  href={`/watch?v=${v.id}`}
+                  handle={owner ? <DragHandleIcon className="h-5 w-5 shrink-0 cursor-grab text-icon" aria-hidden /> : undefined}
+                  actions={
+                    owner ? (
+                      <button
+                        type="button"
+                        aria-label={`Remove ${v.title} from playlist`}
+                        className="press grid h-9 w-9 shrink-0 place-items-center rounded-full text-icon hover:bg-[var(--active)] hover:text-[var(--error)]"
+                        onClick={async () => {
+                          setVideos((list) => list.filter((x) => x.id !== v.id));
+                          showToast((await removeVideo(info.id, v.id)) ? `Removed "${v.title}"` : "That didn't work");
+                        }}
                       >
-                        {video.title}
-                      </Link>
-                      <p className="text-[12px] text-text-2">{formatTime(video.durationS)}</p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleRemove(video.id, video.title)}
-                      title="Remove from playlist"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-icon hover:text-[var(--error)]"
-                    >
-                      <DeleteIcon className="h-4 w-4" />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
+                        <DeleteIcon className="h-5 w-5" />
+                      </button>
+                    ) : undefined
+                  }
+                />
+              </div>
+            ))
           )}
         </div>
       </div>

@@ -1,9 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useSession } from "@/lib/store/session";
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon, EditIcon, EyeIcon } from "@/components/icons";
-import { CLIENT_VIDEOS, type ClientVideo } from "@/lib/clientData";
+
+/** One of my uploads on the calendar: on its publish date, or its upload date while still a draft. */
+type CalendarVideo = { id: string; title: string; date: string; draft: boolean; scheduled: boolean };
 import { formatTime } from "@/lib/watch/format";
 
 type ViewMode = "month" | "week";
@@ -11,6 +15,31 @@ type ViewMode = "month" | "week";
 export function CalendarView() {
   const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [currentDate, setCurrentDate] = useState(new Date());
+  const me = useSession((s) => s.user?.id ?? null);
+  const [videos, setVideos] = useState<CalendarVideo[]>([]);
+
+  useEffect(() => {
+    if (!me) return;
+    void supabase
+      .from("videos")
+      .select("id,title,created_at,published_at")
+      .eq("owner_id", me)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false })
+      .limit(500)
+      .then(({ data }) => {
+        const now = Date.now();
+        setVideos(
+          ((data ?? []) as { id: string; title: string; created_at: string; published_at: string | null }[]).map((v) => ({
+            id: v.id,
+            title: v.title,
+            date: v.published_at ?? v.created_at,
+            draft: v.published_at === null,
+            scheduled: v.published_at !== null && Date.parse(v.published_at) > now,
+          })),
+        );
+      });
+  }, [me]);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -41,9 +70,9 @@ export function CalendarView() {
   const monthName = currentDate.toLocaleString("default", { month: "long" });
 
   // Map videos to days
-  const videosByDate: Record<string, ClientVideo[]> = {};
-  for (const v of CLIENT_VIDEOS) {
-    const d = new Date(v.scheduledAt || v.publishedAt);
+  const videosByDate: Record<string, CalendarVideo[]> = {};
+  for (const v of videos) {
+    const d = new Date(v.date);
     const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
     if (!videosByDate[key]) videosByDate[key] = [];
     videosByDate[key].push(v);
@@ -157,7 +186,7 @@ export function CalendarView() {
 
                 <div className="space-y-1 overflow-y-auto max-h-[85px]">
                   {dayVideos.map((v) => {
-                    const isScheduled = v.status === "scheduled" || (v.scheduledAt && new Date(v.scheduledAt) > new Date());
+                    const isScheduled = v.scheduled || v.draft;
                     return (
                       <Link
                         key={v.id}
@@ -169,7 +198,7 @@ export function CalendarView() {
                         }`}
                         title={v.title}
                       >
-                        <span className="mr-1">{isScheduled ? "⏳" : "🎬"}</span>
+                        <span className="mr-1">{v.draft ? "Draft:" : v.scheduled ? "⏳" : "🎬"}</span>
                         {v.title}
                       </Link>
                     );

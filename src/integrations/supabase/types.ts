@@ -2337,6 +2337,7 @@ export type Database = {
         }
         Returns: string
       }
+      dm_can_receive: { Args: { _user: string }; Returns: boolean }
       dm_conversations: {
         Args: never
         Returns: {

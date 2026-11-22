@@ -82,7 +82,9 @@ export function ShortsFeed({ start, initial }: { start: Short | null; initial: S
   // The address follows the short on screen.
   const activeId = shorts[active]?.id;
   useEffect(() => {
-    if (activeId && window.location.pathname !== `/shorts/${activeId}`) {
+    // Only while still on Snips: after leaving, a late update must not pull the address back here.
+    const path = window.location.pathname;
+    if (activeId && (path === "/shorts" || path === "/shorts/" || path.startsWith("/shorts/")) && path !== `/shorts/${activeId}`) {
       window.history.replaceState(window.history.state, "", `/shorts/${activeId}`);
     }
   }, [activeId]);

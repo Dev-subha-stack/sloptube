@@ -22,6 +22,10 @@ function preferNative(video: HTMLVideoElement): boolean {
  * pauses and plays. View pings go out like on the watch page, the first one
  * at 3 seconds, when a short's view counts.
  */
+function hasSrc(v: HTMLVideoElement | null): boolean {
+  return !!v && !!v.getAttribute("src");
+}
+
 export function ShortPlayer({
   short,
   active,
@@ -56,7 +60,19 @@ export function ShortPlayer({
         if (!cancelled) setPaused(true);
       });
     };
-    if (preferNative(video)) {
+    const direct = !/\.m3u8(\?|$)/i.test(short.src);
+    if (direct && short.src.startsWith("/api/media/")) {
+      // A plain video file in the built-in storage: ask for a signed link (sign-in attached), then play it as is.
+      void fetch(`${short.src}?link=1`)
+        .then((r) => (r.ok ? (r.json() as Promise<{ url?: string }>) : null))
+        .then((j) => {
+          if (cancelled) return;
+          if (!j?.url) return setFailed(true);
+          video.src = j.url;
+          play();
+        })
+        .catch(() => !cancelled && setFailed(true));
+    } else if (direct || preferNative(video)) {
       video.src = short.src;
       play();
     } else {
@@ -69,8 +85,11 @@ export function ShortPlayer({
         }
         hls = new HlsClass({ xhrSetup: hlsXhrSetup, maxBufferLength: 20, backBufferLength: 30 });
         hls.on(HlsClass.Events.MANIFEST_PARSED, play);
+        let retries = 0;
         hls.on(HlsClass.Events.ERROR, (_e, data) => {
           if (!data.fatal || !hls) return;
+          // A few retries, then give up instead of flickering forever.
+          if (++retries > 3) return setFailed(true);
           if (data.type === HlsClass.ErrorTypes.NETWORK_ERROR) hls.startLoad();
           else if (data.type === HlsClass.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
           else setFailed(true);
@@ -116,6 +135,7 @@ export function ShortPlayer({
         muted={muted}
         preload="none"
         onPlay={() => setPaused(false)}
+        onError={() => active && hasSrc(videoRef.current) && setFailed(true)}
         onPause={() => setPaused(true)}
         onTimeUpdate={(e) => {
           const v = e.currentTarget;
