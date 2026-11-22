@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ACCENTS, APPEARANCE_KEY, DEFAULT_APPEARANCE, applyAppearance, parseAppearance, type Accent, type Appearance } from "@/lib/appearance";
+import { ACCENTS, BACKGROUNDS, APPEARANCE_KEY, DEFAULT_APPEARANCE, applyAppearance, parseAppearance, type Accent, type Appearance, type Background } from "@/lib/appearance";
 import { applyTheme, readTheme, type Theme } from "@/lib/theme";
 
 const ACCENT_LABEL: Record<Accent, string> = { red: "Red", blue: "Blue", green: "Green", purple: "Purple", orange: "Orange" };
+const BACKGROUND_LABEL: Record<Background, string> = { default: "Default", ocean: "Ocean", sunset: "Sunset", aurora: "Aurora" };
 
 /** Settings > Appearance: theme, accent colour, compact layout and animations. Saved in this browser. */
 export function AppearanceSettings() {
@@ -63,6 +64,22 @@ export function AppearanceSettings() {
                 className={`h-8 w-8 rounded-full ring-offset-2 ring-offset-[var(--surface)] ${a.accent === c ? "ring-2 ring-[var(--text)]" : ""}`}
                 style={{ background: `var(--accent-${c})` }}
               />
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="text-[13px] text-text-2">Page background</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {BACKGROUNDS.map((background) => (
+              <button
+                key={background}
+                type="button"
+                aria-pressed={a.background === background}
+                onClick={() => update({ background })}
+                className={`rounded-full border px-3 py-1.5 text-[13px] ${a.background === background ? "border-[var(--link)] text-[var(--link)]" : "border-divider text-text"}`}
+              >
+                {BACKGROUND_LABEL[background]}
+              </button>
             ))}
           </div>
         </div>

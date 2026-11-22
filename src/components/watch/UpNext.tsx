@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Thumb } from "@/components/Thumb";
 import { ThumbProgress } from "@/components/ThumbProgress";
 import { formatTime, shortCount, timeAgo } from "@/lib/watch/format";
@@ -52,19 +55,46 @@ function Placeholder({ channel }: { channel: WatchChannel }) {
 export function UpNext({ videos, channel }: { videos: UpNextVideo[]; channel: WatchChannel }) {
   const shown = videos.slice(0, UP_NEXT_COUNT);
   const missing = UP_NEXT_COUNT - shown.length;
+  const [autoplay, setAutoplay] = useState(false);
+
+  useEffect(() => {
+    try {
+      setAutoplay(window.localStorage.getItem("sloptube-autoplay") === "on");
+    } catch {
+      setAutoplay(false);
+    }
+  }, []);
+
+  function toggleAutoplay() {
+    setAutoplay((current) => {
+      const next = !current;
+      try {
+        window.localStorage.setItem("sloptube-autoplay", next ? "on" : "off");
+      } catch {
+        // The current tab still gets the setting if storage is unavailable.
+      }
+      window.dispatchEvent(new Event("sloptube-autoplay-change"));
+      return next;
+    });
+  }
   return (
     <div className="px-3 pb-6 pt-4 tab:px-0 tab:pt-0">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-[16px] font-normal text-text">Up next</h2>
-        <span
-          title="Autoplay arrives in a later feature."
-          className="flex cursor-not-allowed items-center gap-2 text-[13px] font-medium uppercase text-text-2"
+        <button
+          type="button"
+          role="switch"
+          aria-checked={autoplay}
+          aria-label="Autoplay"
+          data-autoplay-toggle
+          onClick={toggleAutoplay}
+          className="flex items-center gap-2 text-[13px] font-medium uppercase text-text-2"
         >
           Autoplay
-          <span aria-hidden className="relative h-[14px] w-9 rounded-full bg-[var(--progress-track)]">
-            <span className="absolute -top-[3px] left-0 h-5 w-5 rounded-full bg-[#bdbdbd] shadow" />
+          <span aria-hidden className={`relative h-[14px] w-9 rounded-full transition-colors ${autoplay ? "bg-[var(--mark)]" : "bg-[var(--progress-track)]"}`}>
+            <span className={`absolute -top-[3px] h-5 w-5 rounded-full bg-[#bdbdbd] shadow transition-[left] ${autoplay ? "left-4" : "left-0"}`} />
           </span>
-        </span>
+        </button>
       </div>
       <div className="flex flex-col gap-2">
         {shown.map((v) => (

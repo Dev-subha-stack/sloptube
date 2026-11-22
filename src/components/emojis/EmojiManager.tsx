@@ -37,6 +37,7 @@ async function shrink(file: File): Promise<Blob> {
 export function EmojiManager() {
   const user = useSession((s) => s.user);
   const [channelId, setChannelId] = useState<string | null | undefined>(undefined);
+  const [channelHandle, setChannelHandle] = useState<string | null>(null);
   const [emojis, setEmojis] = useState<Emoji[] | null>(null);
   const [name, setName] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -44,6 +45,7 @@ export function EmojiManager() {
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const input = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const sharePrefix = channelHandle?.toLowerCase().replace(/[^a-z0-9_]/g, "_").replace(/_+/g, "_") ?? "channel";
   useEffect(() => {
     if (!file) return setPreviewUrl(null);
     const url = URL.createObjectURL(file);
@@ -60,12 +62,14 @@ export function EmojiManager() {
     if (!user) return;
     void supabase
       .from("channels")
-      .select("id")
+      .select("id, handle")
       .eq("owner_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
-        const id = (data as { id?: string } | null)?.id ?? null;
+        const row = data as { id?: string; handle?: string } | null;
+        const id = row?.id ?? null;
         setChannelId(id);
+        setChannelHandle(row?.handle ?? null);
         if (id) void refresh(id);
       });
   }, [user, refresh]);
@@ -172,7 +176,12 @@ export function EmojiManager() {
         )}
       </form>
 
-      <p className="mt-6 text-[13px] text-text-2">
+      <p className="mt-4 max-w-2xl text-[13px] leading-5 text-text-2">
+        Your channel emojis are available in public video comments and Direct Messages. In other channels and DMs, use the shared code
+        {" "}<code className="rounded bg-hover px-1 py-0.5 text-text">:{sharePrefix}_emoji_name:</code>.
+        Comments on your own channel also accept the shorter <code className="rounded bg-hover px-1 py-0.5 text-text">:emoji_name:</code> code.
+      </p>
+      <p className="mt-4 text-[13px] text-text-2">
         {emojis?.length ?? 0} of {EMOJI_MAX} emojis
       </p>
       <ul className={`${card} mt-2 grid grid-cols-2 gap-px overflow-hidden bg-[var(--divider)] sm:grid-cols-3 lg:grid-cols-4`} data-emoji-list>

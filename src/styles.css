@@ -102,6 +102,14 @@
   color-scheme: dark;
 }
 
+/* Local page background presets. Surface cards keep their normal theme colours. */
+:root[data-background="ocean"] { --page: #eaf4fb; }
+:root[data-background="sunset"] { --page: #fff0e8; }
+:root[data-background="aurora"] { --page: #eef0fa; }
+:root.dark[data-background="ocean"] { --page: #101d2b; }
+:root.dark[data-background="sunset"] { --page: #2b1c1a; }
+:root.dark[data-background="aurora"] { --page: #1d1c30; }
+
 @theme inline {
   --color-page: var(--page);
   --color-surface: var(--surface);

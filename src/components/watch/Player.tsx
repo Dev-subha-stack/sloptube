@@ -1,6 +1,7 @@
 "use client";
 
 import type Hls from "hls.js";
+import { useRouter } from "next/navigation";
 import { hlsXhrSetup } from "@/lib/auth-fetch";
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import {
@@ -46,6 +47,8 @@ type Props = {
    * Signed out, or with the flag off, the browser's own position is used.
    */
   engagement?: WatchEngagement | null;
+  /** The next visible related video, used when autoplay is enabled. */
+  nextVideoId?: string | null;
   /** /embed/<id> (feature 16): no theater mode, there is no page around it. */
   embed?: boolean;
 };
@@ -75,7 +78,8 @@ function preferNative(video: HTMLVideoElement): boolean {
  * in picture and fullscreen. hls.js everywhere except Safari, which plays
  * HLS natively (and then picks the quality itself).
  */
-export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, engagement = null, embed = false }: Props) {
+export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, engagement = null, nextVideoId = null, embed = false }: Props) {
+  const router = useRouter();
   const wrapRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
@@ -85,6 +89,7 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
   const hlsRef = useRef<Hls | null>(null);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const lastSaved = useRef(0);
+  const autoplayRef = useRef(false);
 
   const theater = useWatch((s) => s.theater);
   const toggleTheater = useWatch((s) => s.toggleTheater);
@@ -138,6 +143,24 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
   const serverStart =
     engagementOn && engagement?.signedIn ? resumeAt(engagement.positionS, engagement.durationS ?? durationS) : null;
   useWatchPings(videoId, videoRef, engagementOn);
+
+  // The Up next switch is shared through localStorage and a same-tab event.
+  useEffect(() => {
+    const read = () => {
+      try {
+        autoplayRef.current = window.localStorage.getItem("sloptube-autoplay") === "on";
+      } catch {
+        autoplayRef.current = false;
+      }
+    };
+    read();
+    window.addEventListener("storage", read);
+    window.addEventListener("sloptube-autoplay-change", read);
+    return () => {
+      window.removeEventListener("storage", read);
+      window.removeEventListener("sloptube-autoplay-change", read);
+    };
+  }, []);
 
   // Load the stream -------------------------------------------------------------------
 
@@ -599,6 +622,11 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
           setPlaying(false);
           setEnded(true);
           saveResume(videoId, e.currentTarget.duration, e.currentTarget.duration);
+          if (autoplayRef.current && nextVideoId) {
+            window.setTimeout(() => {
+              router.push(`/watch?v=${encodeURIComponent(nextVideoId)}`);
+            }, 350);
+          }
         }}
         onWaiting={() => setWaiting(true)}
         onPlaying={() => {

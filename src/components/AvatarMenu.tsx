@@ -1,25 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { canOpenTab } from "@/lib/admin/permissions";
-import { usePerms } from "@/lib/store/perms";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { StaffBadge } from "@/components/admin/RoleBadge";
-import { myRoles, useAccounts } from "@/lib/accounts/switcher";
+import { useAccounts } from "@/lib/accounts/switcher";
 import { useFlag, type SessionUser } from "@/lib/store/session";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar } from "./Avatar";
 import {
-  BugReportIcon,
   ChatIcon,
   StudioIcon,
-  LightbulbIcon,
   ChannelIcon,
   CheckIcon,
   PaletteIcon,
   SettingsIcon,
-  ShieldIcon,
   SignOutIcon,
   StarIcon,
 } from "./icons";
@@ -46,23 +41,9 @@ export function AvatarMenu({ user, email }: { user: SessionUser; email: string |
   const switchTo = useAccounts((s) => s.switchTo);
   const addAnother = useAccounts((s) => s.addAnother);
   const forget = useAccounts((s) => s.forget);
-  const [roles, setRoles] = useState<string[]>([]);
-  const perms = usePerms((s) => s.perms);
-  const isAdminPerm = usePerms((s) => s.isAdmin);
-  const loadPerms = usePerms((s) => s.load);
-  useEffect(() => loadPerms(user.id), [loadPerms, user.id]);
-  // Built-in roles or a custom role with any power.
-  const staff = roles.includes("admin") || roles.includes("moderator") || (perms?.size ?? 0) > 0;
-  const firstTab = isAdminPerm || roles.includes("admin")
-    ? "/admin/users"
-    : (["users", "videos", "announcements", "bugs", "suggestions", "comments", "queue", "log", "words", "messages"]
-        .filter((t) => perms && canOpenTab(t, perms, false))
-        .map((t) => (t === "queue" ? "/admin" : `/admin/${t}`))[0] ?? "/admin/bugs");
-
   useEffect(() => {
     load();
     void remember({ name: user.displayName, username: user.username, avatarUrl: user.avatarUrl });
-    void myRoles().then(setRoles);
   }, [load, remember, user.id, user.displayName, user.username, user.avatarUrl]);
 
   const others = accounts.filter((a) => a.userId !== user.id);
@@ -182,35 +163,6 @@ export function AvatarMenu({ user, email }: { user: SessionUser; email: string |
             }}
           >
             Your ratings
-          </MenuItem>
-          {staff && (
-            <MenuItem
-              icon={<ShieldIcon className="h-6 w-6" />}
-              onClick={() => {
-                close();
-                router.push(firstTab);
-              }}
-            >
-              Admin panel
-            </MenuItem>
-          )}
-          <MenuItem
-            icon={<BugReportIcon className="h-6 w-6" />}
-            onClick={() => {
-              close();
-              router.push("/bugs");
-            }}
-          >
-            Report a bug
-          </MenuItem>
-          <MenuItem
-            icon={<LightbulbIcon className="h-6 w-6" />}
-            onClick={() => {
-              close();
-              router.push("/suggestions");
-            }}
-          >
-            Suggest a feature
           </MenuItem>
           <MenuItem
             icon={<SettingsIcon className="h-6 w-6" />}

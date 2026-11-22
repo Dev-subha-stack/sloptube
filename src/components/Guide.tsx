@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createContext, Suspense, useContext, type ComponentType } from "react";
+import { createContext, Suspense, useContext, useEffect, useState, type ComponentType } from "react";
 import { accountGuide, mainGuide, moreGuide, railGuide, youGuide, type GuideKey } from "@/lib/guide";
+import { canOpenTab } from "@/lib/admin/permissions";
+import { myRoles } from "@/lib/accounts/switcher";
+import { usePerms } from "@/lib/store/perms";
 import { useFlag, useSession } from "@/lib/store/session";
 import { useUi } from "@/lib/store/ui";
 import { GuideFooterLinks } from "./launch/SiteFooter";
@@ -27,6 +30,7 @@ import {
   ChatIcon,
   StudioIcon,
   FavoriteIcon,
+  ShieldIcon,
 } from "./icons";
 import { Logo } from "./Logo";
 
@@ -50,6 +54,7 @@ const ITEMS: Record<GuideKey, Item> = {
   updates: { href: "/updates", label: "What's new", Icon: CampaignIcon },
   studio: { href: "/studio", label: "sloptube Studio", Icon: StudioIcon },
   messages: { href: "/messages", label: "Messages", Icon: ChatIcon },
+  admin: { href: "/admin", label: "Admin panel", Icon: ShieldIcon },
 };
 
 function useShellFlags() {
@@ -121,6 +126,26 @@ function GuideContent({ onNavigate }: { onNavigate?: () => void }) {
   const flags = useShellFlags();
   const subscriptions = flags.subscriptions;
   const you = youGuide(flags);
+  const perms = usePerms((s) => s.perms);
+  const isAdminPerm = usePerms((s) => s.isAdmin);
+  const loadPerms = usePerms((s) => s.load);
+  const [roles, setRoles] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!user) {
+      setRoles([]);
+      return;
+    }
+    void loadPerms(user.id);
+    void myRoles().then(setRoles).catch(() => setRoles([]));
+  }, [loadPerms, user?.id]);
+
+  const staff = Boolean(user && (roles.includes("admin") || roles.includes("moderator") || (perms?.size ?? 0) > 0));
+  const adminHref = isAdminPerm || roles.includes("admin")
+    ? "/admin/users"
+    : (["users", "videos", "announcements", "bugs", "suggestions", "comments", "queue", "log", "words", "messages"]
+        .filter((tab) => perms && canOpenTab(tab, perms, false))
+        .map((tab) => (tab === "queue" ? "/admin" : `/admin/${tab}`))[0] ?? "/admin/bugs");
 
   return (
     <>
@@ -141,6 +166,11 @@ function GuideContent({ onNavigate }: { onNavigate?: () => void }) {
           <GuideLink key={key} item={ITEMS[key]} onClick={onNavigate} />
         ))}
       </Section>
+      {staff && (
+        <Section>
+          <GuideLink item={{ ...ITEMS.admin, href: adminHref }} onClick={onNavigate} />
+        </Section>
+      )}
 
       {loaded && !user && accounts && (
         <Section>

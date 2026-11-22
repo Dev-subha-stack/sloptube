@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 import { StaffBadge } from "@/components/admin/RoleBadge";
 import { Avatar } from "@/components/Avatar";
 import { ChatIcon, SendIcon } from "@/components/icons";
-import { LinkedText } from "@/components/LinkedText";
+import { EmojiPicker, EmojiProvider, EmojiText } from "@/components/emojis/EmojiContext";
 import { supabase } from "@/integrations/supabase/client";
 import { DM_MAX, dmErrorText, dmProblem } from "@/lib/messages/rules";
 import { useDmUnread } from "@/lib/store/dms";
@@ -87,7 +87,7 @@ function NewChat({ onPick }: { onPick: (p: Person) => void }) {
 }
 
 /** /messages: conversations on the left, the open chat on the right (one at a time on phones). */
-export function MessagesView() {
+function MessagesContent() {
   const me = useSession((s) => s.user);
   const loaded = useSession((s) => s.loaded);
   const router = useRouter();
@@ -230,7 +230,7 @@ export function MessagesView() {
                 </span>
                 <span className={`block truncate text-[13px] ${c.unread ? "font-medium text-text" : "text-text-2"}`}>
                   {c.last_from_me ? "You: " : ""}
-                  {c.last_body}
+                  <EmojiText text={c.last_body} />
                 </span>
               </span>
               {c.unread > 0 && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-[var(--link)] px-1 text-[11px] font-medium text-white">{c.unread}</span>}
@@ -285,7 +285,7 @@ export function MessagesView() {
                         }`}
                         data-dm-message={mine ? "mine" : "theirs"}
                       >
-                        <LinkedText text={m.body} />
+                        <EmojiText text={m.body} />
                       </p>
                     </div>
                   </div>
@@ -294,6 +294,9 @@ export function MessagesView() {
               <div ref={bottom} />
             </div>
             <form onSubmit={send} className="flex shrink-0 items-end gap-2 border-t border-divider p-2 sm:p-3">
+              <EmojiPicker
+                onPick={(code) => setDraft((current) => (current && !/\s$/.test(current) ? current + " " + code : current + code))}
+              />
               <textarea
                 value={draft}
                 maxLength={DM_MAX}
@@ -318,5 +321,15 @@ export function MessagesView() {
         )}
       </section>
     </div>
+  );
+}
+
+
+/** Direct messages use the same publicly shared channel emoji library as video comments. */
+export function MessagesView() {
+  return (
+    <EmojiProvider>
+      <MessagesContent />
+    </EmojiProvider>
   );
 }
