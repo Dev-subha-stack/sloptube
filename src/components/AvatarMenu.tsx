@@ -9,11 +9,9 @@ import { useFlag, type SessionUser } from "@/lib/store/session";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar } from "./Avatar";
 import {
-  ChatIcon,
   StudioIcon,
   ChannelIcon,
   CheckIcon,
-  PaletteIcon,
   SettingsIcon,
   SignOutIcon,
   StarIcon,
@@ -147,15 +145,6 @@ export function AvatarMenu({ user, email }: { user: SessionUser; email: string |
             sloptube Studio
           </MenuItem>
           <MenuItem
-            icon={<ChatIcon className="h-6 w-6" />}
-            onClick={() => {
-              close();
-              router.push("/messages");
-            }}
-          >
-            Messages
-          </MenuItem>
-          <MenuItem
             icon={<StarIcon className="h-6 w-6" />}
             onClick={() => {
               close();
@@ -172,15 +161,6 @@ export function AvatarMenu({ user, email }: { user: SessionUser; email: string |
             }}
           >
             Settings
-          </MenuItem>
-          <MenuItem
-            icon={<PaletteIcon className="h-6 w-6" />}
-            onClick={() => {
-              close();
-              router.push("/settings#appearance");
-            }}
-          >
-            Appearance
           </MenuItem>
           <ThemeMenuItem />
           <MenuItem
