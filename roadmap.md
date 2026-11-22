@@ -68,7 +68,7 @@ Hosting: stay on the Lovable database for now (user may move to own Supabase lat
 - [x] Playlists and Watch later saved per account; sample playlist videos removed
 
 - [x] EMERGENCY: Snips don't play, flicker, and Home button stuck on Snips
-- [ ] FIX: sending a direct message fails ("The message didn't send")
+- [x] FIX: sending a direct message fails ("The message didn't send")
 
 ### Phase 4
 - [x] YouTube-style home grid; all public videos in feed
