@@ -45,6 +45,7 @@ export function EmojiManager() {
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const input = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const sharePrefix = channelHandle?.toLowerCase().replace(/[^a-z0-9_]/g, "_").replace(/_+/g, "_") ?? "channel";
   useEffect(() => {
     if (!file) return setPreviewUrl(null);
     const url = URL.createObjectURL(file);
@@ -177,7 +178,7 @@ export function EmojiManager() {
 
       <p className="mt-4 max-w-2xl text-[13px] leading-5 text-text-2">
         Your channel emojis are available in public video comments and Direct Messages. In other channels and DMs, use the shared code
-        {" "}<code className="rounded bg-hover px-1 py-0.5 text-text">:{channelHandle ?? "channel"}_emoji_name:</code>.
+        {" "}<code className="rounded bg-hover px-1 py-0.5 text-text">:{sharePrefix}_emoji_name:</code>.
         Comments on your own channel also accept the shorter <code className="rounded bg-hover px-1 py-0.5 text-text">:emoji_name:</code> code.
       </p>
       <p className="mt-4 text-[13px] text-text-2">
