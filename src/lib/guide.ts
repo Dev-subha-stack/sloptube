@@ -3,7 +3,7 @@
 // one feature at a time (Trending appears when feed goes on, and so on).
 // No imports on purpose, so `node --test` can load it directly.
 
-export type GuideKey = "home" | "shorts" | "trending" | "subscriptions" | "library" | "history" | "watchLater" | "playlists" | "topRated" | "ratings" | "bugs" | "suggestions" | "updates" | "studio" | "messages";
+export type GuideKey = "home" | "shorts" | "trending" | "subscriptions" | "library" | "history" | "watchLater" | "playlists" | "topRated" | "ratings" | "bugs" | "suggestions" | "updates" | "studio" | "messages" | "admin";
 
 export type ShellFlags = {
   feed?: boolean;
