@@ -195,7 +195,7 @@ export function NotificationsBell() {
       label={badge ? `Notifications, ${unread} new` : "Notifications"}
       width={480}
       onOpen={opened}
-      buttonClassName={`relative grid h-10 w-10 place-items-center rounded-full hover:bg-hover ${unread > 0 ? "text-[var(--link)]" : "text-icon"}`}
+      buttonClassName={`relative grid h-8 w-8 place-items-center rounded-full hover:bg-hover sm:h-10 sm:w-10 ${unread > 0 ? "text-[var(--link)]" : "text-icon"}`}
       button={
         <>
           <span className={`inline-flex ${ring ? "anim-ring" : ""}`} onAnimationEnd={() => setRing(false)}>
