@@ -61,10 +61,12 @@ export function VideoCard({
             <Link href={href}>{video.title}</Link>
           </Heading>
           <p className="mt-1 text-[13px] leading-[18px] text-text-2 sm:mt-1.5">
-            <Link href={channelHref} className="hover:text-text sm:block sm:truncate">
-              {video.channel.name}
-            </Link>
-            <StaffBadge name={video.channel.handle} />
+            <span className="sm:flex sm:min-w-0 sm:items-center">
+              <Link href={channelHref} className="hover:text-text sm:truncate">
+                {video.channel.name}
+              </Link>
+              <StaffBadge name={video.channel.handle} />
+            </span>
             <span className="sm:hidden"> · </span>
             {viewsLabel(video.views)} · {timeAgo(video.publishedAt, now)}
           </p>

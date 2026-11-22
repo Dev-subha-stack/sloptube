@@ -4,6 +4,7 @@ import { SkeletonRow, videoGridClass } from "@/components/VideoCard";
 import type { feedState } from "@/lib/feed/server";
 import type { shelfShorts } from "@/lib/shorts/server";
 import type { FeedKind } from "@/lib/feed/types";
+import { FeaturedVideo, pickFeatured } from "./FeaturedVideo";
 import { FeedGrid } from "./FeedGrid";
 
 const frame = "mx-auto max-w-[2200px] px-0 py-6 sm:px-6";
@@ -14,13 +15,12 @@ const CHIPS: { href: string; label: string; kind?: string }[] = [
   { href: "/shorts", label: "Snips" },
   { href: "/feed/subscriptions", label: "Subscriptions" },
   { href: "/top-rated", label: "Top rated" },
-  { href: "/updates", label: "What's new" },
 ];
 
 /** YouTube-style chips under the top bar: quick jumps between feeds. */
 function Chips({ kind }: { kind: string }) {
   return (
-    <nav aria-label="Browse" className="chips -mx-0 mb-5 flex gap-3 overflow-x-auto px-3 pb-1 sm:px-0" data-feed-chips>
+    <nav aria-label="Browse" className="chips sticky top-14 z-20 -mt-3 mb-5 flex gap-3 overflow-x-auto bg-[var(--page)] px-3 py-3 sm:px-0" data-feed-chips>
       {CHIPS.map((c) => {
         const active = c.kind === kind;
         return (
@@ -108,10 +108,15 @@ export function FeedView({
           </div>
         );
       }
+      // Home opens with the most watched of the newest videos, big; the grid follows without it.
+      const featured = kind === "newest" ? pickFeatured(state.page.cards) : null;
+      const page = featured ? { ...state.page, cards: state.page.cards.filter((c) => c.id !== featured.id) } : state.page;
       return (
         <div className={frame} data-feed-state="ready">
           <Header title={title} kind={kind} />
-          <FeedGrid kind={kind} initial={state.page} now={state.now} ranked={kind === "trending"} shelf={shelf} />
+          {featured && <FeaturedVideo video={featured} now={state.now} />}
+          {featured && <h2 className="mb-4 px-3 text-[20px] font-bold leading-7 text-text sm:px-0">Latest videos</h2>}
+          <FeedGrid kind={kind} initial={page} now={state.now} ranked={kind === "trending"} shelf={shelf} />
         </div>
       );
     }

@@ -21,10 +21,14 @@ export function Thumb({ src, alt, sizes, eager = false, className = "" }: { src:
       unoptimized
       loading={eager ? "eager" : "lazy"}
       fetchPriority={eager ? "high" : undefined}
-      className={`object-cover ${className}`}
+      className={`object-cover text-transparent ${className}`}
       // A video without a picture yet: show the grey box instead of a broken image.
       onError={(e) => {
         e.currentTarget.style.visibility = "hidden";
+      }}
+      // An image that already failed before the page came alive never fires onError: hide it here.
+      ref={(img: HTMLImageElement | null) => {
+        if (img && img.complete && img.naturalWidth === 0 && img.currentSrc) img.style.visibility = "hidden";
       }}
     />
   );

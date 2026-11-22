@@ -1,9 +1,10 @@
 // Stand-in for the old framework's <Image>: a plain <img> with the same props.
-import type { CSSProperties, ImgHTMLAttributes } from "react";
+import type { CSSProperties, ImgHTMLAttributes, Ref } from "react";
 
 type StaticImage = { src: string; width?: number; height?: number };
 
 export type ImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "width" | "height"> & {
+  ref?: Ref<HTMLImageElement>;
   src: string | StaticImage;
   width?: number | string;
   height?: number | string;

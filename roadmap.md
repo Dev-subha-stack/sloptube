@@ -62,8 +62,13 @@ Hosting: stay on the Lovable database for now (user may move to own Supabase lat
 - [x] Fix mod panel crashes / permission glitches
 - [x] Staff can change users' usernames
 - [x] FIX: custom badges must show to every user next to names
+## Round 5 (Nov 22) — user: "can't watch videos, home looks bad, no updates section"
+- [x] Videos play (checked 6 videos on preview and live site, signed out and signed in)
+- [x] New Home: featured video, chips without "What's new", tidy Snips row, latest grid
+- [x] Playlists and Watch later saved per account; sample playlist videos removed
+
 ### Phase 4
-- [ ] YouTube-style home grid; all public videos in feed
+- [x] YouTube-style home grid; all public videos in feed
 - [ ] Username/profile changes show everywhere immediately
 - [ ] Mobile fit: no horizontal overflow, responsive spacing
 - [ ] Snappy animations (pages, buttons, modals, hover)
@@ -76,6 +81,6 @@ Hosting: stay on the Lovable database for now (user may move to own Supabase lat
 - [ ] Desktop profile icon opens Sign In then jumps Home
 - [ ] Remove browser PiP; miniplayer click returns to watch page
 - [ ] Paused videos resuming on their own
-- [ ] Snips not loading/playing; remove fake playlist videos
+- [ ] Snips not loading/playing (fake playlist videos removed Nov 22)
 - [ ] Upload progress bar resetting to 0%
 - [ ] Performance pass
