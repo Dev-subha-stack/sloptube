@@ -213,6 +213,8 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
   const [playing, setPlaying] = useState(false);
   const [started, setStarted] = useState(false);
   const [ended, setEnded] = useState(false);
+  const [autoplayCountdown, setAutoplayCountdown] = useState<number | null>(null);
+  const [autoplayTarget, setAutoplayTarget] = useState<string | null>(null);
   const [waiting, setWaiting] = useState(false);
   /** false until the first frame actually plays: the loading spinner stays up until then. */
   const [rolling, setRolling] = useState(false);
@@ -264,6 +266,10 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
       } catch {
         autoplayRef.current = false;
       }
+      if (!autoplayRef.current) {
+        setAutoplayCountdown(null);
+        setAutoplayTarget(null);
+      }
     };
     read();
     window.addEventListener("storage", read);
@@ -273,6 +279,27 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
       window.removeEventListener("sloptube-autoplay-change", read);
     };
   }, []);
+
+  // Give the viewer five seconds to cancel or start the next recommendation immediately.
+  const playAutoplayTarget = useCallback(() => {
+    if (!autoplayTarget) return;
+    const target = autoplayTarget;
+    setAutoplayCountdown(null);
+    setAutoplayTarget(null);
+    router.push(`/watch?v=${encodeURIComponent(target)}`);
+  }, [autoplayTarget, router]);
+
+  useEffect(() => {
+    if (autoplayCountdown === null || !autoplayTarget) return;
+    if (autoplayCountdown <= 0) {
+      playAutoplayTarget();
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setAutoplayCountdown((current) => current === null ? null : Math.max(0, current - 1));
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [autoplayCountdown, autoplayTarget, playAutoplayTarget]);
 
   // Load the stream -------------------------------------------------------------------
 
@@ -718,6 +745,8 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
           setPlaying(true);
           setStarted(true);
           setEnded(false);
+          setAutoplayCountdown(null);
+          setAutoplayTarget(null);
           poke();
         }}
         onPause={(e) => {
@@ -733,9 +762,8 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
           if (autoplayRef.current) {
             const nextId = nextVideoIds.find((candidate) => candidate !== videoId && !watched.has(candidate));
             if (nextId) {
-              window.setTimeout(() => {
-                router.push(`/watch?v=${encodeURIComponent(nextId)}`);
-              }, 350);
+              setAutoplayTarget(nextId);
+              setAutoplayCountdown(5);
             }
           }
         }}
@@ -790,6 +818,43 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
           className="pointer-events-none absolute left-3 top-3 rounded-sm bg-black/80 px-3 py-1.5 text-[13px] font-medium text-white"
         >
           Resumed
+        </div>
+      )}
+
+      {autoplayCountdown !== null && autoplayTarget && !error && (
+        <div
+          role="status"
+          aria-live="polite"
+          data-autoplay-countdown
+          className="absolute bottom-14 left-1/2 z-30 flex w-[min(92%,430px)] -translate-x-1/2 items-center gap-3 rounded-lg bg-[#181818]/95 p-3 text-white shadow-[0_4px_22px_rgba(0,0,0,0.45)] backdrop-blur-sm"
+        >
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/15 text-[18px] font-semibold tabular-nums">
+            {autoplayCountdown}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-semibold">Up next</p>
+            <p className="text-[12px] text-white/75">Playing next video in {autoplayCountdown}…</p>
+          </div>
+          <button
+            type="button"
+            data-autoplay-next-now
+            onClick={playAutoplayTarget}
+            className="shrink-0 rounded-full bg-[var(--mark)] px-3 py-2 text-[12px] font-semibold text-white hover:brightness-110"
+          >
+            Play now
+          </button>
+          <button
+            type="button"
+            data-autoplay-cancel
+            aria-label="Cancel autoplay"
+            onClick={() => {
+              setAutoplayCountdown(null);
+              setAutoplayTarget(null);
+            }}
+            className="shrink-0 rounded-full px-2 py-2 text-[12px] font-medium text-white/80 hover:bg-white/10"
+          >
+            Cancel
+          </button>
         </div>
       )}
 
