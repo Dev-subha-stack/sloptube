@@ -9,7 +9,7 @@ import { ChannelMessage } from "@/components/channel/ChannelNotices";
 import { CommentsSection, CommentsUnavailable } from "@/components/comments/CommentsSection";
 import { ErrorIcon } from "@/components/icons";
 import { WatchProcessing } from "@/components/processing/WatchProcessing";
-import { Player } from "@/components/watch/Player";
+import { PlayerSlot } from "@/components/watch/Player";
 import { UpNext } from "@/components/watch/UpNext";
 import { VideoInfo } from "@/components/watch/VideoInfo";
 import { WatchLayout } from "@/components/watch/WatchLayout";
@@ -133,7 +133,7 @@ function Watch() {
           {!preview && <VideoJsonLd video={video} origin={origin} />}
           <WatchLayout
             player={
-              <Player
+              <PlayerSlot
                 key={video.id}
                 videoId={video.id}
                 src={video.src}
