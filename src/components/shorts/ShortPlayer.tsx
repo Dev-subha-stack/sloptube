@@ -16,10 +16,9 @@ function preferNative(video: HTMLVideoElement): boolean {
 
 /**
  * One short's video. Only the short on screen loads its stream and plays,
- * looping; the others show their poster. It starts muted (browsers only
- * autoplay without sound) until the first tap anywhere on a short, which
- * turns the sound on for this one and every one after it. A later tap
- * pauses and plays. View pings go out like on the watch page, the first one
+ * looping; the others show their poster. It starts unmuted. If the browser
+ * blocks audible autoplay, the play control appears for a tap. Later taps
+ * pause and play. View pings go out like on the watch page, the first one
  * at 3 seconds, when a short's view counts.
  */
 function hasSrc(v: HTMLVideoElement | null): boolean {

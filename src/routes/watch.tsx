@@ -142,7 +142,7 @@ function Watch() {
                 durationS={video.durationS}
                 startAt={parseStart(t)}
                 engagement={engagement}
-                nextVideoId={upNext[0]?.id ?? null}
+                nextVideoIds={upNext.map((video) => video.id)}
               />
             }
             info={<VideoInfo video={video} engagement={engagement} />}

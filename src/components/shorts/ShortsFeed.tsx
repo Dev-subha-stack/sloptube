@@ -25,7 +25,7 @@ const WHEEL_QUIET_MS = 450;
 /**
  * /shorts: one short per screen, in a column that snaps. Swipe or scroll to
  * move, or use the arrow keys (and the arrow buttons on desktop). The short
- * on screen plays and loops; each newly active Snip starts muted until tapped. The address follows
+ * on screen plays and loops with sound on. The address follows
  * the short on screen (/shorts/<id>), so it can be shared or reloaded. More
  * shorts load from /api/shorts as the end gets near.
  */
@@ -33,7 +33,7 @@ export function ShortsFeed({ start, initial }: { start: Short | null; initial: S
   const [shorts, setShorts] = useState<Short[]>(() => (start ? mergePage([start], initial.shorts) : initial.shorts));
   const [next, setNext] = useState<string | null>(initial.next);
   const [active, setActive] = useState(0);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
   const [comments, setComments] = useState<Short | null>(null);
   const [share, setShare] = useState<Short | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
@@ -75,8 +75,8 @@ export function ShortsFeed({ start, initial }: { start: Short | null; initial: S
           if (i !== activeIndex.current) {
             activeIndex.current = i;
             setActive(i);
-            // Sound is opt-in for each Snip; never carry unmuted audio across a scroll.
-            setMuted(true);
+            // Every newly active Snip starts with sound on.
+            setMuted(false);
           }
           if (i >= more.current.count - 1 - LOAD_AHEAD) void more.current.loadMore();
         }

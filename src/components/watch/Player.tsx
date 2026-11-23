@@ -26,6 +26,7 @@ import type { WatchEngagement } from "@/lib/engagement/types";
 import { useWatchPings } from "@/lib/engagement/useWatchPings";
 import { useWatch } from "@/lib/store/watch";
 import { formatTime } from "@/lib/watch/format";
+import { markAutoplayWatched } from "@/lib/watch/autoplay-history";
 import { clampTime, keyAction, stepVolume, type PlayerAction } from "@/lib/watch/keys";
 import { loadQuality, loadResume, loadVolume, saveQuality, saveResume, saveVolume } from "@/lib/watch/prefs";
 import { AUTO, levelForSaved, qualityOptions, qualitySummary, SPEEDS, speedLabel, type QualityOption } from "@/lib/watch/quality";
@@ -47,8 +48,8 @@ type Props = {
    * Signed out, or with the flag off, the browser's own position is used.
    */
   engagement?: WatchEngagement | null;
-  /** The next visible related video, used when autoplay is enabled. */
-  nextVideoId?: string | null;
+  /** Ordered related videos; autoplay skips anything already ended this tab session. */
+  nextVideoIds?: string[];
   /** /embed/<id> (feature 16): no theater mode, there is no page around it. */
   embed?: boolean;
   /** Controlled by the persistent app-shell player host. */
@@ -106,7 +107,7 @@ export function PlayerSlot(props: DockPlayerProps) {
 
   useEffect(() => {
     usePlayerDock.getState().setPlayer(props);
-  }, [props.src, props.poster, props.spriteVtt, props.durationS, props.startAt, props.engagement, props.nextVideoId]);
+  }, [props.src, props.poster, props.spriteVtt, props.durationS, props.startAt, props.engagement, props.nextVideoIds]);
 
   return <div ref={targetRef} className="h-full w-full" data-player-slot-target />;
 }
@@ -192,7 +193,7 @@ function preferNative(video: HTMLVideoElement): boolean {
  * in picture and fullscreen. hls.js everywhere except Safari, which plays
  * HLS natively (and then picks the quality itself).
  */
-export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, engagement = null, nextVideoId = null, embed = false, mini = false, onMiniChange, onClose }: Props) {
+export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, engagement = null, nextVideoIds = [], embed = false, mini = false, onMiniChange, onClose }: Props) {
   const router = useRouter();
   const wrapRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -727,10 +728,15 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
           setPlaying(false);
           setEnded(true);
           saveResume(videoId, e.currentTarget.duration, e.currentTarget.duration);
-          if (autoplayRef.current && nextVideoId) {
-            window.setTimeout(() => {
-              router.push(`/watch?v=${encodeURIComponent(nextVideoId)}`);
-            }, 350);
+          // Remember completed videos for this tab so recommendations cannot loop back to them.
+          const watched = markAutoplayWatched(videoId);
+          if (autoplayRef.current) {
+            const nextId = nextVideoIds.find((candidate) => candidate !== videoId && !watched.has(candidate));
+            if (nextId) {
+              window.setTimeout(() => {
+                router.push(`/watch?v=${encodeURIComponent(nextId)}`);
+              }, 350);
+            }
           }
         }}
         onWaiting={() => setWaiting(true)}

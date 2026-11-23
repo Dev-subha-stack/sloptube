@@ -6,6 +6,7 @@ import { Thumb } from "@/components/Thumb";
 import { ThumbProgress } from "@/components/ThumbProgress";
 import { formatTime, shortCount, timeAgo } from "@/lib/watch/format";
 import type { UpNextVideo, WatchChannel } from "@/lib/watch/types";
+import { AUTOPLAY_HISTORY_EVENT, readAutoplayWatched } from "@/lib/watch/autoplay-history";
 
 /** Up next shows this many cards, padded with placeholders when there are fewer videos. */
 export const UP_NEXT_COUNT = 10;
@@ -53,9 +54,17 @@ function Placeholder({ channel }: { channel: WatchChannel }) {
 
 /** The right column: related videos (or more from this channel), padded with placeholders to 10 cards. */
 export function UpNext({ videos, channel }: { videos: UpNextVideo[]; channel: WatchChannel }) {
-  const shown = videos.slice(0, UP_NEXT_COUNT);
-  const missing = UP_NEXT_COUNT - shown.length;
+  const [watched, setWatched] = useState<Set<string>>(() => new Set());
+  const shown = videos.filter((video) => !watched.has(video.id)).slice(0, UP_NEXT_COUNT);
+  const missing = Math.max(0, UP_NEXT_COUNT - videos.length);
   const [autoplay, setAutoplay] = useState(false);
+
+  useEffect(() => {
+    const refresh = () => setWatched(readAutoplayWatched());
+    refresh();
+    window.addEventListener(AUTOPLAY_HISTORY_EVENT, refresh);
+    return () => window.removeEventListener(AUTOPLAY_HISTORY_EVENT, refresh);
+  }, []);
 
   useEffect(() => {
     try {
