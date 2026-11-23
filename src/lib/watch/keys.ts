@@ -9,7 +9,7 @@ export type PlayerAction =
   | { type: "toggle-mute" }
   | { type: "fullscreen" }
   | { type: "theater" }
-  | { type: "pip" }
+  | { type: "miniplayer" }
   | { type: "captions" };
 
 export type KeyInput = {
@@ -44,7 +44,7 @@ function isTyping(e: KeyInput): boolean {
  *   m               mute
  *   f               fullscreen
  *   t               theater mode
- *   i               picture in picture
+ *   i               open or restore the miniplayer
  *   c               subtitles and closed captions on or off
  *   0 to 9          jump to 0% to 90%
  * Returns null for any other key, and when a modifier is held (so browser
@@ -79,7 +79,7 @@ export function keyAction(e: KeyInput): PlayerAction | null {
     case "t":
       return { type: "theater" };
     case "i":
-      return { type: "pip" };
+      return { type: "miniplayer" };
     case "c":
       return { type: "captions" };
   }
