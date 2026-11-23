@@ -253,6 +253,13 @@
       "when": 1795329440999,
       "tag": "0035_dm_edit_delete_reactions",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1795401495635,
+      "tag": "0036_dm_deleted_body_allowed",
+      "breakpoints": true
     }
   ]
 }

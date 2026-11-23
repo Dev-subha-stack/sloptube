@@ -87,3 +87,7 @@ Hosting: stay on the Lovable database for now (user may move to own Supabase lat
 - [ ] Snips not loading/playing (fake playlist videos removed Nov 22)
 - [ ] Upload progress bar resetting to 0%
 - [ ] Performance pass
+
+## Nov 22
+- [x] Bring in the main2 branch features (already merged into main on GitHub, PR #6)
+- [x] Messages: edit, delete and reactions

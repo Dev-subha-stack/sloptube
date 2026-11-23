@@ -8,7 +8,7 @@ import { Avatar } from "@/components/Avatar";
 import { ChatIcon, SendIcon } from "@/components/icons";
 import { EmojiPicker, EmojiProvider, EmojiText } from "@/components/emojis/EmojiContext";
 import { supabase } from "@/integrations/supabase/client";
-import { DM_MAX, dmErrorText, dmProblem } from "@/lib/messages/rules";
+import { DM_MAX, DM_REACTIONS, dmErrorText, dmProblem, nextReaction, reactionChips } from "@/lib/messages/rules";
 import { useDmUnread } from "@/lib/store/dms";
 import { useSession } from "@/lib/store/session";
 import { parseUtc, timeAgo } from "@/lib/watch/format";
@@ -23,7 +23,18 @@ type Conversation = {
   last_from_me: boolean;
   unread: number;
 };
-type Message = { id: string; sender_id: string; recipient_id: string; body: string; created_at: string; read_at: string | null };
+type Message = {
+  id: string;
+  sender_id: string;
+  recipient_id: string;
+  body: string;
+  created_at: string;
+  read_at: string | null;
+  edited_at: string | null;
+  deleted_at: string | null;
+  reactions: Record<string, string> | null;
+};
+const MESSAGE_COLUMNS = "id, sender_id, recipient_id, body, created_at, read_at, edited_at, deleted_at, reactions";
 type Person = { id: string; username: string; display_name: string; avatar_url: string | null };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -86,6 +97,195 @@ function NewChat({ onPick }: { onPick: (p: Person) => void }) {
   );
 }
 
+function MessageBubble({
+  m,
+  me,
+  active,
+  onToggle,
+  onChanged,
+  onError,
+}: {
+  m: Message;
+  me: string;
+  active: boolean;
+  onToggle: () => void;
+  onChanged: (m: Message) => void;
+  onError: (text: string) => void;
+}) {
+  const mine = m.sender_id === me;
+  const [editing, setEditing] = useState(false);
+  const [text, setText] = useState(m.body);
+  const [picker, setPicker] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const chips = reactionChips(m.reactions, me);
+  const myReaction = m.reactions?.[me] ?? null;
+
+  useEffect(() => {
+    if (!active) {
+      setPicker(false);
+      setConfirmDelete(false);
+    }
+  }, [active]);
+
+  async function run(call: PromiseLike<{ data: unknown; error: { message: string } | null }>) {
+    setBusy(true);
+    const { data, error } = await call;
+    setBusy(false);
+    if (error) {
+      const text = dmErrorText(error.message);
+      onError(text.startsWith("The message didn't send") ? "That didn't work. Try again." : text);
+      return false;
+    }
+    if (data) onChanged(data as Message);
+    return true;
+  }
+
+  const react = (emoji: string) => {
+    setPicker(false);
+    void run(supabase.rpc("dm_react", { _id: m.id, _emoji: nextReaction(myReaction, emoji) ?? "" }));
+  };
+
+  async function saveEdit(e?: FormEvent) {
+    e?.preventDefault();
+    const problem = dmProblem(text);
+    if (problem) return onError(problem);
+    if (await run(supabase.rpc("dm_edit", { _id: m.id, _body: text.trim() }))) {
+      setEditing(false);
+      onToggle();
+    }
+  }
+
+  if (m.deleted_at) {
+    return (
+      <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+        <p className="max-w-[78%] rounded-[18px] border border-divider px-3.5 py-2 text-[13px] italic text-text-3" data-dm-message="deleted">
+          Message deleted
+        </p>
+      </div>
+    );
+  }
+
+  if (editing) {
+    return (
+      <form onSubmit={saveEdit} className="flex justify-end" data-dm-editing>
+        <div className="w-full max-w-[78%]">
+          <textarea
+            value={text}
+            maxLength={DM_MAX}
+            autoFocus
+            rows={2}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                void saveEdit();
+              }
+              if (e.key === "Escape") setEditing(false);
+            }}
+            aria-label="Edit message"
+            className="block w-full resize-none rounded-[14px] border border-[var(--focus)] bg-transparent px-3 py-2 text-[14px] text-text outline-none"
+          />
+          <div className="mt-1 flex justify-end gap-2">
+            <button type="button" onClick={() => setEditing(false)} className="rounded-full px-3 py-1 text-[13px] text-text hover:bg-hover">
+              Cancel
+            </button>
+            <button type="submit" disabled={busy || !text.trim()} className="rounded-full bg-[var(--link)] px-3 py-1 text-[13px] font-medium text-white disabled:opacity-40">
+              Save
+            </button>
+          </div>
+        </div>
+      </form>
+    );
+  }
+
+  const tool = "grid h-8 min-w-8 place-items-center rounded-full px-2 text-[13px] text-text hover:bg-hover disabled:opacity-40";
+  return (
+    <div className={`group flex flex-col ${mine ? "items-end" : "items-start"}`}>
+      <div className={`flex w-full items-center gap-1 ${mine ? "flex-row-reverse" : ""}`}>
+        <p
+          onClick={onToggle}
+          className={`anim-in max-w-[78%] cursor-pointer whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-2 text-[14px] leading-5 ${
+            mine ? "rounded-br-[6px] bg-[var(--link)] text-white [&_a]:text-white [&_a]:underline" : "rounded-bl-[6px] bg-[var(--hover)] text-text"
+          }`}
+          data-dm-message={mine ? "mine" : "theirs"}
+        >
+          <EmojiText text={m.body} />
+          {m.edited_at && <span className={`ml-1.5 text-[11px] ${mine ? "opacity-75" : "text-text-3"}`}>(edited)</span>}
+        </p>
+        <div className={`${active ? "flex" : "hidden [@media(hover:hover)]:group-hover:flex"} shrink-0 items-center gap-0.5`} data-dm-actions>
+          <button type="button" aria-label="React" onClick={() => setPicker((v) => !v)} className={tool} disabled={busy}>
+            <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="currentColor" aria-hidden>
+              <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Zm-3.5-9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm7 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM12 17.5c2.3 0 4.3-1.4 5.1-3.5H6.9c.8 2.1 2.8 3.5 5.1 3.5Z" />
+            </svg>
+          </button>
+          {mine && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setText(m.body);
+                  setEditing(true);
+                }}
+                className={tool}
+                disabled={busy}
+              >
+                Edit
+              </button>
+              {confirmDelete ? (
+                <>
+                  <button type="button" onClick={() => void run(supabase.rpc("dm_delete", { _id: m.id }))} className={`${tool} font-medium text-[var(--error)]`} disabled={busy}>
+                    Delete?
+                  </button>
+                  <button type="button" onClick={() => setConfirmDelete(false)} className={tool}>
+                    No
+                  </button>
+                </>
+              ) : (
+                <button type="button" onClick={() => setConfirmDelete(true)} className={tool} disabled={busy}>
+                  Delete
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+      {picker && (
+        <div className="anim-in mt-1 flex gap-0.5 rounded-full bg-surface px-1.5 py-1 shadow-[var(--menu-shadow)]" role="menu" aria-label="Pick a reaction">
+          {DM_REACTIONS.map((e) => (
+            <button
+              key={e}
+              type="button"
+              role="menuitem"
+              onClick={() => react(e)}
+              aria-label={`React ${e}`}
+              className={`grid h-9 w-9 place-items-center rounded-full text-[20px] transition-transform hover:scale-125 ${myReaction === e ? "bg-[var(--active)]" : ""}`}
+            >
+              {e}
+            </button>
+          ))}
+        </div>
+      )}
+      {chips.length > 0 && (
+        <div className="-mt-1 flex gap-1 px-2" data-dm-reactions>
+          {chips.map((c) => (
+            <button
+              key={c.emoji}
+              type="button"
+              onClick={() => react(c.emoji)}
+              aria-label={`${c.emoji} ${c.count}${c.mine ? ", yours" : ""}`}
+              className={`flex h-6 items-center gap-1 rounded-full border px-1.5 text-[12px] text-text ${c.mine ? "border-[var(--link)] bg-[var(--active)]" : "border-divider bg-surface"}`}
+            >
+              <span>{c.emoji}</span>
+              {c.count > 1 && <span>{c.count}</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** /messages: conversations on the left, the open chat on the right (one at a time on phones). */
 function MessagesContent() {
   const me = useSession((s) => s.user);
@@ -103,6 +303,7 @@ function MessagesContent() {
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  const [activeId, setActiveId] = useState<string | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
   const otherRef = useRef<string | null>(null);
   otherRef.current = otherId;
@@ -120,7 +321,7 @@ function MessagesContent() {
         supabase.from("profiles").select("id, username, display_name, avatar_url").eq("id", id).maybeSingle(),
         supabase
           .from("direct_messages")
-          .select("id, sender_id, recipient_id, body, created_at, read_at")
+          .select(MESSAGE_COLUMNS)
           .or(`and(sender_id.eq.${me.id},recipient_id.eq.${id}),and(sender_id.eq.${id},recipient_id.eq.${me.id})`)
           .order("created_at", { ascending: false })
           .limit(200),
@@ -145,6 +346,7 @@ function MessagesContent() {
     setMessages(null);
     setOther(null);
     setError(null);
+    setActiveId(null);
     if (otherId) void loadThread(otherId);
   }, [otherId, loadThread]);
 
@@ -161,6 +363,11 @@ function MessagesContent() {
           if (m.sender_id === current) void supabase.rpc("dm_mark_read", { other: current }).then(() => void refreshBadge());
         }
         void loadConvos();
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "direct_messages" }, (payload) => {
+        const m = payload.new as Message;
+        setMessages((list) => (list ? list.map((x) => (x.id === m.id ? { ...x, ...m } : x)) : list));
+        if (m.deleted_at || m.edited_at) void loadConvos();
       })
       .subscribe();
     return () => {
@@ -182,7 +389,7 @@ function MessagesContent() {
     const { data, error: err } = await supabase
       .from("direct_messages")
       .insert({ sender_id: me.id, recipient_id: otherId, body: draft.trim() })
-      .select("id, sender_id, recipient_id, body, created_at, read_at")
+      .select(MESSAGE_COLUMNS)
       .single();
     setSending(false);
     if (err) return setError(dmErrorText(err.message));
@@ -272,22 +479,25 @@ function MessagesContent() {
               {messages === null && <p className="text-center text-[14px] text-text-2">Loading...</p>}
               {messages?.length === 0 && <p className="text-center text-[14px] text-text-2">Say hi to {other?.display_name ?? "them"}.</p>}
               {messages?.map((m, i) => {
-                const mine = m.sender_id === me?.id;
                 const prev = messages[i - 1];
                 const gap = !prev || parseUtc(m.created_at) - parseUtc(prev.created_at) > 10 * 60_000;
                 return (
                   <div key={m.id}>
                     {gap && <p className="py-2 text-center text-[11px] text-text-3">{timeAgo(m.created_at, now)}</p>}
-                    <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                      <p
-                        className={`anim-in max-w-[78%] whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-2 text-[14px] leading-5 ${
-                          mine ? "rounded-br-[6px] bg-[var(--link)] text-white [&_a]:text-white [&_a]:underline" : "rounded-bl-[6px] bg-[var(--hover)] text-text"
-                        }`}
-                        data-dm-message={mine ? "mine" : "theirs"}
-                      >
-                        <EmojiText text={m.body} />
-                      </p>
-                    </div>
+                    {me && (
+                      <MessageBubble
+                        m={m}
+                        me={me.id}
+                        active={activeId === m.id}
+                        onToggle={() => setActiveId((a) => (a === m.id ? null : m.id))}
+                        onChanged={(next) => {
+                          setError(null);
+                          setMessages((list) => (list ? list.map((x) => (x.id === next.id ? next : x)) : list));
+                          if (next.deleted_at || next.edited_at) void loadConvos();
+                        }}
+                        onError={setError}
+                      />
+                    )}
                   </div>
                 );
               })}
