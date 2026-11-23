@@ -27,6 +27,7 @@ import { FlagPanel } from "@/components/flags/FlagPanel";
 import { SiteFooter } from "@/components/launch/SiteFooter";
 import { PathTracker } from "@/components/PathTracker";
 import { TopBar } from "@/components/TopBar";
+import { PlayerHost } from "@/components/watch/Player";
 import { Logo } from "@/components/Logo";
 import { ErrorPage } from "@/components/launch/ErrorPage";
 
@@ -192,6 +193,7 @@ function RootComponent() {
                     </div>
                   )}
                 </main>
+                <PlayerHost />
                 <SiteFooter />
               </div>
             </div>
