@@ -30,6 +30,19 @@ describe("built-in compressor plan", () => {
     expect(p.width).toBe(640);
     expect(p.height).toBe(360);
   });
+
+  it("uses a higher-quality 1080p encode when a short clip has enough size budget", () => {
+    const p = planCompression({ width: 1920, height: 1080, fps: 30, durationS: 30 });
+    expect(p.width).toBe(1920);
+    expect(p.height).toBe(1080);
+    expect(p.videoBitrate).toBe(4_000_000);
+  });
+
+  it("uses a finer intermediate resolution before dropping straight to 540p", () => {
+    const p = planCompression({ width: 3840, height: 2160, fps: 30, durationS: 400 });
+    expect(p.fits).toBe(true);
+    expect(Math.min(p.width, p.height)).toBe(640);
+  });
   it("says a video too long for 50 MB does not fit", () => {
     expect(planCompression({ width: 1920, height: 1080, fps: 30, durationS: maxDurationS() * 3 }).fits).toBe(false);
   });
