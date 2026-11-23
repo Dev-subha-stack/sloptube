@@ -182,8 +182,8 @@ export function ShortsFeed({ start, initial }: { start: Short | null; initial: S
             className="flex h-full snap-start snap-always items-center justify-center tab:py-4"
           >
             <div className="relative h-full w-full overflow-hidden bg-black tab:aspect-[9/16] tab:w-auto tab:max-w-full tab:rounded-lg">
-              {Math.abs(i - active) <= 1 ? (
-                <ShortPlayer short={s} active={i === active} muted={muted} pings={likesOn} onUnmute={() => setMuted(false)} />
+              {i >= active && i <= active + 2 ? (
+                <ShortPlayer short={s} active={i === active} muted={muted} pings={likesOn} onUnmute={() => setMuted(false)} preload={i > active} />
               ) : (
                 <div className="absolute inset-0 bg-black" />
               )}
