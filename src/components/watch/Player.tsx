@@ -3,7 +3,8 @@
 import type Hls from "hls.js";
 import { useRouter } from "next/navigation";
 import { hlsXhrSetup } from "@/lib/auth-fetch";
-import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { create } from "zustand";
 import {
   CheckIcon,
   ChevronLeftIcon,
@@ -12,7 +13,6 @@ import {
   FullscreenExitIcon,
   FullscreenIcon,
   PauseIcon,
-  PipIcon,
   PlayIcon,
   ReplayIcon,
   SettingsIcon,
@@ -51,7 +51,117 @@ type Props = {
   nextVideoId?: string | null;
   /** /embed/<id> (feature 16): no theater mode, there is no page around it. */
   embed?: boolean;
+  /** Controlled by the persistent app-shell player host. */
+  mini?: boolean;
+  onMiniChange?: (next: boolean) => void;
+  onClose?: () => void;
 };
+
+type DockPlayerProps = Omit<Props, "embed" | "mini" | "onMiniChange" | "onClose">;
+
+type PlayerDockState = {
+  player: DockPlayerProps | null;
+  mini: boolean;
+  target: HTMLDivElement | null;
+  setPlayer: (player: DockPlayerProps) => void;
+  setMini: (mini: boolean) => void;
+  setTarget: (target: HTMLDivElement | null) => void;
+  clear: () => void;
+};
+
+const usePlayerDock = create<PlayerDockState>((set) => ({
+  player: null,
+  mini: false,
+  target: null,
+  setPlayer: (player) => set((state) => ({
+    player,
+    mini: state.player && state.player.videoId !== player.videoId ? false : state.mini,
+  })),
+  setMini: (mini) => set({ mini }),
+  setTarget: (target) => set({ target }),
+  clear: () => set({ player: null, mini: false, target: null }),
+}));
+
+/**
+ * The watch page leaves a layout-sized slot. The real Player is mounted by
+ * PlayerHost in the root shell, so route changes never destroy the video node.
+ */
+export function PlayerSlot(props: DockPlayerProps) {
+  const targetRef = useRef<HTMLDivElement>(null);
+  const latestProps = useRef(props);
+  latestProps.current = props;
+
+  useEffect(() => {
+    const dock = usePlayerDock.getState();
+    dock.setPlayer(latestProps.current);
+    dock.setTarget(targetRef.current);
+    return () => {
+      const current = usePlayerDock.getState();
+      if (current.player?.videoId !== props.videoId) return;
+      current.setTarget(null);
+      if (!current.mini) current.clear();
+    };
+  }, [props.videoId]);
+
+  useEffect(() => {
+    usePlayerDock.getState().setPlayer(props);
+  }, [props.src, props.poster, props.spriteVtt, props.durationS, props.startAt, props.engagement, props.nextVideoId]);
+
+  return <div ref={targetRef} className="h-full w-full" data-player-slot-target />;
+}
+
+/** A route-persistent host that positions the player in the watch slot or as a floating mini player. */
+export function PlayerHost() {
+  const player = usePlayerDock((state) => state.player);
+  const mini = usePlayerDock((state) => state.mini);
+  const target = usePlayerDock((state) => state.target);
+  const setMini = usePlayerDock((state) => state.setMini);
+  const clear = usePlayerDock((state) => state.clear);
+  const [bounds, setBounds] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
+
+  useEffect(() => {
+    if (!target || mini) {
+      setBounds(null);
+      return;
+    }
+    const update = () => {
+      const rect = target.getBoundingClientRect();
+      setBounds(rect.width > 0 && rect.height > 0
+        ? { left: rect.left, top: rect.top, width: rect.width, height: rect.height }
+        : null);
+    };
+    update();
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(update) : null;
+    observer?.observe(target);
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [target, mini, player?.videoId]);
+
+  if (!player) return null;
+
+  const hostStyle: CSSProperties = mini
+    ? { position: "fixed", left: 0, top: 0, width: 0, height: 0, zIndex: 60, pointerEvents: "none" }
+    : bounds
+      ? { position: "fixed", left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height, zIndex: 1 }
+      : { display: "none" };
+
+  return (
+    <div style={hostStyle} data-player-host>
+      <Player
+        key={player.videoId}
+        {...player}
+        mini={mini}
+        onMiniChange={setMini}
+        onClose={clear}
+      />
+    </div>
+  );
+}
 
 type Menu = null | "main" | "quality" | "speed";
 
@@ -78,7 +188,7 @@ function preferNative(video: HTMLVideoElement): boolean {
  * in picture and fullscreen. hls.js everywhere except Safari, which plays
  * HLS natively (and then picks the quality itself).
  */
-export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, engagement = null, nextVideoId = null, embed = false }: Props) {
+export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, engagement = null, nextVideoId = null, embed = false, mini = false, onMiniChange, onClose }: Props) {
   const router = useRouter();
   const wrapRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -102,9 +212,7 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
   /** false until the first frame actually plays: the loading spinner stays up until then. */
   const [rolling, setRolling] = useState(false);
   /** The draggable miniplayer (i), and where it sits. */
-  const [mini, setMini] = useState(false);
   const [miniPos, setMiniPos] = useState<{ x: number; y: number } | null>(null);
-  const slotRef = useRef<HTMLDivElement>(null);
   const miniDrag = useRef<{ dx: number; dy: number; id: number } | null>(null);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(durationS ?? 0);
@@ -122,7 +230,6 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
   const [scrubbing, setScrubbing] = useState(false);
   const [volumeDrag, setVolumeDrag] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
-  const [pipOk, setPipOk] = useState(false);
   const [cues, setCues] = useState<SpriteCue[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [resumed, setResumed] = useState(false);
@@ -177,7 +284,6 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
     video.muted = v.muted;
     setVolume(v.volume);
     setMuted(v.muted);
-    setPipOk(typeof document !== "undefined" && document.pictureInPictureEnabled === true);
 
     const tryAutoplay = () => {
       video.play().catch(() => {
@@ -354,18 +460,24 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
     else video.webkitEnterFullscreen?.();
   }, []);
 
-  const togglePip = useCallback(() => {
-    const video = videoRef.current;
-    if (!video || !document.pictureInPictureEnabled) return;
-    if (document.pictureInPictureElement) void document.exitPictureInPicture().catch(() => {});
-    else void video.requestPictureInPicture().catch(() => {});
-  }, []);
-
-  /** i: the miniplayer on or off. */
+  /** i: open the player on Home, or return to its watch page. */
   const toggleMini = useCallback(() => {
-    if (embed) return;
-    setMini((m) => !m);
-  }, [embed]);
+    if (embed || !onMiniChange) return;
+    const next = !mini;
+    onMiniChange(next);
+    router.push(next ? "/" : `/watch?v=${encodeURIComponent(videoId)}`);
+  }, [embed, mini, onMiniChange, router, videoId]);
+
+  const restoreMini = useCallback(() => {
+    if (!onMiniChange) return;
+    onMiniChange(false);
+    router.push(`/watch?v=${encodeURIComponent(videoId)}`);
+  }, [onMiniChange, router, videoId]);
+
+  const closeMini = useCallback(() => {
+    videoRef.current?.pause();
+    onClose?.();
+  }, [onClose]);
 
   /** c: subtitles on or off, from hls.js or the video's own text tracks; a note when the video has none. */
   const toggleCaptions = useCallback(() => {
@@ -408,7 +520,7 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
           return toggleFullscreen();
         case "theater":
           return embed ? undefined : toggleTheater();
-        case "pip":
+        case "miniplayer":
           return toggleMini();
         case "captions":
           return toggleCaptions();
@@ -524,16 +636,7 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
   const miniStyle = mini && miniPos ? { left: miniPos.x, top: miniPos.y } : undefined;
 
   return (
-    <div ref={slotRef} className="relative h-full w-full" data-player-slot data-mini={mini ? "1" : undefined}>
-      {mini && (
-        <button
-          type="button"
-          onClick={() => setMini(false)}
-          className="absolute inset-0 grid place-items-center bg-black text-[14px] text-[#aaaaaa]"
-        >
-          Playing in the miniplayer. Click to bring it back.
-        </button>
-      )}
+    <div className={mini ? "h-0 w-0" : "relative h-full w-full"} data-player-slot data-mini={mini ? "1" : undefined}>
     <div
       ref={wrapRef}
       data-player
@@ -546,7 +649,7 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
       onPointerLeave={() => playing && setActive(false)}
       className={`group/player select-none overflow-hidden bg-black text-white ${
         mini
-          ? "fixed z-[60] aspect-video w-[min(400px,calc(100vw-24px))] rounded-lg shadow-[0_8px_28px_rgba(0,0,0,0.45)]" + (miniPos ? "" : " bottom-4 right-4")
+          ? "fixed z-[60] aspect-video w-[min(400px,calc(100vw-24px))] rounded-lg shadow-[0_8px_28px_rgba(0,0,0,0.45)] pointer-events-auto" + (miniPos ? "" : " bottom-4 right-4")
           : "relative h-full w-full"
       } ${showChrome ? "" : "cursor-none"}`}
     >
@@ -579,8 +682,8 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
               aria-label="Expand (i)"
               title="Expand (i)"
               onPointerDown={(e) => e.stopPropagation()}
-              onClick={() => setMini(false)}
-              className="grid h-7 w-7 place-items-center rounded-full hover:bg-white/20"
+              onClick={restoreMini}
+              className="grid h-7 w-7 w-7 place-items-center rounded-full hover:bg-white/20"
             >
               <DefaultViewIcon className="h-5 w-5" />
             </button>
@@ -589,10 +692,7 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
               aria-label="Close miniplayer"
               title="Close"
               onPointerDown={(e) => e.stopPropagation()}
-              onClick={() => {
-                videoRef.current?.pause();
-                setMini(false);
-              }}
+              onClick={closeMini}
               className="grid h-7 w-7 place-items-center rounded-full text-[18px] hover:bg-white/20"
             >
               ×
@@ -604,6 +704,7 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
         ref={videoRef}
         poster={poster ?? undefined}
         playsInline
+        disablePictureInPicture
         preload="metadata"
         className="absolute inset-0 h-full w-full object-contain"
         onClick={() => (menu ? setMenu(null) : togglePlay())}
@@ -873,11 +974,6 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
             {!embed && (
               <CtrlButton label={mini ? "Expand (i)" : "Miniplayer (i)"} onClick={toggleMini} data-miniplayer>
                 <MiniplayerIcon className="h-[22px] w-[22px]" />
-              </CtrlButton>
-            )}
-            {pipOk && (
-              <CtrlButton label="Picture in picture" onClick={togglePip} data-pip>
-                <PipIcon className="h-[22px] w-[22px]" />
               </CtrlButton>
             )}
             <CtrlButton label={fullscreen ? "Exit full screen (f)" : "Full screen (f)"} onClick={toggleFullscreen} data-fullscreen>
