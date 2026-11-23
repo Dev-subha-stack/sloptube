@@ -15,6 +15,8 @@ import { ShortRail } from "./ShortRail";
 
 /** Load the next page when this few shorts are left below the one on screen. */
 const LOAD_AHEAD = 3;
+/** A Snip must occupy most of the viewport before it becomes active. */
+const ACTIVE_THRESHOLD = 0.6;
 /** Wheel movement that counts as "next" or "previous"... */
 const WHEEL_STEP = 40;
 /** ...and the quiet time that ends one wheel gesture (trackpads keep sending events). */
@@ -23,7 +25,7 @@ const WHEEL_QUIET_MS = 450;
 /**
  * /shorts: one short per screen, in a column that snaps. Swipe or scroll to
  * move, or use the arrow keys (and the arrow buttons on desktop). The short
- * on screen plays and loops, muted until the first tap. The address follows
+ * on screen plays and loops; each newly active Snip starts muted until tapped. The address follows
  * the short on screen (/shorts/<id>), so it can be shared or reloaded. More
  * shorts load from /api/shorts as the end gets near.
  */
@@ -35,6 +37,7 @@ export function ShortsFeed({ start, initial }: { start: Short | null; initial: S
   const [comments, setComments] = useState<Short | null>(null);
   const [share, setShare] = useState<Short | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
+  const activeIndex = useRef(0);
   const busy = useRef(false);
   const likesOn = useFlag("engagement");
 
@@ -67,13 +70,18 @@ export function ShortsFeed({ start, initial }: { start: Short | null; initial: S
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
-          if (!e.isIntersecting) continue;
+          if (!e.isIntersecting || e.intersectionRatio < ACTIVE_THRESHOLD) continue;
           const i = Number((e.target as HTMLElement).dataset.index);
-          setActive(i);
+          if (i !== activeIndex.current) {
+            activeIndex.current = i;
+            setActive(i);
+            // Sound is opt-in for each Snip; never carry unmuted audio across a scroll.
+            setMuted(true);
+          }
           if (i >= more.current.count - 1 - LOAD_AHEAD) void more.current.loadMore();
         }
       },
-      { root, threshold: 0.6 },
+      { root, threshold: ACTIVE_THRESHOLD },
     );
     root.querySelectorAll("[data-short]").forEach((el) => io.observe(el));
     return () => io.disconnect();
