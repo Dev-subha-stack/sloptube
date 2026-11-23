@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DM_REACTIONS, nextReaction, reactionChips } from "@/lib/messages/rules";
+import { DM_REACTIONS, dmErrorText, nextReaction, reactionChips, replySnippet } from "@/lib/messages/rules";
 
 describe("message reactions", () => {
   it("offers the six reactions", () => {
@@ -18,5 +18,25 @@ describe("message reactions", () => {
     expect(nextReaction("👍", "👍")).toBeNull();
     expect(nextReaction("👍", "🔥")).toBe("🔥");
     expect(nextReaction(null, "😮")).toBe("😮");
+  });
+});
+
+describe("message replies", () => {
+  it("quotes a deleted message as deleted", () => {
+    expect(replySnippet("", true)).toBe("Message deleted");
+  });
+
+  it("shortens long messages in the quote", () => {
+    const quote = replySnippet("a".repeat(300), false);
+    expect(quote.length).toBe(120);
+    expect(quote.endsWith("…")).toBe(true);
+  });
+
+  it("joins lines in the quote", () => {
+    expect(replySnippet("hi\n\nthere", false)).toBe("hi there");
+  });
+
+  it("explains a reply to a message from another chat", () => {
+    expect(dmErrorText("dm_bad_reply")).toBe("You can only reply to messages in this chat.");
   });
 });

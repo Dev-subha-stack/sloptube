@@ -8,7 +8,7 @@ import { Avatar } from "@/components/Avatar";
 import { ChatIcon, SendIcon } from "@/components/icons";
 import { EmojiPicker, EmojiProvider, EmojiText } from "@/components/emojis/EmojiContext";
 import { supabase } from "@/integrations/supabase/client";
-import { DM_MAX, DM_REACTIONS, dmErrorText, dmProblem, nextReaction, reactionChips } from "@/lib/messages/rules";
+import { DM_MAX, DM_REACTIONS, REPLY_SWIPE_PX, dmErrorText, dmProblem, nextReaction, reactionChips, replySnippet } from "@/lib/messages/rules";
 import { useDmUnread } from "@/lib/store/dms";
 import { useSession } from "@/lib/store/session";
 import { parseUtc, timeAgo } from "@/lib/watch/format";
@@ -33,8 +33,19 @@ type Message = {
   edited_at: string | null;
   deleted_at: string | null;
   reactions: Record<string, string> | null;
+  reply_to: string | null;
 };
-const MESSAGE_COLUMNS = "id, sender_id, recipient_id, body, created_at, read_at, edited_at, deleted_at, reactions";
+const MESSAGE_COLUMNS = "id, sender_id, recipient_id, body, created_at, read_at, edited_at, deleted_at, reactions, reply_to";
+/** What a reply quote shows about the original message. */
+type Quote = { id: string; name: string; text: string; mine: boolean; found: boolean };
+
+function ReplyIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
+      <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11Z" />
+    </svg>
+  );
+}
 type Person = { id: string; username: string; display_name: string; avatar_url: string | null };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -101,14 +112,22 @@ function MessageBubble({
   m,
   me,
   active,
+  quote,
+  highlight,
   onToggle,
+  onReply,
+  onJump,
   onChanged,
   onError,
 }: {
   m: Message;
   me: string;
   active: boolean;
+  quote: Quote | null;
+  highlight: boolean;
   onToggle: () => void;
+  onReply: () => void;
+  onJump: (id: string) => void;
   onChanged: (m: Message) => void;
   onError: (text: string) => void;
 }) {
@@ -118,6 +137,8 @@ function MessageBubble({
   const [picker, setPicker] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [swipe, setSwipe] = useState(0);
+  const touch = useRef<{ x: number; y: number; on: boolean } | null>(null);
   const chips = reactionChips(m.reactions, me);
   const myReaction = m.reactions?.[me] ?? null;
 
@@ -158,7 +179,7 @@ function MessageBubble({
 
   if (m.deleted_at) {
     return (
-      <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+      <div id={`dm-${m.id}`} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
         <p className="max-w-[78%] rounded-[18px] border border-divider px-3.5 py-2 text-[13px] italic text-text-3" data-dm-message="deleted">
           Message deleted
         </p>
@@ -201,19 +222,78 @@ function MessageBubble({
 
   const tool = "grid h-8 min-w-8 place-items-center rounded-full px-2 text-[13px] text-text hover:bg-hover disabled:opacity-40";
   return (
-    <div className={`group flex flex-col ${mine ? "items-end" : "items-start"}`}>
-      <div className={`flex w-full items-center gap-1 ${mine ? "flex-row-reverse" : ""}`}>
-        <p
+    <div
+      id={`dm-${m.id}`}
+      className={`group relative flex flex-col rounded-[12px] transition-colors duration-700 ${mine ? "items-end" : "items-start"} ${highlight ? "bg-[var(--active)]" : ""}`}
+    >
+      {swipe > 0 && (
+        <span
+          className="absolute left-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full bg-[var(--hover)] text-icon"
+          style={{ opacity: Math.min(1, swipe / REPLY_SWIPE_PX) }}
+          aria-hidden
+        >
+          <ReplyIcon className="h-4 w-4" />
+        </span>
+      )}
+      <div
+        className={`flex w-full items-center gap-1 ${mine ? "flex-row-reverse" : ""}`}
+        style={swipe ? { transform: `translateX(${swipe}px)` } : { transition: "transform 150ms" }}
+        onTouchStart={(e) => {
+          const t = e.touches[0];
+          if (t) touch.current = { x: t.clientX, y: t.clientY, on: false };
+        }}
+        onTouchMove={(e) => {
+          const t = e.touches[0];
+          const start = touch.current;
+          if (!t || !start) return;
+          const dx = t.clientX - start.x;
+          const dy = Math.abs(t.clientY - start.y);
+          if (!start.on && (dy > 12 || dx < 0)) {
+            touch.current = null;
+            setSwipe(0);
+            return;
+          }
+          if (dx > 10) start.on = true;
+          if (start.on) setSwipe(Math.min(Math.max(dx, 0), REPLY_SWIPE_PX + 20));
+        }}
+        onTouchEnd={() => {
+          if (swipe >= REPLY_SWIPE_PX) onReply();
+          touch.current = null;
+          setSwipe(0);
+        }}
+      >
+        <div
           onClick={onToggle}
+          onDoubleClick={onReply}
           className={`anim-in max-w-[78%] cursor-pointer whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-2 text-[14px] leading-5 ${
             mine ? "rounded-br-[6px] bg-[var(--link)] text-white [&_a]:text-white [&_a]:underline" : "rounded-bl-[6px] bg-[var(--hover)] text-text"
           }`}
           data-dm-message={mine ? "mine" : "theirs"}
         >
+          {quote && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (quote.found) onJump(quote.id);
+              }}
+              className={`mb-1.5 block w-full min-w-[140px] rounded-[10px] border-l-4 px-2.5 py-1.5 text-left ${
+                mine ? "border-white/80 bg-black/15" : "border-[var(--link)] bg-surface"
+              }`}
+              data-dm-quote
+              aria-label={`Reply to ${quote.name}: ${quote.text}`}
+            >
+              <span className={`block text-[12px] font-medium ${mine ? "text-white" : "text-[var(--link)]"}`}>{quote.name}</span>
+              <span className={`line-clamp-2 block text-[13px] ${mine ? "text-white/85" : "text-text-2"}`}>{quote.text}</span>
+            </button>
+          )}
           <EmojiText text={m.body} />
           {m.edited_at && <span className={`ml-1.5 text-[11px] ${mine ? "opacity-75" : "text-text-3"}`}>(edited)</span>}
-        </p>
+        </div>
         <div className={`${active ? "flex" : "hidden [@media(hover:hover)]:group-hover:flex"} shrink-0 items-center gap-0.5`} data-dm-actions>
+          <button type="button" aria-label="Reply" title="Reply" onClick={onReply} className={tool}>
+            <ReplyIcon className="h-[18px] w-[18px]" />
+          </button>
           <button type="button" aria-label="React" onClick={() => setPicker((v) => !v)} className={tool} disabled={busy}>
             <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="currentColor" aria-hidden>
               <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Zm-3.5-9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm7 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM12 17.5c2.3 0 4.3-1.4 5.1-3.5H6.9c.8 2.1 2.8 3.5 5.1 3.5Z" />
@@ -304,6 +384,9 @@ function MessagesContent() {
   const [sending, setSending] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [replyId, setReplyId] = useState<string | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const composer = useRef<HTMLTextAreaElement>(null);
   const bottom = useRef<HTMLDivElement>(null);
   const otherRef = useRef<string | null>(null);
   otherRef.current = otherId;
@@ -347,6 +430,7 @@ function MessagesContent() {
     setOther(null);
     setError(null);
     setActiveId(null);
+    setReplyId(null);
     if (otherId) void loadThread(otherId);
   }, [otherId, loadThread]);
 
@@ -388,12 +472,13 @@ function MessagesContent() {
     setError(null);
     const { data, error: err } = await supabase
       .from("direct_messages")
-      .insert({ sender_id: me.id, recipient_id: otherId, body: draft.trim() })
+      .insert({ sender_id: me.id, recipient_id: otherId, body: draft.trim(), reply_to: replyId })
       .select(MESSAGE_COLUMNS)
       .single();
     setSending(false);
     if (err) return setError(dmErrorText(err.message));
     setDraft("");
+    setReplyId(null);
     setMessages((list) => (list && data && !list.some((x) => x.id === (data as Message).id) ? [...list, data as Message] : list));
     void loadConvos();
   }
@@ -412,6 +497,26 @@ function MessagesContent() {
   }
 
   const open = (id: string) => router.push(`/messages?to=${id}`, { scroll: false });
+
+  const byId = new Map((messages ?? []).map((x) => [x.id, x]));
+  const quoteFor = (id: string | null): Quote | null => {
+    if (!id) return null;
+    const o = byId.get(id);
+    if (!o) return { id, name: "Earlier message", text: "This message is further back in the chat.", mine: false, found: false };
+    const mine = o.sender_id === me?.id;
+    return { id, name: mine ? "You" : (other?.display_name ?? "Them"), text: replySnippet(o.body, Boolean(o.deleted_at)), mine, found: true };
+  };
+  const replying = quoteFor(replyId);
+  const startReply = (id: string) => {
+    setReplyId(id);
+    setActiveId(null);
+    requestAnimationFrame(() => composer.current?.focus());
+  };
+  const jumpTo = (id: string) => {
+    document.getElementById(`dm-${id}`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+    setHighlightId(id);
+    window.setTimeout(() => setHighlightId((h) => (h === id ? null : h)), 1600);
+  };
 
   return (
     <div className="mx-auto flex h-[calc(100dvh-56px)] max-w-[1100px] overflow-hidden bg-surface sm:my-4 sm:h-[calc(100dvh-88px)] sm:rounded-[12px] sm:border sm:border-divider" data-dm-view>
@@ -489,7 +594,11 @@ function MessagesContent() {
                         m={m}
                         me={me.id}
                         active={activeId === m.id}
+                        quote={quoteFor(m.reply_to)}
+                        highlight={highlightId === m.id}
                         onToggle={() => setActiveId((a) => (a === m.id ? null : m.id))}
+                        onReply={() => startReply(m.id)}
+                        onJump={jumpTo}
                         onChanged={(next) => {
                           setError(null);
                           setMessages((list) => (list ? list.map((x) => (x.id === next.id ? next : x)) : list));
@@ -503,11 +612,30 @@ function MessagesContent() {
               })}
               <div ref={bottom} />
             </div>
-            <form onSubmit={send} className="flex shrink-0 items-end gap-2 border-t border-divider p-2 sm:p-3">
+            {replying && (
+              <div className="anim-in flex shrink-0 items-center gap-3 border-t border-divider bg-[var(--hover)] px-3 py-2 sm:px-4" data-dm-replying>
+                <ReplyIcon className="h-5 w-5 shrink-0 text-icon" />
+                <button
+                  type="button"
+                  onClick={() => replying.found && jumpTo(replying.id)}
+                  className="min-w-0 flex-1 rounded-[8px] border-l-4 border-[var(--link)] bg-surface px-3 py-1.5 text-left"
+                >
+                  <span className="block text-[12px] font-medium text-[var(--link)]">Replying to {replying.name}</span>
+                  <span className="block truncate text-[13px] text-text-2">{replying.text}</span>
+                </button>
+                <button type="button" onClick={() => setReplyId(null)} aria-label="Cancel reply" className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-icon hover:bg-surface">
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
+                    <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                  </svg>
+                </button>
+              </div>
+            )}
+            <form onSubmit={send} className={`flex shrink-0 items-end gap-2 p-2 sm:p-3 ${replying ? "" : "border-t border-divider"}`}>
               <EmojiPicker
                 onPick={(code) => setDraft((current) => (current && !/\s$/.test(current) ? current + " " + code : current + code))}
               />
               <textarea
+                ref={composer}
                 value={draft}
                 maxLength={DM_MAX}
                 rows={1}
@@ -517,8 +645,12 @@ function MessagesContent() {
                     e.preventDefault();
                     e.currentTarget.form?.requestSubmit();
                   }
+                  if (e.key === "Escape" && replyId) {
+                    e.preventDefault();
+                    setReplyId(null);
+                  }
                 }}
-                placeholder="Write a message"
+                placeholder={replying ? "Write a reply" : "Write a message"}
                 aria-label="Message"
                 className="max-h-32 min-h-10 flex-1 resize-none rounded-[20px] border border-[var(--input-border)] bg-transparent px-4 py-2 text-[14px] text-text outline-none focus:border-[var(--focus)]"
               />

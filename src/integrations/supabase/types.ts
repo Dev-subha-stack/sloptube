@@ -597,6 +597,7 @@ export type Database = {
           reactions: Json
           read_at: string | null
           recipient_id: string
+          reply_to: string | null
           sender_id: string
         }
         Insert: {
@@ -608,6 +609,7 @@ export type Database = {
           reactions?: Json
           read_at?: string | null
           recipient_id: string
+          reply_to?: string | null
           sender_id: string
         }
         Update: {
@@ -619,6 +621,7 @@ export type Database = {
           reactions?: Json
           read_at?: string | null
           recipient_id?: string
+          reply_to?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -627,6 +630,13 @@ export type Database = {
             columns: ["recipient_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "direct_messages_reply_to_fkey"
+            columns: ["reply_to"]
+            isOneToOne: false
+            referencedRelation: "direct_messages"
             referencedColumns: ["id"]
           },
           {
@@ -2371,6 +2381,7 @@ export type Database = {
           reactions: Json
           read_at: string | null
           recipient_id: string
+          reply_to: string | null
           sender_id: string
         }
         SetofOptions: {
@@ -2391,6 +2402,7 @@ export type Database = {
           reactions: Json
           read_at: string | null
           recipient_id: string
+          reply_to: string | null
           sender_id: string
         }
         SetofOptions: {
@@ -2412,6 +2424,7 @@ export type Database = {
           reactions: Json
           read_at: string | null
           recipient_id: string
+          reply_to: string | null
           sender_id: string
         }
         SetofOptions: {
