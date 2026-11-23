@@ -38,11 +38,18 @@ export async function compressVideo(
 ): Promise<CompressResult> {
   let limit = PLATFORM_LIMIT_BYTES;
   let last: CompressResult | null = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const result = await compressOnce(file, limit, { signal: opts.signal, onProgress: opts.onProgress });
+  const maxAttempts = 5;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const result = await compressOnce(file, limit, {
+      signal: opts.signal,
+      // Keep progress moving forward when a difficult video needs another encode.
+      onProgress: (fraction) => opts.onProgress?.((attempt + fraction) / maxAttempts),
+    });
     last = result;
     if (!result.compressed || result.file.size <= PLATFORM_LIMIT_BYTES) return result;
-    limit = Math.floor(limit * (PLATFORM_LIMIT_BYTES / result.file.size) * 0.85);
+    // Use a measured correction with a small safety margin rather than
+    // immediately dropping the bitrate too aggressively.
+    limit = Math.max(1, Math.floor(limit * (PLATFORM_LIMIT_BYTES / result.file.size) * 0.92));
   }
   return last!;
 }
