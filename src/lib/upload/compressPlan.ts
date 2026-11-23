@@ -7,16 +7,16 @@
 export const PLATFORM_LIMIT_BYTES = 50 * 1024 * 1024;
 
 /** Picture sizes tried, by the shorter side, biggest first. */
-export const SHORT_SIDES = [1080, 720, 540, 480, 360, 240] as const;
+export const SHORT_SIDES = [1080, 960, 900, 800, 720, 640, 600, 540, 480, 360, 240] as const;
 /** Frames per second are capped here; very long videos drop to 24. */
 export const MAX_FPS = 30;
 export const LOW_FPS = 24;
 /** Bits per pixel per frame: about where H.264 still looks clean. */
-export const GOOD_BPP = 0.06;
+export const GOOD_BPP = 0.08;
 /** Below this the picture gets blocky, so a smaller size is used first. */
 export const MIN_BPP = 0.035;
 /** Never above this: 1080p30 needs no more after a good encode. */
-export const MAX_VIDEO_BITRATE = 2_500_000;
+export const MAX_VIDEO_BITRATE = 4_000_000;
 /** Never below this: the floor for a watchable 240p. */
 export const MIN_VIDEO_BITRATE = 60_000;
 /** Room kept for the MP4 container and encoder overshoot. */
