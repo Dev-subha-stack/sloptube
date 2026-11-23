@@ -171,7 +171,12 @@ export function ShortPlayer({
         onWaiting={() => {
           if (active && !videoRef.current?.paused) setLoading(true);
         }}
-        onError={() => active && hasSrc(videoRef.current) && (setLoading(false), setFailed(true))}
+        onError={() => {
+          if (active && hasSrc(videoRef.current)) {
+            setLoading(false);
+            setFailed(true);
+          }
+        }}
         onPause={() => {
           setPaused(true);
           setLoading(false);
