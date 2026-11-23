@@ -33,22 +33,29 @@ function CheckCircle({ className }: { className?: string }) {
   );
 }
 
-/** The white dialog style card from the 2019 upload page. */
+/** A responsive upload panel that uses the same surfaces and borders as the rest of SlopTube. */
 function Card({ title, children, footer }: { title: string; children: ReactNode; footer?: ReactNode }) {
   return (
-    <section className="mx-auto flex w-full max-w-[960px] flex-col bg-surface sm:rounded-[4px] sm:shadow-[0_0_0_1px_var(--divider),0_4px_16px_rgba(0,0,0,0.08)]">
-      <header className="flex h-16 shrink-0 items-center border-b border-divider px-4 sm:px-6">
-        <h1 className="truncate text-[20px] font-normal leading-7 text-text">{title}</h1>
+    <section className="mx-auto flex w-full max-w-[1080px] flex-col overflow-hidden rounded-2xl border border-divider bg-surface shadow-[0_12px_36px_rgba(0,0,0,0.16)]">
+      <header className="flex min-h-[76px] shrink-0 items-center justify-between gap-4 border-b border-divider bg-[color-mix(in_srgb,var(--hover)_45%,transparent)] px-5 py-4 sm:px-7">
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-text-3">SlopTube · Creator tools</p>
+          <h1 className="mt-1 truncate text-[21px] font-semibold leading-7 text-text sm:text-[23px]">{title}</h1>
+        </div>
+        <span className="hidden shrink-0 items-center gap-2 rounded-full border border-divider bg-surface px-3 py-2 text-[11px] font-medium text-text-2 sm:inline-flex">
+          <span className="h-2 w-2 rounded-full bg-[var(--mark)]" />
+          Upload center
+        </span>
       </header>
       {children}
-      {footer && <footer className="border-t border-divider px-4 py-3 sm:px-6">{footer}</footer>}
+      {footer && <footer className="border-t border-divider bg-[color-mix(in_srgb,var(--hover)_45%,transparent)] px-4 py-4 sm:px-7">{footer}</footer>}
     </section>
   );
 }
 
 function Notice({ children }: { children: ReactNode }) {
   return (
-    <div role="status" className="mb-4 rounded-[2px] border border-divider bg-surface px-4 py-3 text-[14px] leading-5 text-text">
+    <div role="status" className="mb-5 rounded-xl border border-divider bg-surface px-4 py-3 text-[14px] leading-5 text-text shadow-[0_4px_18px_rgba(0,0,0,0.08)]">
       {children}
     </div>
   );
@@ -91,8 +98,10 @@ function DropZone({ disabled }: { disabled: boolean }) {
       onDragOver={(e) => onDrag(e, "over")}
       onDragLeave={(e) => onDrag(e, "leave")}
       onDrop={onDrop}
-      className={`m-3 flex min-h-[420px] flex-col items-center justify-center rounded-[2px] border-2 border-dashed px-6 py-10 text-center transition-colors sm:m-4 sm:min-h-[480px] ${
-        dragging ? "border-[var(--link)] bg-[color-mix(in_srgb,var(--link)_6%,transparent)]" : "border-transparent"
+      className={`m-4 flex min-h-[360px] flex-col items-center justify-center rounded-2xl border-2 border-dashed px-5 py-10 text-center transition-all duration-200 sm:m-6 sm:min-h-[420px] sm:px-8 ${
+        dragging
+          ? "border-[var(--mark)] bg-[color-mix(in_srgb,var(--mark)_9%,transparent)] shadow-[inset_0_0_0_1px_var(--mark)]"
+          : "border-divider bg-[color-mix(in_srgb,var(--hover)_42%,transparent)] hover:border-[var(--input-border)]"
       }`}
     >
       <button
@@ -100,18 +109,25 @@ function DropZone({ disabled }: { disabled: boolean }) {
         disabled={disabled}
         onClick={() => input.current?.click()}
         aria-label="Select a video file"
-        className={`grid h-[136px] w-[136px] place-items-center rounded-full transition-colors ${
-          dragging ? "bg-[var(--link)] text-white" : "bg-[var(--hover)] text-text-3"
+        className={`grid h-24 w-24 place-items-center rounded-[28px] border border-divider bg-surface text-[var(--link)] shadow-[0_8px_28px_rgba(0,0,0,0.16)] transition-all duration-200 ${
+          dragging ? "scale-105 border-[var(--mark)] text-[var(--mark)]" : "hover:-translate-y-1"
         }`}
       >
-        <UploadArrow className={`h-[60px] w-[60px] transition-transform ${dragging ? "-translate-y-1" : ""}`} />
+        <UploadArrow className={`h-11 w-11 transition-transform ${dragging ? "-translate-y-1" : ""}`} />
       </button>
-      <p className="mt-6 text-[15px] leading-6 text-text">
-        {dragging ? "Drop to upload" : "Drag and drop video files to upload"}
+      <p className="mt-6 text-[17px] font-semibold leading-7 text-text sm:text-[19px]">
+        {dragging ? "Drop your video here" : "Drag and drop your video"}
       </p>
-      <p className="mt-1 text-[13px] leading-5 text-text-2">Your videos will be private until you publish them.</p>
-      <button type="button" disabled={disabled} onClick={() => input.current?.click()} className="btn-blue mt-7">
-        Select files
+      <p className="mt-1 max-w-[420px] text-[13px] leading-5 text-text-2 sm:text-[14px]">
+        Or choose a file from your device. Your video stays private until you publish it.
+      </p>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => input.current?.click()}
+        className="btn-blue mt-6 !h-11 !rounded-lg !px-7 !font-semibold !normal-case !tracking-normal"
+      >
+        Choose video
       </button>
       <input
         ref={input}
@@ -130,9 +146,11 @@ function DropZone({ disabled }: { disabled: boolean }) {
           {notice}
         </p>
       )}
-      <p className="mt-auto pt-10 text-[12px] leading-4 text-text-3">
-        MP4, MOV, WebM or MKV. Every video is compressed in your browser to fit 50 MB. Up to {UPLOADS_PER_DAY} uploads a day.
-      </p>
+      <div className="mt-8 flex flex-wrap justify-center gap-2">
+        <span className="rounded-full border border-divider bg-surface px-3 py-1.5 text-[11px] font-medium text-text-2">MP4 · MOV · WebM · MKV</span>
+        <span className="rounded-full border border-divider bg-surface px-3 py-1.5 text-[11px] font-medium text-text-2">Compressed to 50 MB</span>
+        <span className="rounded-full border border-divider bg-surface px-3 py-1.5 text-[11px] font-medium text-text-2">Up to {UPLOADS_PER_DAY} uploads / day</span>
+      </div>
     </div>
   );
 }
@@ -153,7 +171,7 @@ function ShortChoice() {
   if (!on) return null;
   const allowed = short.state === "ready" && short.problem === null;
   return (
-    <div className="mt-6" data-short-choice={short.state === "checking" ? "checking" : allowed ? "allowed" : "not-allowed"}>
+    <div className="mt-6 rounded-xl border border-divider bg-[color-mix(in_srgb,var(--hover)_38%,transparent)] p-3" data-short-choice={short.state === "checking" ? "checking" : allowed ? "allowed" : "not-allowed"}>
       <label className={`flex items-start gap-3 rounded-[2px] px-1 py-2 ${allowed ? "cursor-pointer hover:bg-hover" : "cursor-not-allowed"}`}>
         <input
           type="checkbox"
@@ -193,7 +211,7 @@ function ThumbnailField() {
   const [open, setOpen] = useState(false);
   const line = thumbLine(thumb?.state, thumb?.error);
   return (
-    <div className="mt-6" data-thumbnail-field>
+    <div className="mt-7 rounded-xl border border-divider bg-[color-mix(in_srgb,var(--hover)_35%,transparent)] p-4" data-thumbnail-field>
       <h3 className="text-[16px] font-medium leading-[22px] text-text">Thumbnail</h3>
       <p className="mt-1 text-[13px] leading-[18px] text-text-2">
         Pick a picture that shows what's in your video. You can set its size and position before saving.
@@ -202,7 +220,7 @@ function ThumbnailField() {
         {thumb ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={thumb.url} alt="Your thumbnail" className="aspect-video w-[168px] rounded-[2px] object-cover shadow-[0_0_0_1px_var(--divider)]" data-thumb-chosen />
+            <img src={thumb.url} alt="Your thumbnail" className="aspect-video w-[184px] rounded-lg object-cover shadow-[0_0_0_1px_var(--divider)]" data-thumb-chosen />
             <div className="flex flex-col items-start gap-1">
               <button type="button" onClick={() => setOpen(true)} className="btn-text !px-2" disabled={thumb.state === "saving"}>
                 Change
@@ -218,7 +236,7 @@ function ThumbnailField() {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="grid aspect-video w-[168px] place-items-center rounded-[2px] border border-dashed border-[var(--input-border)] text-[13px] text-text-2 hover:bg-hover"
+            className="grid aspect-video w-[184px] place-items-center rounded-lg border border-dashed border-[var(--input-border)] bg-surface text-[13px] font-medium text-text-2 transition-colors hover:border-[var(--link)] hover:bg-hover"
             data-add-thumbnail
           >
             Add thumbnail
@@ -252,11 +270,14 @@ function DetailsForm() {
   const titleMissing = details.title.trim() === "";
 
   return (
-    <div className="grid gap-6 px-4 py-5 sm:px-6 md:grid-cols-[1fr_284px] md:gap-8">
+    <div className="grid gap-8 px-4 py-5 sm:px-6 sm:py-7 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-10">
       <div className="min-w-0">
-        <h2 className="text-[20px] font-normal leading-7 text-text">Details</h2>
+        <div className="mb-5">
+          <h2 className="text-[18px] font-semibold leading-6 text-text">Video details</h2>
+          <p className="mt-1 text-[13px] leading-5 text-text-2">Give your upload a title and tell viewers what it is about.</p>
+        </div>
 
-        <label className="mt-4 block rounded-[4px] border border-[var(--input-border)] px-3 pb-2 pt-2 focus-within:border-[var(--focus)]">
+        <label className="mt-4 block rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 pb-3 pt-3 transition-colors focus-within:border-[var(--focus)] focus-within:shadow-[0_0_0_1px_var(--focus)]">
           <span className="flex justify-between text-[12px] leading-4 text-text-2">
             <span>Title (required)</span>
             <Counter value={details.title.length} max={TITLE_MAX} />
@@ -267,12 +288,12 @@ function DetailsForm() {
             rows={2}
             onChange={(e) => setDetails({ title: e.target.value.replace(/\n/g, " ") })}
             placeholder="Add a title that describes your video"
-            className="mt-1 block w-full resize-none bg-transparent text-[15px] leading-[22px] text-text outline-none placeholder:text-text-3"
+            className="mt-2 block min-h-[58px] w-full resize-none bg-transparent text-[15px] leading-[23px] text-text outline-none placeholder:text-text-3"
           />
         </label>
         {titleMissing && <p className="mt-1 text-[12px] text-[var(--error)]">Your video needs a title.</p>}
 
-        <label className="mt-5 block rounded-[4px] border border-[var(--input-border)] px-3 pb-2 pt-2 focus-within:border-[var(--focus)]">
+        <label className="mt-5 block rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 pb-3 pt-3 transition-colors focus-within:border-[var(--focus)] focus-within:shadow-[0_0_0_1px_var(--focus)]">
           <span className="flex justify-between text-[12px] leading-4 text-text-2">
             <span>Description</span>
             <Counter value={details.description.length} max={DESCRIPTION_MAX} />
@@ -283,20 +304,27 @@ function DetailsForm() {
             rows={5}
             onChange={(e) => setDetails({ description: e.target.value })}
             placeholder="Tell viewers about your video"
-            className="mt-1 block w-full resize-y bg-transparent text-[15px] leading-[22px] text-text outline-none placeholder:text-text-3"
+            className="mt-2 block min-h-[120px] w-full resize-y bg-transparent text-[15px] leading-[23px] text-text outline-none placeholder:text-text-3"
           />
         </label>
 
         <ThumbnailField />
 
-        <fieldset className="mt-6">
-          <legend className="text-[16px] font-medium leading-[22px] text-text">Visibility</legend>
+        <fieldset className="mt-7">
+          <legend className="text-[16px] font-semibold leading-[22px] text-text">Who can watch this video?</legend>
           <p className="mt-1 text-[13px] leading-[18px] text-text-2">
             Your video is saved as a draft. Nobody sees it until you press Publish, then it becomes:
           </p>
           <div className="mt-3 space-y-1">
             {VISIBILITY_OPTIONS.map((o) => (
-              <label key={o.value} className="flex cursor-pointer items-start gap-3 rounded-[2px] px-1 py-2 hover:bg-hover">
+              <label
+                key={o.value}
+                className={`flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-3 transition-colors ${
+                  details.visibility === o.value
+                    ? "border-[var(--link)] bg-[color-mix(in_srgb,var(--link)_8%,transparent)]"
+                    : "border-divider bg-[var(--input-bg)] hover:border-[var(--input-border)] hover:bg-hover"
+                }`}
+              >
                 <input
                   type="radio"
                   name="visibility"
@@ -318,8 +346,14 @@ function DetailsForm() {
       </div>
 
       <aside className="min-w-0">
-        <div className="overflow-hidden rounded-[2px] bg-[var(--hover)]">
-          <div className="relative grid aspect-video place-items-center overflow-hidden bg-black text-[13px] text-[#aaaaaa]">
+        <div className="rounded-2xl border border-divider bg-[var(--input-bg)] p-3">
+          <div className="flex items-center justify-between gap-3 px-1 pb-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">Video preview</p>
+            <span className="rounded-full bg-[color-mix(in_srgb,var(--link)_12%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--link)]">
+              {phase === "compressing" ? "Compressing" : phase === "finishing" ? "Finalizing" : "Uploading"}
+            </span>
+          </div>
+          <div className="relative grid aspect-video place-items-center overflow-hidden rounded-xl bg-black text-[13px] text-[#c7c7c7]">
             {thumb && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={thumb.url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
@@ -328,15 +362,17 @@ function DetailsForm() {
               {phase === "compressing" ? "Compressing video" : phase === "checking" ? "Checking video" : phase === "finishing" ? "Finishing up" : "Uploading video"}
             </span>
           </div>
-          <div className="px-4 py-3">
-            <p className="text-[12px] leading-4 text-text-2">Filename</p>
-            <p className="mt-1 break-all text-[14px] leading-5 text-text">{fileName}</p>
+          <div className="px-2 pb-1 pt-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-text-3">Filename</p>
+            <p className="mt-1 break-all text-[13px] leading-5 text-text">{fileName}</p>
           </div>
         </div>
-        <p className="mt-3 text-[12px] leading-4 text-text-3">
-          Every video is compressed in your browser before it uploads, so it goes up faster. Your details are saved when
-          the upload finishes. You can keep typing while it runs.
-        </p>
+        <div className="mt-4 rounded-xl border border-divider bg-[color-mix(in_srgb,var(--hover)_35%,transparent)] p-4">
+          <p className="text-[13px] font-semibold text-text">Automatic compression</p>
+          <p className="mt-1 text-[12px] leading-5 text-text-2">
+            Your video is compressed in your browser before upload. You can keep editing the details while it runs.
+          </p>
+        </div>
       </aside>
     </div>
   );
@@ -388,9 +424,9 @@ function ProgressFooter() {
           aria-valuemax={100}
           aria-valuenow={percent}
           aria-label="Upload progress"
-          className="mt-2 h-1 w-full overflow-hidden rounded-full bg-[var(--active)]"
+          className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[var(--progress-track)]"
         >
-          <div className="h-full bg-[var(--link)] transition-[width] duration-200" style={{ width: `${percent}%` }} />
+          <div className="h-full rounded-full bg-[var(--progress)] transition-[width] duration-200" style={{ width: `${percent}%` }} />
         </div>
       </div>
       <button type="button" onClick={() => void cancel()} disabled={phase === "finishing"} className="btn-text">
@@ -433,14 +469,16 @@ function DoneView() {
   }
 
   return (
-    <div data-upload-phase="done" className="flex min-h-[420px] flex-col items-center justify-center px-6 py-12 text-center">
+    <div data-upload-phase="done" className="flex min-h-[420px] flex-col items-center justify-center px-5 py-14 text-center">
       {thumb ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={thumb.url} alt="Your thumbnail" className="aspect-video w-[240px] rounded-[2px] object-cover shadow-[0_0_0_1px_var(--divider)]" data-thumb-done />
+        <img src={thumb.url} alt="Your thumbnail" className="aspect-video w-[260px] rounded-xl border border-divider object-cover shadow-[0_8px_28px_rgba(0,0,0,0.18)]" data-thumb-done />
       ) : (
-        <CheckCircle className="h-16 w-16 text-[#2ba640]" />
+        <div className="grid h-20 w-20 place-items-center rounded-[26px] border border-divider bg-[color-mix(in_srgb,var(--mark)_10%,transparent)]">
+          <CheckCircle className="h-11 w-11 text-[var(--mark)]" />
+        </div>
       )}
-      <p className="mt-5 text-[20px] leading-7 text-text">
+      <p className="mt-6 text-[23px] font-semibold leading-8 text-text">
         {published ? "Published!" : ready ? "Video uploaded and saved as a draft." : "Video uploaded. Processing starts soon."}
       </p>
       <p className="mt-2 max-w-[520px] text-[14px] leading-5 text-text-2" data-draft-note>
@@ -464,7 +502,7 @@ function DoneView() {
         </p>
       )}
       {watchUrl && (
-        <div className="mt-6 w-full max-w-[420px] rounded-[2px] bg-[var(--hover)] px-4 py-3 text-left">
+        <div className="mt-6 w-full max-w-[460px] rounded-xl border border-divider bg-[color-mix(in_srgb,var(--hover)_42%,transparent)] px-4 py-3 text-left">
           <p className="text-[12px] leading-4 text-text-2">Video link</p>
           <Link href={watchUrl} className="link mt-1 block break-all text-[14px] leading-5">
             {origin}
@@ -472,8 +510,8 @@ function DoneView() {
           </Link>
         </div>
       )}
-      <div className="mt-8 flex flex-wrap justify-center gap-2">
-        <button type="button" onClick={reset} className="btn-text">
+      <div className="mt-8 flex flex-wrap justify-center gap-3">
+        <button type="button" onClick={reset} className="btn-text !h-10 !rounded-lg !normal-case">
           Upload another
         </button>
         {videoId && ready && (
@@ -482,11 +520,11 @@ function DoneView() {
           </button>
         )}
         {published ? (
-          <Link href="/studio/videos" className="btn-blue">
+          <Link href="/studio/videos" className="btn-blue !h-10 !rounded-lg !normal-case">
             Go to your videos
           </Link>
         ) : (
-          <button type="button" onClick={() => void publish()} disabled={busy || !videoId} className="btn-blue" data-publish>
+          <button type="button" onClick={() => void publish()} disabled={busy || !videoId} className="btn-blue !h-10 !rounded-lg !normal-case" data-publish>
             {busy ? "Publishing..." : `Publish as ${label.toLowerCase()}`}
           </button>
         )}
@@ -508,12 +546,13 @@ function DoneView() {
 function FailedView() {
   const { error, reset } = useUpload();
   return (
-    <div data-upload-phase="failed" className="flex min-h-[420px] flex-col items-center justify-center px-6 py-12 text-center">
-      <p className="text-[20px] leading-7 text-text">The upload did not finish</p>
+    <div data-upload-phase="failed" className="flex min-h-[420px] flex-col items-center justify-center px-5 py-14 text-center">
+      <div className="grid h-20 w-20 place-items-center rounded-[26px] border border-[color-mix(in_srgb,var(--error)_24%,var(--divider))] bg-[color-mix(in_srgb,var(--error)_9%,transparent)] text-[32px] font-semibold text-[var(--error)]">!</div>
+      <p className="mt-6 text-[23px] font-semibold leading-8 text-text">The upload did not finish</p>
       <p role="alert" className="mt-2 max-w-[520px] text-[14px] leading-5 text-[var(--error)]">
         {error}
       </p>
-      <button type="button" onClick={reset} className="btn-blue mt-8">
+      <button type="button" onClick={reset} className="btn-blue mt-8 !h-10 !rounded-lg !normal-case">
         Try again
       </button>
     </div>
@@ -543,8 +582,8 @@ export function Uploader({ configured, preview = false }: { configured: boolean;
   }, [busy]);
 
   return (
-    <div data-upload-state={preview ? "preview" : "ready"} data-upload-phase={phase} className="px-0 py-0 sm:px-6 sm:py-6">
-      <div className="mx-auto max-w-[960px] px-4 pt-4 sm:px-0 sm:pt-0">
+    <div data-upload-state={preview ? "preview" : "ready"} data-upload-phase={phase} className="mx-auto w-full max-w-[1200px] px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+      <div className="mx-auto max-w-[1080px]">
         {preview && (
           <Notice>
             <p className="font-medium">database not connected</p>
