@@ -95,6 +95,7 @@ export function PlayerSlot(props: DockPlayerProps) {
     const dock = usePlayerDock.getState();
     dock.setPlayer(latestProps.current);
     dock.setTarget(targetRef.current);
+    if (dock.mini && dock.player?.videoId === latestProps.current.videoId) dock.setMini(false);
     return () => {
       const current = usePlayerDock.getState();
       if (current.player?.videoId !== props.videoId) return;
@@ -133,10 +134,13 @@ export function PlayerHost() {
     update();
     const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(update) : null;
     observer?.observe(target);
+    // The route wrapper animates into place; refresh the measured slot when that finishes.
+    document.addEventListener("animationend", update, true);
     window.addEventListener("resize", update);
     window.addEventListener("scroll", update, true);
     return () => {
       observer?.disconnect();
+      document.removeEventListener("animationend", update, true);
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update, true);
     };
@@ -683,7 +687,7 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
               title="Expand (i)"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={restoreMini}
-              className="grid h-7 w-7 w-7 place-items-center rounded-full hover:bg-white/20"
+              className="grid h-7 w-7 place-items-center rounded-full hover:bg-white/20"
             >
               <DefaultViewIcon className="h-5 w-5" />
             </button>
