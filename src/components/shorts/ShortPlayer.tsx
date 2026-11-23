@@ -110,7 +110,7 @@ export function ShortPlayer({
       playIfActive();
     };
 
-    const direct = !/\\.m3u8(\\?|$)/i.test(short.src);
+    const direct = !/\.m3u8(\?|$)/i.test(short.src);
     if (direct && short.src.startsWith("/api/media/")) {
       // Resolve the protected media URL once; the existing auth fetch adds
       // the viewer's bearer token to this same-origin request.
