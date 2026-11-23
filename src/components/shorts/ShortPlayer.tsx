@@ -25,12 +25,19 @@ function hasSrc(v: HTMLVideoElement | null): boolean {
   return !!v && !!v.getAttribute("src");
 }
 
+/** Do not spend mobile data on speculative playback when Data Saver is on. */
+function dataSaverEnabled(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+}
+
 export function ShortPlayer({
   short,
   active,
   muted,
   pings,
   onUnmute,
+  preload = false,
 }: {
   short: Short;
   active: boolean;
@@ -38,91 +45,166 @@ export function ShortPlayer({
   /** The engagement flag is on: send view pings. */
   pings: boolean;
   onUnmute: () => void;
+  /** Load this video ahead of time without starting playback. */
+  preload?: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [paused, setPaused] = useState(false);
   const [loading, setLoading] = useState(active);
   const [progress, setProgress] = useState(0);
   const [failed, setFailed] = useState(false);
+  const activeRef = useRef(active);
+  activeRef.current = active;
+  const shouldLoad = active || (preload && !dataSaverEnabled());
+  const sourceReadyRef = useRef(false);
+  const failedRef = useRef(false);
+  const hlsRef = useRef<Hls | null>(null);
+  const startPlaybackRef = useRef<() => void>(() => undefined);
 
   useWatchPings(short.id, videoRef, pings && active, { short: true });
 
-  // Load and play the stream while on screen; let it go when scrolled away.
+  // Prepare the current Snip and the next two without starting playback early.
+  // The effect depends on shouldLoad (not active), so a warmed player is kept
+  // alive when it moves from the preload window into the active position.
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !active) return;
+    if (!video || !shouldLoad) return;
+
     let hls: Hls | null = null;
     let cancelled = false;
+    let retries = 0;
+    sourceReadyRef.current = false;
+    failedRef.current = false;
     setFailed(false);
-    setPaused(false);
-    setLoading(true);
+    video.preload = "auto";
+
     const fail = () => {
       if (cancelled) return;
-      setLoading(false);
-      setFailed(true);
+      failedRef.current = true;
+      if (activeRef.current) {
+        setLoading(false);
+        setFailed(true);
+      }
     };
-    const play = () => {
-      if (cancelled) return;
+
+    const playIfActive = () => {
+      if (cancelled || !activeRef.current || !sourceReadyRef.current || !video.paused) return;
       setLoading(true);
       video.play().catch(() => {
-        if (!cancelled) {
+        if (!cancelled && activeRef.current) {
           setPaused(true);
-          // Autoplay can be blocked; show the play control instead of a
-          // spinner that can never finish until the viewer taps.
+          // Audible autoplay can be blocked; show the play control instead
+          // of leaving a spinner on screen until the viewer taps.
           setLoading(false);
         }
       });
     };
-    const direct = !/\.m3u8(\?|$)/i.test(short.src);
+    startPlaybackRef.current = playIfActive;
+
+    const attachDirect = (url: string) => {
+      if (cancelled) return;
+      video.preload = "auto";
+      video.src = url;
+      video.load();
+      sourceReadyRef.current = true;
+      playIfActive();
+    };
+
+    const direct = !/\\.m3u8(\\?|$)/i.test(short.src);
     if (direct && short.src.startsWith("/api/media/")) {
-      // A plain video file in the built-in storage: ask for a signed link (sign-in attached), then play it as is.
+      // Resolve the protected media URL once; the existing auth fetch adds
+      // the viewer's bearer token to this same-origin request.
       void fetch(`${short.src}?link=1`)
         .then((r) => (r.ok ? (r.json() as Promise<{ url?: string }>) : null))
         .then((j) => {
           if (cancelled) return;
           if (!j?.url) return fail();
-          video.src = j.url;
-          play();
+          attachDirect(j.url);
         })
         .catch(() => !cancelled && fail());
     } else if (direct || preferNative(video)) {
-      video.src = short.src;
-      play();
+      // Native MP4 and Safari's native HLS both use the browser's preload buffer.
+      attachDirect(short.src);
     } else {
-      void import("hls.js").then(({ default: HlsClass }) => {
-        if (cancelled) return;
-        if (!HlsClass.isSupported()) {
-          video.src = short.src;
-          play();
-          return;
-        }
-        hls = new HlsClass({ xhrSetup: hlsXhrSetup, maxBufferLength: 20, backBufferLength: 30 });
-        hls.on(HlsClass.Events.MANIFEST_PARSED, play);
-        let retries = 0;
-        hls.on(HlsClass.Events.ERROR, (_e, data) => {
-          if (!data.fatal || !hls) return;
-          // A few retries, then give up instead of flickering forever.
-          if (++retries > 3) return fail();
-          if (data.type === HlsClass.ErrorTypes.NETWORK_ERROR) hls.startLoad();
-          else if (data.type === HlsClass.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
-          else fail();
+      void import("hls.js")
+        .then(({ default: HlsClass }) => {
+          if (cancelled) return;
+          if (!HlsClass.isSupported()) {
+            attachDirect(short.src);
+            return;
+          }
+
+          // Upcoming videos only buffer a few seconds. Their existing Hls
+          // instance is promoted to the normal active buffer size on playback.
+          hls = new HlsClass({
+            xhrSetup: hlsXhrSetup,
+            maxBufferLength: activeRef.current ? 20 : 8,
+            backBufferLength: activeRef.current ? 30 : 4,
+          });
+          hlsRef.current = hls;
+          hls.on(HlsClass.Events.MANIFEST_PARSED, () => {
+            sourceReadyRef.current = true;
+            playIfActive();
+          });
+          hls.on(HlsClass.Events.ERROR, (_e, data) => {
+            if (!data.fatal || !hls || cancelled) return;
+            // Retry a few times, then stop rather than repeatedly flashing.
+            if (++retries > 3) return fail();
+            if (data.type === HlsClass.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+            else if (data.type === HlsClass.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+            else fail();
+          });
+          hls.loadSource(new URL(short.src, window.location.href).toString());
+          hls.attachMedia(video);
+        })
+        .catch(() => {
+          if (!cancelled) fail();
         });
-        hls.loadSource(new URL(short.src, window.location.href).toString());
-        hls.attachMedia(video);
-      }).catch(() => {
-        if (!cancelled) fail();
-      });
     }
+
     return () => {
       cancelled = true;
+      startPlaybackRef.current = () => undefined;
+      sourceReadyRef.current = false;
       video.pause();
       hls?.destroy();
+      if (hlsRef.current === hls) hlsRef.current = null;
       video.removeAttribute("src");
       video.load();
       setProgress(0);
       setLoading(false);
     };
-  }, [active, short.src]);
+  }, [shouldLoad, short.src]);
+
+  // Pause when this Snip leaves the active position, but keep its warmed
+  // buffer while it remains one of the next two. Never rebuild its source.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (!active) {
+      video.pause();
+      if (hlsRef.current) {
+        hlsRef.current.config.maxBufferLength = 8;
+        hlsRef.current.config.backBufferLength = 4;
+      }
+      return;
+    }
+
+    setPaused(false);
+    if (failedRef.current) {
+      setFailed(true);
+      setLoading(false);
+      return;
+    }
+    setFailed(false);
+    setLoading(true);
+    if (hlsRef.current) {
+      hlsRef.current.config.maxBufferLength = 20;
+      hlsRef.current.config.backBufferLength = 30;
+    }
+    startPlaybackRef.current();
+  }, [active]);
+
 
   useEffect(() => {
     if (videoRef.current) videoRef.current.muted = muted;
@@ -153,14 +235,14 @@ export function ShortPlayer({
   };
 
   return (
-    <div className="absolute inset-0" data-short-player={active ? "active" : "idle"}>
+    <div className="absolute inset-0" data-short-player={active ? "active" : "idle"} data-short-preload={preload && !active && shouldLoad ? "true" : undefined}>
       <video
         ref={videoRef}
         poster={short.thumbnail}
         loop
         playsInline
         muted={muted}
-        preload="none"
+        preload={shouldLoad ? "auto" : "none"}
         onLoadStart={() => active && setLoading(true)}
         onPlay={() => setPaused(false)}
         onPlaying={() => {
@@ -171,9 +253,12 @@ export function ShortPlayer({
           if (active && !videoRef.current?.paused) setLoading(true);
         }}
         onError={() => {
-          if (active && hasSrc(videoRef.current)) {
-            setLoading(false);
-            setFailed(true);
+          if (hasSrc(videoRef.current)) {
+            failedRef.current = true;
+            if (activeRef.current) {
+              setLoading(false);
+              setFailed(true);
+            }
           }
         }}
         onPause={() => {
