@@ -30,7 +30,7 @@ function outputName(name: string): string {
 
 /**
  * Compresses `file` to fit the platform limit. When the encoder overshoots
- * (busy scenes), it runs again aiming lower, up to two more times.
+ * (busy scenes), it makes up to four measured follow-up attempts with a lower target.
  */
 export async function compressVideo(
   file: File,
