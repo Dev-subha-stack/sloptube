@@ -42,6 +42,7 @@ export function ShortPlayer({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [paused, setPaused] = useState(false);
+  const [loading, setLoading] = useState(active);
   const [progress, setProgress] = useState(0);
   const [failed, setFailed] = useState(false);
 
@@ -55,9 +56,22 @@ export function ShortPlayer({
     let cancelled = false;
     setFailed(false);
     setPaused(false);
+    setLoading(true);
+    const fail = () => {
+      if (cancelled) return;
+      setLoading(false);
+      setFailed(true);
+    };
     const play = () => {
+      if (cancelled) return;
+      setLoading(true);
       video.play().catch(() => {
-        if (!cancelled) setPaused(true);
+        if (!cancelled) {
+          setPaused(true);
+          // Autoplay can be blocked; show the play control instead of a
+          // spinner that can never finish until the viewer taps.
+          setLoading(false);
+        }
       });
     };
     const direct = !/\.m3u8(\?|$)/i.test(short.src);
@@ -67,11 +81,11 @@ export function ShortPlayer({
         .then((r) => (r.ok ? (r.json() as Promise<{ url?: string }>) : null))
         .then((j) => {
           if (cancelled) return;
-          if (!j?.url) return setFailed(true);
+          if (!j?.url) return fail();
           video.src = j.url;
           play();
         })
-        .catch(() => !cancelled && setFailed(true));
+        .catch(() => !cancelled && fail());
     } else if (direct || preferNative(video)) {
       video.src = short.src;
       play();
@@ -89,13 +103,15 @@ export function ShortPlayer({
         hls.on(HlsClass.Events.ERROR, (_e, data) => {
           if (!data.fatal || !hls) return;
           // A few retries, then give up instead of flickering forever.
-          if (++retries > 3) return setFailed(true);
+          if (++retries > 3) return fail();
           if (data.type === HlsClass.ErrorTypes.NETWORK_ERROR) hls.startLoad();
           else if (data.type === HlsClass.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
-          else setFailed(true);
+          else fail();
         });
         hls.loadSource(new URL(short.src, window.location.href).toString());
         hls.attachMedia(video);
+      }).catch(() => {
+        if (!cancelled) fail();
       });
     }
     return () => {
@@ -105,6 +121,7 @@ export function ShortPlayer({
       video.removeAttribute("src");
       video.load();
       setProgress(0);
+      setLoading(false);
     };
   }, [active, short.src]);
 
@@ -118,11 +135,22 @@ export function ShortPlayer({
     if (muted) {
       onUnmute();
       video.muted = false;
-      if (video.paused) void video.play().catch(() => setPaused(true));
+      if (video.paused) {
+        setLoading(true);
+        void video.play().catch(() => {
+          setPaused(true);
+          setLoading(false);
+        });
+      }
       return;
     }
-    if (video.paused) void video.play().catch(() => setPaused(true));
-    else video.pause();
+    if (video.paused) {
+      setLoading(true);
+      void video.play().catch(() => {
+        setPaused(true);
+        setLoading(false);
+      });
+    } else video.pause();
   };
 
   return (
@@ -134,15 +162,43 @@ export function ShortPlayer({
         playsInline
         muted={muted}
         preload="none"
+        onLoadStart={() => active && setLoading(true)}
         onPlay={() => setPaused(false)}
-        onError={() => active && hasSrc(videoRef.current) && setFailed(true)}
-        onPause={() => setPaused(true)}
+        onPlaying={() => {
+          setLoading(false);
+          setPaused(false);
+        }}
+        onWaiting={() => {
+          if (active && !videoRef.current?.paused) setLoading(true);
+        }}
+        onError={() => active && hasSrc(videoRef.current) && (setLoading(false), setFailed(true))}
+        onPause={() => {
+          setPaused(true);
+          setLoading(false);
+        }}
         onTimeUpdate={(e) => {
           const v = e.currentTarget;
           if (v.duration > 0) setProgress(v.currentTime / v.duration);
         }}
         className="h-full w-full bg-black object-cover"
       />
+      {active && loading && !failed && (
+        <div
+          className="pointer-events-none absolute inset-0 z-[1] grid place-items-center bg-black/25"
+          role="status"
+          aria-live="polite"
+          aria-label="Loading Snip"
+          data-short-loading
+        >
+          <span className="flex flex-col items-center gap-3 rounded-xl bg-black/35 px-5 py-4 text-white backdrop-blur-sm">
+            <span
+              aria-hidden="true"
+              className="h-10 w-10 animate-spin rounded-full border-[3px] border-white/30 border-t-white motion-reduce:animate-none"
+            />
+            <span className="text-[13px] font-medium">Loading Snip…</span>
+          </span>
+        </div>
+      )}
       <button
         type="button"
         onClick={tap}
