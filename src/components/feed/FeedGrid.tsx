@@ -179,11 +179,11 @@ export function FeedGrid({
           {/* dense: the shelf spans the row, and the cards around it fill the rows above and below. */}
           <div className={`${videoGridClass} grid-flow-row-dense`}>
             {g.before.map((c, i) => (
-              <VideoCard hoverPreview={kind !== "newest"} key={c.id} video={c} now={now} eager={i < EAGER} heading="h2" />
+              <VideoCard key={c.id} video={c} now={now} eager={i < EAGER} heading="h2" />
             ))}
             <ShortsShelf shorts={g.shelf} />
             {g.after.map((c) => (
-              <VideoCard hoverPreview={kind !== "newest"} key={c.id} video={c} now={now} heading="h2" />
+              <VideoCard key={c.id} video={c} now={now} heading="h2" />
             ))}
             {loading && <SkeletonRow />}
           </div>
@@ -213,7 +213,7 @@ export function FeedGrid({
             {section.label && <h2 className="mb-4 px-3 text-[16px] font-medium leading-[22px] text-text sm:px-0">{section.label}</h2>}
             <div className={videoGridClass}>
               {section.items.map((c, i) => (
-                <VideoCard hoverPreview={kind !== "newest"} key={c.id} video={c} now={now} rank={ranked ? i + 1 : undefined} eager={si === 0 && i < EAGER} heading={section.label ? "h3" : "h2"} />
+                <VideoCard key={c.id} video={c} now={now} rank={ranked ? i + 1 : undefined} eager={si === 0 && i < EAGER} heading={section.label ? "h3" : "h2"} />
               ))}
               {loading && si === sections.length - 1 && <SkeletonRow />}
             </div>
