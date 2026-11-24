@@ -26,6 +26,7 @@ export function VideoCard({
   rank,
   eager = false,
   heading: Heading = "h3",
+  hoverPreview = true,
 }: {
   video: FeedCard;
   now: number;
@@ -33,6 +34,8 @@ export function VideoCard({
   eager?: boolean;
   /** h2 right under the page's h1 (home, trending), h3 under a section header. */
   heading?: "h2" | "h3";
+  /** false on Home: the grid shows pictures only and never loads a <video>. */
+  hoverPreview?: boolean;
 }) {
   const href = `/watch?v=${video.id}`;
   const channelHref = `/@${video.channel.handle}`;
@@ -41,7 +44,7 @@ export function VideoCard({
       <Link href={href} className="card-thumb relative block aspect-video overflow-hidden bg-skeleton sm:rounded-xl" tabIndex={-1} aria-hidden>
         <Thumb src={video.thumbnail} alt={video.title} sizes={GRID_SIZES} eager={eager} />
         {video.spriteVtt && <SpritePreview vtt={video.spriteVtt} />}
-        {video.previewSrc && <HoverVideoPreview src={video.previewSrc} />}
+        {hoverPreview && video.previewSrc && <HoverVideoPreview src={video.previewSrc} />}
         {rank !== undefined && (
           <span className="absolute left-0 top-0 min-w-7 bg-black/80 px-1.5 py-0.5 text-center text-[14px] font-medium leading-5 text-white">
             {rank}

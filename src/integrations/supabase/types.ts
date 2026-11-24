@@ -2568,6 +2568,26 @@ export type Database = {
         Returns: boolean
       }
       history_paused: { Args: never; Returns: boolean }
+      home_videos: {
+        Args: { exclude_shorts?: boolean; lim?: number }
+        Returns: {
+          channel_avatar_url: string
+          channel_handle: string
+          channel_id: string
+          channel_name: string
+          created_at: string
+          duration_s: number
+          has_thumb: boolean
+          hls_key: string
+          id: string
+          is_short: boolean
+          preview_sprite_key: string
+          published_at: string
+          thumbnail_url: string
+          title: string
+          views: number
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
       is_shared_with_me: { Args: { _video_id: string }; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }

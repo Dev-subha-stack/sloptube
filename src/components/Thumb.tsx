@@ -1,36 +1,43 @@
-import Image from "next/image";
+import { useState } from "react";
+import { PlayIcon } from "@/components/icons";
 
 /**
- * A video thumbnail with next/image (feature 15): it fills its box (the box
- * sets the size and position: relative), loads lazily unless `eager`, and
- * says how wide it shows with `sizes`.
+ * A video thumbnail: a plain <img> that fills its box (the box sets the size
+ * and position: relative), loads lazily unless `eager`, and decodes off the
+ * main thread. Never a <video>: grids only ever load the small picture.
  *
- * unoptimized: thumbnails come from the video bucket, through /api/media (a
- * redirect to a short lived R2 link) or from MEDIA_PUBLIC_URL, which is read
- * at request time. The image optimizer would need that host frozen into the
- * build and would fetch every thumbnail a second time, so the files are sent
- * as the encoder made them (small WebP, 640 wide).
+ * With no picture (empty `src`) or one that fails to load, a clean
+ * placeholder shows instead, and the video file is never touched.
  */
 export function Thumb({ src, alt, sizes, eager = false, className = "" }: { src: string; alt: string; sizes?: string; eager?: boolean; className?: string }) {
+  const [failed, setFailed] = useState<string | null>(null);
+  if (!src || failed === src) return <ThumbPlaceholder />;
   return (
-    <Image
+    <img
       src={src}
       alt={alt}
-      fill
       sizes={sizes}
-      unoptimized
       loading={eager ? "eager" : "lazy"}
+      decoding="async"
       fetchPriority={eager ? "high" : undefined}
-      className={`object-cover text-transparent ${className}`}
-      // A video without a picture yet: show the grey box instead of a broken image.
-      onError={(e) => {
-        e.currentTarget.style.visibility = "hidden";
-      }}
-      // An image that already failed before the page came alive never fires onError: hide it here.
-      ref={(img: HTMLImageElement | null) => {
-        if (img && img.complete && img.naturalWidth === 0 && img.currentSrc) img.style.visibility = "hidden";
+      className={`absolute inset-0 h-full w-full object-cover text-transparent ${className}`}
+      onError={() => setFailed(src)}
+      // An image that already failed before the page came alive never fires onError: catch it here.
+      ref={(img) => {
+        if (img && img.complete && img.naturalWidth === 0 && img.currentSrc) setFailed(src);
       }}
     />
+  );
+}
+
+/** Shown where a video has no thumbnail picture. */
+export function ThumbPlaceholder() {
+  return (
+    <span aria-hidden data-thumb-placeholder className="absolute inset-0 grid place-items-center bg-gradient-to-br from-[var(--hover)] to-[var(--active)] text-text-2">
+      <span className="grid h-12 w-12 place-items-center rounded-full bg-[var(--surface)]/70">
+        <PlayIcon className="h-6 w-6 opacity-70" />
+      </span>
+    </span>
   );
 }
 

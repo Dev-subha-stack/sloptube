@@ -44,6 +44,8 @@ export type FeedRow = {
   channel_avatar_url: string | null;
   /** From 013 on; older rows and related_videos() have none. */
   is_short?: boolean | null;
+  /** home_videos() only: false when the video has no thumbnail picture at all. */
+  has_thumb?: boolean | null;
 };
 
 export function isFeedKind(v: unknown): v is FeedKind {
@@ -80,7 +82,8 @@ export function rowToCard(row: FeedRow, publicBase: string | null): FeedCard {
     id: row.id,
     title: row.title,
     durationS: num(row.duration_s),
-    thumbnail: media.thumbnail,
+    // No picture saved: an empty thumbnail makes <Thumb> show the placeholder without a request.
+    thumbnail: row.has_thumb === false ? "" : media.thumbnail,
     spriteVtt: media.spriteVtt,
     previewSrc: media.previewSrc,
     publishedAt: row.published_at,

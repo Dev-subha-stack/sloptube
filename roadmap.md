@@ -92,3 +92,6 @@ Hosting: stay on the Lovable database for now (user may move to own Supabase lat
 - [x] Bring in the main2 branch features (already merged into main on GitHub, PR #6)
 - [x] Messages: edit, delete and reactions
 - [x] Messages: WhatsApp-style replies (hover Reply, double-click, swipe on phones, jump to original)
+
+## Nov 24
+- [x] Home lists every public video, newest upload first, cached 5 min; picture-only grid with placeholders; watch page loads the video

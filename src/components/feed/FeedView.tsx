@@ -55,7 +55,21 @@ export function FeedSkeleton({ title }: { title: string }) {
   return (
     <div className={frame} data-feed-state="loading">
       <Header title={title} />
+      <div aria-hidden className="-mt-3 mb-5 flex gap-3 overflow-hidden px-3 py-3 sm:px-0">
+        {CHIPS.map((c) => (
+          <span key={c.href} className="h-8 w-20 shrink-0 rounded-[8px] bg-skeleton" />
+        ))}
+      </div>
+      <div aria-hidden className="mb-8 grid gap-4 px-3 sm:px-0 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] md:gap-8">
+        <div className="aspect-video rounded-[16px] bg-skeleton" />
+        <div className="hidden flex-col justify-center gap-3 md:flex">
+          <div className="h-4 w-24 bg-skeleton" />
+          <div className="h-7 w-[85%] bg-skeleton" />
+          <div className="h-7 w-[60%] bg-skeleton" />
+        </div>
+      </div>
       <div className={videoGridClass}>
+        <SkeletonRow />
         <SkeletonRow />
         <SkeletonRow />
       </div>

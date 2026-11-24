@@ -80,6 +80,32 @@ export async function feedState(
   return { kind: "ready", page: { cards, next }, now: Date.now() };
 }
 
+/** Most cards the home page lists in one read (all public videos, newest upload first). */
+export const HOME_LIMIT = 1000;
+
+/**
+ * Home: every public video, newest upload first, in one light read
+ * (home_videos(), card fields only). Snips stay on their shelf when the
+ * shorts flag is on. No cursor: the browser caches the whole list.
+ */
+export async function homeState(): Promise<FeedState> {
+  const gate = await feedGate();
+  if (gate !== "on") return { kind: gate };
+  const supabase = await createClient();
+  if (!supabase) return { kind: "no-db" };
+  const shortsOn = await flagOn("shorts", (await getCurrentUser())?.id ?? null);
+  const { data, error } = await supabase.rpc("home_videos", { lim: HOME_LIMIT, exclude_shorts: shortsOn });
+  if (error) {
+    if (notSetUp(error.code)) return feedState("newest");
+    return { kind: "ready", page: { cards: [], next: null }, now: Date.now() };
+  }
+  const rows = (Array.isArray(data) ? data : []) as FeedRow[];
+  const publicBase = mediaPublicBase();
+  // Home never plays video in the grid: no hover clip source.
+  const cards = rows.map((r) => ({ ...rowToCard(r, publicBase), previewSrc: null }));
+  return { kind: "ready", page: { cards, next: null }, now: Date.now() };
+}
+
 /**
  * Up next for the watch page: same channel first, then the newest. null when
  * related_videos() is not there yet, so the caller can fall back.
