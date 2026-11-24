@@ -91,3 +91,4 @@ Hosting: stay on the Lovable database for now (user may move to own Supabase lat
 ## Nov 22
 - [x] Bring in the main2 branch features (already merged into main on GitHub, PR #6)
 - [x] Messages: edit, delete and reactions
+- [x] Messages: WhatsApp-style replies (hover Reply, double-click, swipe on phones, jump to original)
