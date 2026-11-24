@@ -1,6 +1,5 @@
 // Ported page: the original app's /privacy.
 import { createFileRoute } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
 import { metadataToHead } from "@/lib/seo/head";
 
 import Link from "next/link";
