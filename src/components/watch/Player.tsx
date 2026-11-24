@@ -31,9 +31,13 @@ import { clampTime, keyAction, stepVolume, type PlayerAction } from "@/lib/watch
 import { loadQuality, loadResume, loadVolume, saveQuality, saveResume, saveVolume } from "@/lib/watch/prefs";
 import { AUTO, levelForSaved, qualityOptions, qualitySummary, SPEEDS, speedLabel, type QualityOption } from "@/lib/watch/quality";
 import { cueAt, parseSpriteVtt, type SpriteCue } from "@/lib/watch/vtt";
+import { connectMediaSession, isBackgroundPlaybackEnabled, saveBackgroundPlayback } from "@/lib/watch/media-session";
 
 type Props = {
   videoId: string;
+  /** Video metadata shown by lock-screen and headset media controls. */
+  title?: string;
+  channelName?: string;
   /** master.m3u8, or null in a preview without media. */
   src: string | null;
   poster: string | null;
@@ -107,7 +111,7 @@ export function PlayerSlot(props: DockPlayerProps) {
 
   useEffect(() => {
     usePlayerDock.getState().setPlayer(props);
-  }, [props.src, props.poster, props.spriteVtt, props.durationS, props.startAt, props.engagement, props.nextVideoIds]);
+  }, [props.src, props.poster, props.spriteVtt, props.durationS, props.startAt, props.engagement, props.nextVideoIds, props.title, props.channelName]);
 
   return <div ref={targetRef} className="h-full w-full" data-player-slot-target />;
 }
@@ -193,7 +197,7 @@ function preferNative(video: HTMLVideoElement): boolean {
  * in picture and fullscreen. hls.js everywhere except Safari, which plays
  * HLS natively (and then picks the quality itself).
  */
-export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, engagement = null, nextVideoIds = [], embed = false, mini = false, onMiniChange, onClose }: Props) {
+export function Player({ videoId, title = "SlopTube video", channelName = "SlopTube", src, poster, spriteVtt, durationS, startAt, engagement = null, nextVideoIds = [], embed = false, mini = false, onMiniChange, onClose }: Props) {
   const router = useRouter();
   const wrapRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -210,6 +214,7 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
   const toggleTheater = useWatch((s) => s.toggleTheater);
   const setStoreTime = useWatch((s) => s.setCurrentTime);
 
+  const [backgroundPlayback, setBackgroundPlayback] = useState(true);
   const [playing, setPlaying] = useState(false);
   const [started, setStarted] = useState(false);
   const [ended, setEnded] = useState(false);
@@ -257,6 +262,24 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
   const serverStart =
     engagementOn && engagement?.signedIn ? resumeAt(engagement.positionS, engagement.durationS ?? durationS) : null;
   useWatchPings(videoId, videoRef, engagementOn);
+
+  // Publish lock-screen, notification and headset controls for this video.
+  useEffect(() => {
+    const read = () => setBackgroundPlayback(isBackgroundPlaybackEnabled());
+    read();
+    window.addEventListener("storage", read);
+    window.addEventListener("sloptube-background-playback-change", read);
+    return () => {
+      window.removeEventListener("storage", read);
+      window.removeEventListener("sloptube-background-playback-change", read);
+    };
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !src || !backgroundPlayback) return;
+    return connectMediaSession(video, { title, artist: channelName, album: "SlopTube", artwork: poster });
+  }, [videoId, title, channelName, src, poster, backgroundPlayback]);
 
   // The Up next switch is shared through localStorage and a same-tab event.
   useEffect(() => {
@@ -467,6 +490,12 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
   }, []);
 
   useEffect(() => () => clearTimeout(idleTimer.current), []);
+
+  const toggleBackgroundPlayback = useCallback(() => {
+    const next = !backgroundPlayback;
+    setBackgroundPlayback(next);
+    saveBackgroundPlayback(next);
+  }, [backgroundPlayback]);
 
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
@@ -1070,6 +1099,17 @@ export function Player({ videoId, src, poster, spriteVtt, durationS, startAt, en
             <>
               <MenuRow onClick={() => setMenu("speed")} label="Playback speed" value={speedLabel(rate)} />
               <MenuRow onClick={() => setMenu("quality")} label="Quality" value={summary} />
+              <button
+                type="button"
+                role="menuitemcheckbox"
+                aria-checked={backgroundPlayback}
+                onClick={toggleBackgroundPlayback}
+                data-background-playback
+                className="flex h-10 w-full items-center px-4 hover:bg-white/10"
+              >
+                <span className="mr-6 flex-1 text-left">Background play</span>
+                <span className="text-right font-normal">{backgroundPlayback ? "On" : "Off"}</span>
+              </button>
             </>
           )}
           {menu === "speed" && (

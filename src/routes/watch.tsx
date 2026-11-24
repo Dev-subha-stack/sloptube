@@ -136,6 +136,8 @@ function Watch() {
               <PlayerSlot
                 key={video.id}
                 videoId={video.id}
+                title={video.title}
+                channelName={video.channel.name}
                 src={video.src}
                 poster={video.thumbnail}
                 spriteVtt={video.spriteVtt}

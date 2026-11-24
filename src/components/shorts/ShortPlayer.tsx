@@ -5,6 +5,7 @@ import { hlsXhrSetup } from "@/lib/auth-fetch";
 import { useEffect, useRef, useState } from "react";
 import { PlayIcon, VolumeOffIcon } from "@/components/icons";
 import { useWatchPings } from "@/lib/engagement/useWatchPings";
+import { connectMediaSession, isBackgroundPlaybackEnabled } from "@/lib/watch/media-session";
 import type { Short } from "@/lib/shorts/types";
 
 /** Safari (desktop and iOS) plays HLS itself; everybody else gets hls.js. */
@@ -62,6 +63,31 @@ export function ShortPlayer({
   const startPlaybackRef = useRef<() => void>(() => undefined);
 
   useWatchPings(short.id, videoRef, pings && active, { short: true });
+
+  const [backgroundPlayback, setBackgroundPlayback] = useState(true);
+
+  useEffect(() => {
+    const read = () => setBackgroundPlayback(isBackgroundPlaybackEnabled());
+    read();
+    window.addEventListener("storage", read);
+    window.addEventListener("sloptube-background-playback-change", read);
+    return () => {
+      window.removeEventListener("storage", read);
+      window.removeEventListener("sloptube-background-playback-change", read);
+    };
+  }, []);
+
+  // Keep the active Snip available to lock-screen and headset controls.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!active || !video || !backgroundPlayback) return;
+    return connectMediaSession(video, {
+      title: short.title,
+      artist: short.channel.name,
+      album: "SlopTube Snips",
+      artwork: short.thumbnail,
+    });
+  }, [active, backgroundPlayback, short.id, short.title, short.channel.name, short.thumbnail]);
 
   // Prepare the current Snip and the next two without starting playback early.
   // The effect depends on shouldLoad (not active), so a warmed player is kept
