@@ -1,6 +1,5 @@
 // Ported page: the original app's /about.
 import { createFileRoute } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { metadataToHead } from "@/lib/seo/head";
 
