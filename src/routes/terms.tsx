@@ -35,9 +35,8 @@ function TermsPage() {
     >
       {setupIncomplete && (
         <p role="note" className="mt-5 rounded-sm border border-divider bg-[var(--hover)] px-3 py-2 text-[13px] leading-5 text-text-2">
-          The operator name, contact email and/or governing jurisdiction have not been configured for this deployment.
-          The site operator should complete those fields in site.config.ts and obtain appropriate legal review before
-          relying on this as a final legal notice.
+          The governing jurisdiction has not been configured for this deployment. The site operator should set it in
+          site.config.ts and obtain appropriate legal review before relying on this as a final legal notice.
         </p>
       )}
 
