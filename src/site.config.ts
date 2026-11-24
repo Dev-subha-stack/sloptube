@@ -1,11 +1,12 @@
 // The owner's details for the public pages (/about, /terms, /privacy,
 // /guidelines, /press, /contact), the footer and the share cards.
 //
-// Fill these in before you open your sloptube to the public. Nothing here is
-// secret: it all shows on the site. Until a value is changed, the pages show
-// the placeholder in capitals so a missing detail is easy to spot.
+// Fill in ownerName, contactEmail and jurisdiction before opening this
+// instance to the public. Nothing here is secret: it all shows on the site.
+// Until a value is changed, the pages show the placeholder in capitals so
+// a missing detail is easy to spot.
 //
-// No imports on purpose, so `node --test` can load it directly.
+// No imports on purpose, so node --test can load it directly.
 
 export const siteConfig = {
   /** The site's name in titles, share cards and the footer. */
@@ -16,12 +17,12 @@ export const siteConfig = {
   contactEmail: "CONTACT_EMAIL",
   /** The country or state whose law the terms follow, like "Germany" or "California, USA". */
   jurisdiction: "JURISDICTION",
-  /** The date the terms and the privacy notice last changed, shown at the top of both. */
-  legalUpdated: "LEGAL_UPDATED",
+  /** The date the terms and the privacy notice were last revised, shown at the top of both. */
+  legalUpdated: "24 November 2026",
   /** One line about the site, for share cards and search results. */
   description: "A video platform, built in the open one feature at a time.",
   /** The source code, linked from the footer and /about. */
-  sourceUrl: "https://github.com/myfilehero/sloptube",
+  sourceUrl: "https://github.com/Dev-subha-stack/sloptube",
 } as const;
 
 export type SiteConfig = typeof siteConfig;
