@@ -95,3 +95,25 @@ Hosting: stay on the Lovable database for now (user may move to own Supabase lat
 
 ## Nov 24
 - [x] Home lists every public video, newest upload first, cached 5 min; picture-only grid with placeholders; watch page loads the video
+
+## Nov 25 (user: no more database optimisation now)
+- [ ] BUG: miniplayer goes full screen when next video plays; opening a Snip with miniplayer jumps back to previous video
+- [ ] Posts (community posts) + more appearance customisation
+- [ ] Report DM messages (admin sees last 10 messages, can timeout/ban)
+- [ ] Timeouts, 3 tiers, custom length
+- [ ] Hover previews 1-5 s on thumbnails
+- [ ] Custom emojis usable in every channel and DMs
+- [ ] Badges: Helper, Pro, Max, Verified tick (skip any that exist)
+- [ ] Autoplay; feed refresh every 10 min
+- [ ] Slop+ premium (200 MB uploads, badge, group chat, paid gifting, free admin gifts with/without notice, durations, prices, tenure badges) — needs payments choice
+- [ ] DM group chats; default groups for everyone and Slop+ with customisation
+- [ ] Announcements: overlay type, Casual/Suggestion types, image/video attachments, custom time
+- [ ] Tickets (private support chat for staff with power)
+- [ ] Applications (on/off, sidebar, questions or Google Form, admin review)
+- [ ] Staff with power can see private videos
+- [ ] Image/emoji in custom badges
+- [ ] Daily delete of seen notifications
+- [ ] Same network/device account view for staff
+- [ ] OG badge (joined before Nov 16); full username reset; admin panel, bug report, suggest in 3-line menu
+- [ ] Staff can reset titles/descriptions
+- [ ] Removed comments kept 30 days in a filter with undo
