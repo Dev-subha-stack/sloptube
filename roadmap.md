@@ -97,7 +97,7 @@ Hosting: stay on the Lovable database for now (user may move to own Supabase lat
 - [x] Home lists every public video, newest upload first, cached 5 min; picture-only grid with placeholders; watch page loads the video
 
 ## Nov 25 (user: no more database optimisation now)
-- [ ] BUG: miniplayer goes full screen when next video plays; opening a Snip with miniplayer jumps back to previous video
+- [x] BUG: miniplayer goes full screen when next video plays; opening a Snip with miniplayer jumps back to previous video
 - [ ] Posts (community posts) + more appearance customisation
 - [ ] Report DM messages (admin sees last 10 messages, can timeout/ban)
 - [ ] Timeouts, 3 tiers, custom length

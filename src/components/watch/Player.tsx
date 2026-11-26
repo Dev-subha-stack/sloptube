@@ -25,8 +25,10 @@ import { resumeAt } from "@/lib/engagement/rules";
 import type { WatchEngagement } from "@/lib/engagement/types";
 import { useWatchPings } from "@/lib/engagement/useWatchPings";
 import { useWatch } from "@/lib/store/watch";
+import { loadMiniVideo } from "@/functions/watch.functions";
 import { formatTime } from "@/lib/watch/format";
 import { markAutoplayWatched } from "@/lib/watch/autoplay-history";
+import { nextDockStateOnSwap, pickNextAutoplayId, shouldNavigateOnAutoplay, type MiniPos } from "@/lib/watch/miniplayer";
 import { clampTime, keyAction, stepVolume, type PlayerAction } from "@/lib/watch/keys";
 import { loadQuality, loadResume, loadVolume, saveQuality, saveResume, saveVolume } from "@/lib/watch/prefs";
 import { AUTO, levelForSaved, qualityOptions, qualitySummary, SPEEDS, speedLabel, type QualityOption } from "@/lib/watch/quality";
@@ -60,16 +62,22 @@ type Props = {
   mini?: boolean;
   onMiniChange?: (next: boolean) => void;
   onClose?: () => void;
+  miniPos?: MiniPos | null;
+  onMiniPosChange?: (pos: MiniPos) => void;
+  onMiniNext?: (next: DockPlayerProps) => void;
 };
 
-type DockPlayerProps = Omit<Props, "embed" | "mini" | "onMiniChange" | "onClose">;
+type DockPlayerProps = Omit<Props, "embed" | "mini" | "onMiniChange" | "onClose" | "miniPos" | "onMiniPosChange" | "onMiniNext">;
 
 type PlayerDockState = {
   player: DockPlayerProps | null;
   mini: boolean;
+  miniPos: MiniPos | null;
   target: HTMLDivElement | null;
   setPlayer: (player: DockPlayerProps) => void;
+  swapMiniPlayer: (player: DockPlayerProps) => void;
   setMini: (mini: boolean) => void;
+  setMiniPos: (pos: MiniPos | null) => void;
   setTarget: (target: HTMLDivElement | null) => void;
   clear: () => void;
 };
@@ -77,14 +85,20 @@ type PlayerDockState = {
 const usePlayerDock = create<PlayerDockState>((set) => ({
   player: null,
   mini: false,
+  miniPos: null,
   target: null,
   setPlayer: (player) => set((state) => ({
     player,
     mini: state.player && state.player.videoId !== player.videoId ? false : state.mini,
   })),
+  swapMiniPlayer: (player) => set((state) => {
+    const next = nextDockStateOnSwap(state, player);
+    return next === state ? state : { player: next.player, mini: next.mini };
+  }),
   setMini: (mini) => set({ mini }),
+  setMiniPos: (miniPos) => set({ miniPos }),
   setTarget: (target) => set({ target }),
-  clear: () => set({ player: null, mini: false, target: null }),
+  clear: () => set({ player: null, mini: false, miniPos: null, target: null }),
 }));
 
 /**
@@ -120,8 +134,11 @@ export function PlayerSlot(props: DockPlayerProps) {
 export function PlayerHost() {
   const player = usePlayerDock((state) => state.player);
   const mini = usePlayerDock((state) => state.mini);
+  const miniPos = usePlayerDock((state) => state.miniPos);
   const target = usePlayerDock((state) => state.target);
   const setMini = usePlayerDock((state) => state.setMini);
+  const setMiniPos = usePlayerDock((state) => state.setMiniPos);
+  const swapMiniPlayer = usePlayerDock((state) => state.swapMiniPlayer);
   const clear = usePlayerDock((state) => state.clear);
   const [bounds, setBounds] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
 
@@ -165,7 +182,10 @@ export function PlayerHost() {
         key={player.videoId}
         {...player}
         mini={mini}
+        miniPos={miniPos}
         onMiniChange={setMini}
+        onMiniPosChange={setMiniPos}
+        onMiniNext={swapMiniPlayer}
         onClose={clear}
       />
     </div>
@@ -197,7 +217,7 @@ function preferNative(video: HTMLVideoElement): boolean {
  * in picture and fullscreen. hls.js everywhere except Safari, which plays
  * HLS natively (and then picks the quality itself).
  */
-export function Player({ videoId, title = "SlopTube video", channelName = "SlopTube", src, poster, spriteVtt, durationS, startAt, engagement = null, nextVideoIds = [], embed = false, mini = false, onMiniChange, onClose }: Props) {
+export function Player({ videoId, title = "SlopTube video", channelName = "SlopTube", src, poster, spriteVtt, durationS, startAt, engagement = null, nextVideoIds = [], embed = false, mini = false, onMiniChange, onClose, miniPos: controlledMiniPos, onMiniPosChange, onMiniNext }: Props) {
   const router = useRouter();
   const wrapRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -224,8 +244,11 @@ export function Player({ videoId, title = "SlopTube video", channelName = "SlopT
   /** false until the first frame actually plays: the loading spinner stays up until then. */
   const [rolling, setRolling] = useState(false);
   /** The draggable miniplayer (i), and where it sits. */
-  const [miniPos, setMiniPos] = useState<{ x: number; y: number } | null>(null);
+  const [localMiniPos, setLocalMiniPos] = useState<MiniPos | null>(null);
+  const miniPos = controlledMiniPos !== undefined ? controlledMiniPos : localMiniPos;
+  const setMiniPos = onMiniPosChange ?? setLocalMiniPos;
   const miniDrag = useRef<{ dx: number; dy: number; id: number } | null>(null);
+  const miniSwapToken = useRef(0);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(durationS ?? 0);
   const [buffered, setBuffered] = useState(0);
@@ -309,8 +332,34 @@ export function Player({ videoId, title = "SlopTube video", channelName = "SlopT
     const target = autoplayTarget;
     setAutoplayCountdown(null);
     setAutoplayTarget(null);
-    router.push(`/watch?v=${encodeURIComponent(target)}`);
-  }, [autoplayTarget, router]);
+    if (shouldNavigateOnAutoplay(mini) || !onMiniNext) {
+      router.push(`/watch?v=${encodeURIComponent(target)}`);
+      return;
+    }
+    // Stay in miniplayer mode without leaving the current page (Home, Snips, etc.).
+    const token = ++miniSwapToken.current;
+    void (async () => {
+      let candidate: string | null = target;
+      while (candidate && miniSwapToken.current === token) {
+        try {
+          const res = await loadMiniVideo({ data: { v: candidate } });
+          if (miniSwapToken.current !== token) return;
+          if (res.kind === "ready") {
+            onMiniNext(res.player);
+            return;
+          }
+        } catch {
+          if (miniSwapToken.current !== token) return;
+        }
+        const watched = markAutoplayWatched(candidate);
+        candidate = pickNextAutoplayId(videoId, nextVideoIds, watched);
+      }
+    })();
+  }, [autoplayTarget, mini, nextVideoIds, onMiniNext, router, videoId]);
+
+  useEffect(() => () => {
+    miniSwapToken.current += 1;
+  }, []);
 
   useEffect(() => {
     if (autoplayCountdown === null || !autoplayTarget) return;
@@ -595,6 +644,9 @@ export function Player({ videoId, title = "SlopTube video", channelName = "SlopT
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       if (target?.closest?.('[role="dialog"]')) return;
+      // When a Snip is open while the miniplayer is docked, let Snips own page-wide keys
+      // unless focus is explicitly inside the miniplayer.
+      if (mini && document.querySelector("[data-shorts-feed]") && !wrapRef.current?.contains(target)) return;
       const action = keyAction({
         key: e.key,
         ctrlKey: e.ctrlKey,
@@ -610,7 +662,7 @@ export function Player({ videoId, title = "SlopTube video", channelName = "SlopT
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [run, poke]);
+  }, [mini, run, poke]);
 
   // Close the settings menu on a click anywhere else.
   useEffect(() => {
@@ -789,7 +841,7 @@ export function Player({ videoId, title = "SlopTube video", channelName = "SlopT
           // Remember completed videos for this tab so recommendations cannot loop back to them.
           const watched = markAutoplayWatched(videoId);
           if (autoplayRef.current) {
-            const nextId = nextVideoIds.find((candidate) => candidate !== videoId && !watched.has(candidate));
+            const nextId = pickNextAutoplayId(videoId, nextVideoIds, watched);
             if (nextId) {
               setAutoplayTarget(nextId);
               setAutoplayCountdown(5);
@@ -855,7 +907,9 @@ export function Player({ videoId, title = "SlopTube video", channelName = "SlopT
           role="status"
           aria-live="polite"
           data-autoplay-countdown
-          className="absolute bottom-14 left-1/2 z-30 flex w-[min(92%,430px)] -translate-x-1/2 items-center gap-3 rounded-lg bg-[#181818]/95 p-3 text-white shadow-[0_4px_22px_rgba(0,0,0,0.45)] backdrop-blur-sm"
+          className={`absolute left-1/2 z-30 flex w-[min(92%,430px)] -translate-x-1/2 items-center rounded-lg bg-[#181818]/95 text-white shadow-[0_4px_22px_rgba(0,0,0,0.45)] backdrop-blur-sm ${
+            mini ? "bottom-12 gap-2 p-2" : "bottom-14 gap-3 p-3"
+          }`}
         >
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/15 text-[18px] font-semibold tabular-nums">
             {autoplayCountdown}
@@ -877,6 +931,7 @@ export function Player({ videoId, title = "SlopTube video", channelName = "SlopT
             data-autoplay-cancel
             aria-label="Cancel autoplay"
             onClick={() => {
+              miniSwapToken.current += 1;
               setAutoplayCountdown(null);
               setAutoplayTarget(null);
             }}
