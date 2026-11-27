@@ -41,6 +41,7 @@ type Item = { href: string; label: string; Icon: ComponentType<{ className?: str
 const ITEMS: Record<GuideKey, Item> = {
   home: { href: "/", label: "Home", Icon: HomeIcon },
   shorts: { href: "/shorts", label: "Snips", Icon: SnipsIcon },
+  posts: { href: "/posts", label: "Posts", Icon: CampaignIcon },
   trending: { href: "/trending", label: "Trending", Icon: TrendingIcon },
   subscriptions: { href: "/feed/subscriptions", label: "Subscriptions", Icon: SubscriptionsIcon },
   library: { href: "/library", label: "Library", Icon: LibraryIcon },

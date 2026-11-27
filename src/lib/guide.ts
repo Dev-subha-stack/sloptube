@@ -3,7 +3,7 @@
 // one feature at a time (Trending appears when feed goes on, and so on).
 // No imports on purpose, so `node --test` can load it directly.
 
-export type GuideKey = "home" | "shorts" | "trending" | "subscriptions" | "library" | "history" | "watchLater" | "playlists" | "topRated" | "ratings" | "bugs" | "suggestions" | "updates" | "studio" | "messages" | "admin";
+export type GuideKey = "home" | "shorts" | "posts" | "trending" | "subscriptions" | "library" | "history" | "watchLater" | "playlists" | "topRated" | "ratings" | "bugs" | "suggestions" | "updates" | "studio" | "messages" | "admin";
 
 export type ShellFlags = {
   feed?: boolean;
@@ -17,6 +17,7 @@ export type ShellFlags = {
 export function mainGuide(f: ShellFlags): GuideKey[] {
   const out: GuideKey[] = ["home"];
   if (f.shorts) out.push("shorts");
+  out.push("posts");
   if (f.feed) out.push("trending");
   if (f.subscriptions) out.push("subscriptions");
   return out;

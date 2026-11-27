@@ -6,6 +6,7 @@ import { ChannelAbout, ChannelHeader, NoVideos, type ChannelTab } from "./Channe
 import { ChannelDbNotice, ChannelMissing, ChannelsNotSetUp, ChannelsOff } from "./ChannelNotices";
 import { ChannelVideos } from "./ChannelVideos";
 import { ChannelPlaylists } from "./ChannelPlaylists";
+import { PostsFeed } from "@/components/posts/PostsFeed";
 
 type FeedState = Awaited<ReturnType<typeof feedState>>;
 
@@ -32,6 +33,14 @@ function TabBody({
   // Without a database (the preview channel) there is nothing to read.
   if (!live) return <NoVideos isOwner={isOwner} />;
   if (tab === "playlists") return <ChannelPlaylists channel={channel} />;
+  if (tab === "posts") {
+    return (
+      <PostsFeed
+        channel={{ id: channel.id, handle: channel.handle, name: channel.name, avatarUrl: channel.avatarUrl }}
+        isOwner={Boolean(isOwner)}
+      />
+    );
+  }
   if (!tabState) return <NoVideos isOwner={isOwner} />;
   if (tab === "shorts") return <ChannelShorts channel={channel} isOwner={isOwner} state={tabState} />;
   return <ChannelVideos channel={channel} tab={tab} isOwner={isOwner} state={tabState} />;

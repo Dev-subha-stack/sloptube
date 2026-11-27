@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { metadataToHead, type Head } from "@/lib/seo/head";
 import type { ChannelViewData } from "@/components/channel/ChannelView";
 
-export type Tab = "home" | "videos" | "shorts" | "playlists" | "about";
+export type Tab = "home" | "videos" | "shorts" | "posts" | "playlists" | "about";
 
 export const loadChannel = createServerFn({ method: "GET" })
   .inputValidator((d: { segment: string; tab: Tab }) => d)
@@ -26,7 +26,7 @@ export const loadChannel = createServerFn({ method: "GET" })
         tabState = await feedState("channel", { channelId: state.channel.id, limit: tab === "home" ? 8 : undefined });
       }
     }
-    const meta = (await channelPageMetadata(segment, tab === "playlists" ? "home" : tab)) as Metadata;
+    const meta = (await channelPageMetadata(segment, tab === "playlists" || tab === "posts" ? "home" : tab)) as Metadata;
     const out: { segment: string; tab: Tab; data: ChannelViewData; meta: Head } = {
       segment,
       tab,

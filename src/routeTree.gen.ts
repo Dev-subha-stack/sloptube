@@ -20,6 +20,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as PlaylistRouteImport } from './routes/playlist'
 import { Route as PlaylistsRouteImport } from './routes/playlists'
+import { Route as PostsRouteImport } from './routes/posts'
 import { Route as PressRouteImport } from './routes/press'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResultsRouteImport } from './routes/results'
@@ -178,6 +179,11 @@ const PlaylistRoute = PlaylistRouteImport.update({
 const PlaylistsRoute = PlaylistsRouteImport.update({
   id: '/playlists',
   path: '/playlists',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PostsRoute = PostsRouteImport.update({
+  id: '/posts',
+  path: '/posts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PressRoute = PressRouteImport.update({
@@ -715,6 +721,7 @@ export interface FileRoutesByFullPath {
   '/messages': typeof MessagesRoute
   '/playlist': typeof PlaylistRoute
   '/playlists': typeof PlaylistsRoute
+  '/posts': typeof PostsRoute
   '/press': typeof PressRoute
   '/privacy': typeof PrivacyRoute
   '/results': typeof ResultsRoute
@@ -832,6 +839,7 @@ export interface FileRoutesByTo {
   '/messages': typeof MessagesRoute
   '/playlist': typeof PlaylistRoute
   '/playlists': typeof PlaylistsRoute
+  '/posts': typeof PostsRoute
   '/press': typeof PressRoute
   '/privacy': typeof PrivacyRoute
   '/results': typeof ResultsRoute
@@ -949,6 +957,7 @@ export interface FileRoutesById {
   '/messages': typeof MessagesRoute
   '/playlist': typeof PlaylistRoute
   '/playlists': typeof PlaylistsRoute
+  '/posts': typeof PostsRoute
   '/press': typeof PressRoute
   '/privacy': typeof PrivacyRoute
   '/results': typeof ResultsRoute
@@ -1068,6 +1077,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/playlist'
     | '/playlists'
+    | '/posts'
     | '/press'
     | '/privacy'
     | '/results'
@@ -1185,6 +1195,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/playlist'
     | '/playlists'
+    | '/posts'
     | '/press'
     | '/privacy'
     | '/results'
@@ -1301,6 +1312,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/playlist'
     | '/playlists'
+    | '/posts'
     | '/press'
     | '/privacy'
     | '/results'
@@ -1419,6 +1431,7 @@ export interface RootRouteChildren {
   MessagesRoute: typeof MessagesRoute
   PlaylistRoute: typeof PlaylistRoute
   PlaylistsRoute: typeof PlaylistsRoute
+  PostsRoute: typeof PostsRoute
   PressRoute: typeof PressRoute
   PrivacyRoute: typeof PrivacyRoute
   ResultsRoute: typeof ResultsRoute
@@ -1577,6 +1590,13 @@ declare module '@tanstack/react-router' {
       path: '/playlists'
       fullPath: '/playlists'
       preLoaderRoute: typeof PlaylistsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posts': {
+      id: '/posts'
+      path: '/posts'
+      fullPath: '/posts'
+      preLoaderRoute: typeof PostsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/press': {
@@ -2458,6 +2478,7 @@ const rootRouteChildren: RootRouteChildren = {
   MessagesRoute: MessagesRoute,
   PlaylistRoute: PlaylistRoute,
   PlaylistsRoute: PlaylistsRoute,
+  PostsRoute: PostsRoute,
   PressRoute: PressRoute,
   PrivacyRoute: PrivacyRoute,
   ResultsRoute: ResultsRoute,

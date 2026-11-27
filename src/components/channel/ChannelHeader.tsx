@@ -8,12 +8,13 @@ import { ChannelReport } from "../moderation/ChannelReport";
 import { SubscribeButton } from "../subscriptions/SubscribeButton";
 import { SubscriberCount } from "../subscriptions/SubscriberCount";
 
-export type ChannelTab = "home" | "videos" | "shorts" | "playlists" | "about";
+export type ChannelTab = "home" | "videos" | "shorts" | "posts" | "playlists" | "about";
 
 const allTabs: { key: ChannelTab; label: string; path: string }[] = [
   { key: "home", label: "Home", path: "" },
   { key: "videos", label: "Videos", path: "/videos" },
   { key: "shorts", label: "Snips", path: "/shorts" },
+  { key: "posts", label: "Posts", path: "/posts" },
   { key: "playlists", label: "Playlists", path: "/playlists" },
   { key: "about", label: "About", path: "/about" },
 ];

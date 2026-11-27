@@ -17,7 +17,7 @@ export const Route = createFileRoute("/c/$handle/$tab")({
   pendingComponent: ChannelSkeleton,
   loader: async ({ params }) => {
     const tab = params.tab as string;
-    if (!["home", "videos", "shorts", "playlists", "about"].includes(tab)) throw routeNotFound();
+    if (!["home", "videos", "shorts", "posts", "playlists", "about"].includes(tab)) throw routeNotFound();
     return loadChannel({ data: { segment: params.handle, tab: tab as Tab } });
   },
   head: ({ loaderData }) => loaderData?.meta ?? {},

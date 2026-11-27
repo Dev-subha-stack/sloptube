@@ -6,7 +6,7 @@ import { Avatar } from "@/components/Avatar";
 import { StaffBadge } from "@/components/admin/RoleBadge";
 import { ThumbUpIcon } from "@/components/icons";
 import { supabase } from "@/integrations/supabase/client";
-import { formatAge } from "@/lib/feed/format";
+import { timeAgo } from "@/lib/watch/format";
 import { POST_COMMENT_MAX_LEN, postImageUrl, type CommunityPostItem } from "@/lib/posts/rules";
 
 type CommentRow = {
@@ -149,7 +149,7 @@ export function PostCard({
                 {post.channel.name}
               </Link>
               <StaffBadge name={post.channel.handle} />
-              <span className="text-text-2">· {formatAge(post.createdAt)}</span>
+              <span className="text-text-2">· {timeAgo(post.createdAt)}</span>
             </div>
             {canDelete && (
               <button
@@ -264,7 +264,7 @@ export function PostCard({
                         <div className="min-w-0 flex-1">
                           <span className="font-medium text-text">{name}</span>
                           {c.author?.username && <StaffBadge name={c.author.username} />}
-                          <span className="ml-1.5 text-[11px] text-text-2">{formatAge(c.created_at)}</span>
+                          <span className="ml-1.5 text-[11px] text-text-2">{timeAgo(c.created_at)}</span>
                           <p className="mt-0.5 whitespace-pre-wrap break-words text-text">{c.body}</p>
                         </div>
                         {canDelComment && (
