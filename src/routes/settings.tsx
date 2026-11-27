@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { DbNotConnected, FeatureOff, FormSkeleton } from "@/components/auth/AuthCard";
 import { AddEmail } from "@/components/settings/AddEmail";
 import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
+import { MessageSoundSettings } from "@/components/settings/MessageSoundSettings";
 import { Connections } from "@/components/settings/Connections";
 import { SettingsForm, type SettingsProfile } from "@/components/settings/SettingsForm";
 import type { accountsState } from "@/lib/accounts/server";
@@ -55,9 +56,6 @@ function SettingsGate() {
         }}
       />
       <AppearanceSettings />
-      <Suspense fallback={null}>
-        <YapinConnection />
-      </Suspense>
     </>
   );
 }
@@ -77,6 +75,10 @@ function SettingsPage() {
         <p className="mb-4 mt-1 text-[14px] text-text-2">Choose how you appear on sloptube.</p>
         <Suspense fallback={<FormSkeleton />}>
           <SettingsGate />
+          <MessageSoundSettings />
+        </Suspense>
+        <Suspense fallback={null}>
+          <YapinConnection />
         </Suspense>
       </div>
     </div>
